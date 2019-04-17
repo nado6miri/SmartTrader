@@ -1,0 +1,31 @@
+var testinfo = {
+    cur_status : 'running, suspend, closed',
+    run_mode : 0, 
+    check_preiod : 5, 
+    retry_cnt : 5, 
+    retry_delay : 5, 
+    slot_num : 0,
+    name : 'KKK',
+    total_amount : 000, 
+    total_invest_krw : 000,
+    total_eval_krw : 200,
+    limit_invest_krw : 0000,
+    limit_invest_amount : 0000,
+    cur_slot_net_ratio : 20,
+    cur_slot_net_krw : 20,
+    target_rate : 5,
+    target_rate_adj : 1,
+    new_slot_crcond : -3, 
+    new_slot_crcond_adj : -0.3,
+    max_addbid_cnt : 10,
+    add_bid_config : {
+        ascent :  [ { add_bid0 : "first_bid_amount", ratio : 'first_bid_price * 0.90' }, { add_bid1 : 'sum(add_bid(0:1))', ratio : 'first_bid_price * 0.85' }, { add_bid2 : 'sum(add_bid(0:2))', ratio : 'first_bid_price * 0.70' } ] ,
+        descent :  [ { add_bid0 : "first_bid_amount", ratio : 'first_bid_price * 0.90' }, { add_bid1 : 'sum(add_bid(0:1))', ratio : 'first_bid_price * 0.85' }, { add_bid2 : 'sum(add_bid(0:2))', ratio : 'first_bid_price * 0.70' } ] ,
+        parallel :  [ { add_bid0 : "first_bid_amount", ratio : 'first_bid_price * 0.90' }, { add_bid1 : 'sum(add_bid(0:1))', ratio : 'first_bid_price * 0.85' }, { add_bid2 : 'sum(add_bid(0:2))', ratio : 'first_bid_price * 0.70' } ] ,
+    },
+    max_slot_cnt : 10,
+    slots : [ 
+        { name : 'KKK', type : 'first', bid_balance_krw : 50000, bid_price : 6300, bid_amount : "bid_balance_krw/bid_price", bid_done_amount : 00, bid_wait_amount : 00 },
+        { name : 'KKK', type : 'add_bid', bid_balance_krw : 50000, bid_price : 6300, bid_amount : "bid_balance_krw/bid_price", bid_done_amount : 00, bid_wait_amount : 00 },
+    ]
+}
