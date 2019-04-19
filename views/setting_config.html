@@ -1,0 +1,196 @@
+/* html / jquery example */
+
+<style>
+    .tb_default {
+        width: 1100px;
+        border: 1px solid;
+    }
+</style>
+
+<html>
+    <head>
+    <title></title>
+    <meta charset="utf-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <div id = "text field example">
+            Hidden Field : <input type="hidden" name="UserIP" value="<?echo $REMOTE_ADDR?>">
+        </div>
+        <div id = "text field example">
+            Text field Input : <input type="text" id="msginput", name="member_name" value="text를 입력하세요...">
+        </div>
+        <div id = "password input example">
+            Password field Input : <input type="password" name="password" value="1234567898">
+        </div>
+        <div id = "bold text example">
+            <b>Configuration Menu</b>
+        </div>
+        <div id = "text array example">
+                Text Array Input : <textarea rows="5" cols="30" name="contents">input your message.....</textarea>
+        </div>
+        <div id = "reset button example">
+            Reset Button Example : 
+            <form name="input" method="post" action="">
+                    <input type="text" name="memberName1" maxlength="10">
+                    <input type="text" name="memberName2" maxlength="10">
+                    <input type="reset" value="초기화">
+            </form>
+        </div>
+
+        <div id = "reset button example">
+            Submit Button Example : 
+            <form name="input" method="post" action="">
+                    <input type="text" name="memberName1" maxlength="10">
+                    <input type="text" name="memberName2" maxlength="10">
+                    <input type="reset" value="초기화">
+            </form>
+        </div>
+    
+        <div id = "button example">
+            Button Example : 
+            <button id = button1, type="button" onclick=buttton1_handler()>Button1</button>
+        </div>
+        <div id = "select box example">
+            Single Select Box with initial valule - Example : <br>
+            <select id = selectbox1 name="single_selection">
+                <option value="volvo">A</option>
+                <option value="saab">B</option>
+                <option value="opel" selected="selected">C</option>
+                <option value="audi">D</option>
+            </select>
+            <br>
+            Multiple Select Box Example : <br>
+            <select id = selectbox2 name="multi_selection" multiple="multiple" size=5 style="width: 200px">
+                    <option value="volvo">A</option>
+                    <option value="saab">B</option>
+                    <option value="opel">C</option>
+                    <optgroup label="audi">
+                        <option value="audi2">E</option>
+                        <option value="audi3">F</option>
+                        <option value="audi4">G</option>
+                    </optgroup>
+                </select>
+            <br>
+            Select Box with scroll - Example : <br>
+            <select id = selectbox3 name="single_selection" size=3>
+                    <option value="volvo">A</option>
+                    <option value="saab">B</option>
+                    <option value="opel">C</option>
+                    <option value="audi">D</option>
+                    <option value="KIA">E</option>
+            </select>
+        </div>
+        <div id = "radio_checkbox example">
+            Radio button Example : 
+            <fieldset>
+                <input type="radio" name="chk_info" value="HTML">HTML
+                <input type="radio" name="chk_info" value="CSS" checked="checked">CSS
+                <input type="radio" name="chk_info" value="웹디자인">웹디자인
+            </fieldset>
+            <br>                            
+            Checked button Example : 
+            <fieldset>
+                <input type="checkbox" name="chk_info" value="HTML">HTML
+                <input type="checkbox" name="chk_info" value="CSS" checked="checked">CSS
+                <input type="checkbox" name="chk_info" value="웹디자인">웹디자인
+            </fieldset>
+        </div>                        
+        <div id = "file selection example">
+            File Selection Example : <br>
+            <input type="file" name="FileName">
+            <form action="" method="post" enctype="multipart/form-data" name="">
+                <input type="file" name="FileName">
+            </form>
+        </div>
+        <div id = "Marquee example">
+            Marquee Example : <br>
+            <marquee direction="right">오른쪽 방향으로 흐르는 텍스트...</marquee>
+            <marquee direction="left">왼쪽 방향으로 흐르는 텍스트...</marquee>
+            <marquee behavior="scroll">behavior="scroll"</marquee>
+            <marquee behavior="slide">behavior="slide"</marquee>
+            <marquee behavior="alternate">behavior="alternate"</marquee>
+            <marquee scrollamount="10">scrollamount 속성을 10픽셀로 지정</marquee>
+            <marquee loop="1">loop 속성을 1로 지정</marquee>
+        </div>
+    </body>
+</html>
+
+
+<!--
+    JQUERY : https://www.w3schools.com/jquery/default.asp
+    Jquery Selector
+    1. Element Selector : $("tag") - $("body"), $("p")
+    2. #id Selector : $("#idname") - $("#button1")
+    3. .class Selector : $(".classname") - $(".clsname")
+    $("*")	Selects all elements	
+    $(this)	Selects the current HTML element	
+    $("p.intro")	Selects all <p> elements with class="intro"	
+    $("p:first")	Selects the first <p> element	
+    $("ul li:first")	Selects the first <li> element of the first <ul>	
+    $("ul li:first-child")	Selects the first <li> element of every <ul>	
+    $("[href]")	Selects all elements with an href attribute	
+    $("a[target='_blank']")	Selects all <a> elements with a target attribute value equal to "_blank"	
+    $("a[target!='_blank']")	Selects all <a> elements with a target attribute value NOT equal to "_blank"	
+    $(":button")	Selects all <button> elements and <input> elements of type="button"	
+    $("tr:even")	Selects all even <tr> elements	
+    $("tr:odd")	    Selects all odd <tr> elements
+-->
+
+<script type="text/javascript">
+    //$(document).ready(function() {  // long syntax
+    $(function() {        // short syntax
+         alert("load completed");
+    });
+
+    function buttton1_handler()
+    {
+        alert("Hello world!!!!");
+    }
+
+</script>
+
+<!--
+var slotinfo = { 
+    timetick : '2019-04-09T10:00:00',
+    market : '---',
+    type : 'first/others',
+    trends_prev : 'descent/ascent/parallel',
+    trends_create : 'descent', 
+    trends_cur : 'descent',
+    config : { },
+    status : 'running / liquidation / suspend', 
+    liqudation_uid : 'uid-xx-dd-wewerew-dd-00',
+    statics : {
+        sum_amount : 100,
+        sum_amount_done : 90, 
+        sum_amount_wait : 10,
+        sum_amount_done_ratio : 'amount_done/amount',
+        sum_bidkw : 'sum(bidkw)',
+        sum_restkw : 'sum(restkw)',
+        sum_investkw : 'sum(investkw)',
+        average : 'sum_bidkw/sum_amount_done',
+        cur_eval_net_ratio : 0.05,
+        cur_eval_net_krw : 'cur_eval_net_ratio*sum_bidkw',
+    },
+    last_bid_info : { timetick : '2019-04-09T10:00:00', tr_price : 6300 },
+    add_bid : [
+        {
+            timetick : '2019-04-09T10:00:00',
+            UID : 'uid-xx-dd-wewerew-dd-00',
+            status : 'done/wait/wait_expired', 
+            p : 0,
+            gap : 0,
+            amount : 100,
+            amount_done : 90, 
+            amount_wait : 10,
+            amount_done_ratio : 'amount_done/amount',
+            bidkw : 'p*amount_done',
+            restkw : 'p*amount_wait',
+            investkw : 'p*amount',
+            deadline : '2019-04-10T10:00:00',
+        },
+    ],
+}
+-->

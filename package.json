@@ -9,11 +9,13 @@
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "express": "~4.16.0",
+    "fs-extra": "^7.0.1",
     "http-errors": "~1.6.2",
     "jade": "~1.11.0",
     "jsonwebtoken": "^8.5.1",
     "morgan": "~1.9.0",
     "request": "^2.88.0",
-    "sleep": "^6.0.0"
+    "sleep": "^6.0.0",
+    "xmlhttprequest-ssl": "^1.5.5"
   }
 }
