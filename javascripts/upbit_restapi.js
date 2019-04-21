@@ -33,6 +33,7 @@ function get_accountbalance()
             else 
             { 
                 console.log(body); 
+                body = JSON.parse(body);
                 resolve(body); 
             }
         });
@@ -67,6 +68,7 @@ function get_chance()
             else 
             { 
                 console.log(body); 
+                body = JSON.parse(body);
                 resolve(body); 
             }
         });
@@ -101,6 +103,7 @@ function get_orderinfo(UUID)
             else 
             { 
                 console.log(body); 
+                body = JSON.parse(body);
                 resolve(body); 
             }
         });
@@ -140,6 +143,7 @@ function get_orderslist(MarketID, State, PageCnt = 1, orderRule = 'desc')
             else 
             { 
                 console.log(body); 
+                body = JSON.parse(body);
                 resolve(body); 
             }
         });
@@ -178,6 +182,7 @@ function input_orders(MarketID, Side, Volume, Price, Order_Type)
             else 
             { 
                 console.log(body); 
+                body = JSON.parse(body);
                 resolve(body); 
             }
         });
@@ -213,6 +218,7 @@ function cancel_orders(UUID)
             else 
             { 
                 console.log(body); 
+                body = JSON.parse(body);
                 resolve(body); 
             }
         });
@@ -235,6 +241,7 @@ function getMarketCodeList()
             else 
             { 
                 console.log(body); 
+                body = JSON.parse(body);
                 resolve(body); 
             }
         });
@@ -294,7 +301,8 @@ function getCandleData(MarketID, Time, Unit, Count = 200, To = "")
             if(error) { reject(error); } 
             else 
             { 
-                console.log(body); 
+                //console.log(body); 
+                body = JSON.parse(body);
                 resolve(body); 
             }
         });
@@ -321,6 +329,7 @@ function getTodayTransactionList(MarketID, Count = 500, To = "")
             else 
             { 
                 console.log(body); 
+                body = JSON.parse(body);
                 resolve(body); 
             }
         });
@@ -349,6 +358,7 @@ function getCurrentPriceInfo(MarketID)
             else 
             { 
                 console.log(body); 
+                body = JSON.parse(body);
                 resolve(body); 
             }
         });
@@ -377,6 +387,7 @@ function getOrderBookInfo(MarketID)
             else 
             { 
                 console.log(body); 
+                body = JSON.parse(body);
                 resolve(body); 
             }
         });
