@@ -1,56 +1,26 @@
 const sleep = require('sleep');
 const upbit = require("./upbit_restapi");
-/*
-var config = {
-    market : 'KRW-EOS',         // market name
-    cur_status : 'running',     // 'running, suspend, closed'
-    run_mode : 0,               // 0 : init (clear - liquidation), 1 : running, 2 : suspend
-    retry_cnt : 5,              // set retry count when restapi fails 
-    retry_delay : 5,            // set retry delay seconds when restapi fails (unit : Sec)
-    slot_cnt : 0,               // The number of slots in current market.
-    total_crcy_amount : 000,    // Total amount of cryptocurrency in current market. (unit : EA)
-    total_invest_krw : 000,     // Total investment money in current market. (unit : KRW)
-    total_eval_krw : 200,       // The amount of evaluation (평가금액) in current market. (unit : KRW)
-    limit_invest_krw : 0000,    // The limitation of invest money in current market. (unit : KRW)
-    limit_invest_amount : 0000, // The limitation of cryptocurrency amount in current market. (unit : EA)
-    cur_slot_net_ratio : 20,    // The ratio of net margin in current market. (unit : %)
-    cur_slot_net_krw : 20,      // The amount(KRW) of net margin in current market. (unit : KRW) 
 
-    check_preiod : 5,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    target_rate : 5,            //* The ratio of liquidation margin in each slot. (unit : %)
-    target_rate_adj : 1,        //* The adjustment ratio of target_rate
-    new_slot_Create_Ratio : -3,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
-    new_slot_Create_Ratio_adj : -0.3, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
-    max_addbid_cnt : 10,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
-    addbid_Ratio : [ 95, 95, 95, 95, 95, 95, 95, 95, 95, 95 ], //* 5% descent ratio.
-    slot_1st_Bid_KRW : 50000,   //* fisrt investment moeny (unit : KRW)
-    slot_2nd_Bid_KRW : 100000,  //* after 1st slot, investment moeny (unit : KRW)
-    max_slot_cnt : 10,          //* The limitation number of creating slots (unit : EA) 
-    slots : [],
-}
-*/
-
-
-// template...
+// default config value.......
 var config_param = {
     max_slot_cnt : 10,          //* The limitation number of creating slots (unit : EA) 
-    slot_1st_Bid_KRW : 50000,   //* fisrt investment moeny (unit : KRW)
-    slot_2nd_Bid_KRW : 100000,  //* after 1st slot, investment moeny (unit : KRW)
+    slot_1st_Bid_KRW : 5000,   //* fisrt investment moeny (unit : KRW)
+    slot_2nd_Bid_KRW : 10000,  //* after 1st slot, investment moeny (unit : KRW)
     check_period : 5,           //* The price check duration of main loop, unit is second. (unit : Sec)
     retry_cnt : 5,              //* set retry count when restapi fails 
     target_rate : 5,            //* The ratio of liquidation margin in each slot. (unit : %)
     target_rate_adj : 1,        //* The adjustment ratio of target_rate
     new_slot_Create_Ratio : -3,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
     new_slot_Create_Ratio_adj : -0.3, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
-    max_addbid_cnt : 10,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
+    max_addbid_cnt : 5,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
     retry_delay : 2,            // set retry delay seconds when restapi fails (unit : Sec)
     limit_invest_krw : 0000,    // The limitation of invest money in current market. (unit : KRW)
     limit_invest_amount : 0000, // The limitation of cryptocurrency amount in current market. (unit : EA)
 }
 
 
-
-var bidinfo = {
+/*
+var bid_info = {
     timetick : '2019-04-09T10:00:00',
     UID : 'uid-xx-dd-wewerew-dd-00',
     status : 'done/wait/wait_expired', 
@@ -65,9 +35,27 @@ var bidinfo = {
     investkw : 'p*amount',
     deadline : '2019-04-10T10:00:00',
 }
+*/
+var bid_info = {
+    timetick : 0,
+    UID : 0,
+    status : 'none', //'none/done/wait/wait_expired', 
+    price : 0,
+    price_gap : 0,    // ??
+    amount : 0,
+    amount_done : 0, 
+    amount_wait : 0,
+    amount_done_ratio : 0, //'amount_done/amount',
+    bidkw : 0, //'p*amount_done',
+    restkw : 0, //'p*amount_wait',
+    investkw : 0, //'p*amount',
+    deadline : 0, //'2019-04-10T10:00:00',
+}
 
-// template...
-var slotinfo = { 
+
+
+/*
+var slot_info = { 
     timetick : '2019-04-09T10:00:00',
     market : "KRW-EOS",
     type : 'first/others',
@@ -90,19 +78,72 @@ var slotinfo = {
         cur_eval_net_krw : 'cur_eval_net_ratio*sum_bidkw',
     },
     //last_bid_info : { timetick : '2019-04-09T10:00:00', tr_price : 6300 },
-    add_bid : [ bidinfo, bidinfo, ],
+    add_bid : [ bid_info, ],
+}
+*/
+var slot_info = { 
+    timetick : 0,
+    market : 0, //"KRW-EOS",
+    type : 0, //'first/others',
+    trends_prev : 0, //'descent/ascent/parallel',
+    trends_create : 0, //'descent', 
+    trends_cur : 0, //'descent',
+    config : { },
+    status : 0, //'running / liquidation / suspend', 
+    liqudation_uid : 0, //'uid-xx-dd-wewerew-dd-00',
+    statics : {
+        sum_amount : 0,
+        sum_amount_done : 0, 
+        sum_amount_wait : 0,
+        sum_amount_done_ratio : 0, //'amount_done/amount',
+        sum_bidkw : 0, //'sum(bidkw)',
+        sum_restkw : 0, //'sum(restkw)',
+        sum_investkw : 0, //'sum(investkw)',
+        average : 0, //'sum_bidkw/sum_amount_done',
+        cur_eval_net_ratio : 0,
+        cur_eval_net_krw : 0, //'cur_eval_net_ratio*sum_bidkw',
+    },
+    add_bid : [], //[ bid_info, ],
 }
 
-var last_tr_info = { timetick : '2019-04-09T10:00:00', tr_price : 6300 };
 
-var portfolio = {
-    "KRW-EOS" : { config : config_param, last_bid_info : last_tr_info, slots : [] }, // slot config & info......
-    "KRW-BTC" : { config : config_param, last_bid_info : last_tr_info, slots : [] }, // slot config & info......
-    "KRW-ETH" : { config : config_param, last_bid_info : last_tr_info, slots : [] }, // slot config & info......
-    "KRW-XRP" : { config : config_param, last_bid_info : last_tr_info, slots : [] }, // slot config & info......
+
+/*
+var last_transaction = { timetick : '2019-04-09T10:00:00', tr_price : 0 }; 
+*/
+var last_transaction = { timetick : 0, tr_price : 0 }; 
+
+/*
+var last_transaction_info = { "KRW-EOS" : last_tr, };
+*/
+var last_transaction_info = { };
+
+
+var portfolio = { config : config_param, last_bid_info : last_transaction_info, slots : [] }; // slot config & info......
+/*
+var portfolio_info = {
+    "KRW-EOS" : { config : config_param, last_bid_info : last_transaction_info, slots : [slot_info, slot_info, ....] }, 
+    "KRW-BTC" : { config : config_param, last_bid_info : last_transaction_info, slots : [] }, // slot config & info......
+    "KRW-ETH" : { config : config_param, last_bid_info : last_transaction_info, slots : [] }, // slot config & info......
+    "KRW-XRP" : { config : config_param, last_bid_info : last_transaction_info, slots : [] }, // slot config & info......
 }
+*/
+var portfolio_info = { };
+
+var MACD_Data = { };
 
 
+/*
+ 1. db로 부터 market에 대한 config value를 읽어온다.
+ 2. db로 부터 portfolio market list를 얻어온다.
+ 3. 현재 marketID가 있으면 config value가 변경되었는지 확인 / 적용한다.
+ 4. marketID가 신규로 추가되었다면 portfolio_info에 추가하여 거래가 이루어 지도록 한다.
+ 5. marketID가 기존대비 삭제 되었다면 portfolio_info에서 삭제하여 bot이 동작하지 않도록 한다. 
+*/ 
+
+/*
+ 1/3/5/10/15/30/60/240 분봉 데이터를 이용하여 MACD 정보를 가공한다.
+*/
 async function get_MACD(market, min, signal, MACD)
 {
     let db = [];
@@ -111,12 +152,15 @@ async function get_MACD(market, min, signal, MACD)
     let MACD_Shortkey = "MACD" + String(signal);
     let MACD_Longkey = "MACD" + String(MACD);
     let retry_cnt = 0;
-
+    var data = 0;
     try{
-        var data = await upbit.getCandleData(market, "MIN", min, 200);  // 분봉
-
+        do{
+            data = await upbit.getCandleData(market, "MIN", min, 200);  // 분봉
+            //console.log("data = ", data, "Retry getCandleData = ", retry_cnt)
+        }while(("error" in data) && retry_cnt++ < 5);
+    
         return new Promise(function (resolve, reject) {  
-            if("error" in data) { console.log("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"); resolve("error"); }
+            if("error" in data) { resolve("error"); }
 
             // Calculate MACD Short Term Signal average 
             let i = 0; j = 0;
@@ -182,26 +226,53 @@ async function smart_coin_trader()
     let elapsed = {};
     //console.log("portfolio = ", portfolio);
     let retry_cnt = 0;
-    let data = 0;
-    do {
-        data = await get_MACD("KRW-EOS", 240, 9, 26);
-    }while(data === "error" && retry_cnt++ < 5);
+    let timerID_1h = { };
 
-    console.log("MACD Data = ", JSON.stringify(data));
+    // 1. make portfolio_info
+    let portpolio_list = [ 'KRW-EOS', 'KRW-XRP' ];
+    for (index in portpolio_list)
+    {
+        let marketID = portpolio_list[index]
+        let pfolio = JSON.parse(JSON.stringify(portfolio));
+        pfolio['config'] = JSON.parse(JSON.stringify(config_param));  // todo : portfolio에 편입된 marketID별 config를 설정해야 함.
+        pfolio['last_bid_info'] = JSON.parse(JSON.stringify(last_transaction));
+        pfolio['slots'] = []; 
+        portfolio_info[marketID] = JSON.parse(JSON.stringify(pfolio));
+    }
+    console.log("Portfolio = ", JSON.stringify(portfolio_info));
+
+
+    // 2. create the first slot
+
+
+    /*
+    // make MACD Information.
+    for(marketID in portfolio)
+    {
+        timerID_1h[marketID] = setInterval(async function () {
+            let data = [];
+            data = await get_MACD(marketID, 240, 9, 26);
+            if(data.length > 0 && (data != "error")) { MACD_Data[marketID] = data; } 
+            console.log("MACD[", marketID, "]", " = ", JSON.stringify(MACD_Data[marketID]));
+        }, 1000*60*30); // 30min
+    }
+
+    console.log("timerID = ", timerID_1h);
+    */
 
     while(0)
     {
         current = new Date();
-        for(key in portfolio)
+        for(marketID in portfolio)
         {
-            if(previous.hasOwnProperty(key) === false) { previous[key] = 0; }
-            if(elapsed.hasOwnProperty(key) === false) { elapsed[key] = 0; }
-            elapsed[key] = (current - previous[key])/1000;
-            if(elapsed[key] > portfolio[key]['config']['check_period'])
+            if(previous.hasOwnProperty(marketID) === false) { previous[marketID] = 0; }
+            if(elapsed.hasOwnProperty(marketID) === false) { elapsed[marketID] = 0; }
+            elapsed[marketID] = (current - previous[key])/1000;
+            if(elapsed[marketID] > portfolio[marketID]['config']['check_period'])
             {
-                console.log("Market = ", key, portfolio[key]['config']['check_period'], " sec priodic routine....");
-                let priceinfo = await upbit.getCurrentPriceInfo(key);
-                previous[key] = current;
+                console.log("Market = ", marketID, portfolio[marketID]['config']['check_period'], " sec priodic routine....");
+                let priceinfo = await upbit.getCurrentPriceInfo(marketID);
+                previous[marketID] = current;
                 /*
                 [{"market":"KRW-EOS",
                 "trade_date":"20190420",
