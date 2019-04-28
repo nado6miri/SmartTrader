@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken")
 const request = require("request")
 const queryEncode = require("querystring").encode
 
+var debug = false;
 
 /*
 전체 계좌 조회 : 보유 원화, 토큰에 대한 잔고 및 lock 수량, 평단가 제공.
@@ -32,7 +33,7 @@ function get_accountbalance()
             if(error) { reject(error); } 
             else 
             { 
-                console.log(body); 
+                if(debug) { console.log(body); } 
                 body = JSON.parse(body);
                 resolve(body); 
             }
@@ -45,9 +46,9 @@ function get_accountbalance()
  Market별 주문 가능 정보를 확인한다. 'KRW-BTC', 'KRW-EOS'......
  https://docs.upbit.com/v1.0.1/reference#%EC%A3%BC%EB%AC%B8-%EA%B0%80%EB%8A%A5-%EC%A0%95%EB%B3%B4
 */
-function get_chance()
+function get_chance(marketID)
 {
-    const query = queryEncode({ market : 'KRW-EOS' });
+    const query = queryEncode({ market : marketID });
     const payload = {
         access_key : upbit.AccessKey,
         nonce : (new Date).getTime(),
@@ -67,7 +68,7 @@ function get_chance()
             if(error) { reject(error); } 
             else 
             { 
-                console.log(body); 
+                if(debug) { console.log(body); } 
                 body = JSON.parse(body);
                 resolve(body); 
             }
@@ -102,7 +103,7 @@ function get_orderinfo(UUID)
             if(error) { reject(error); } 
             else 
             { 
-                console.log(body); 
+                if(debug) { console.log(body); } 
                 body = JSON.parse(body);
                 resolve(body); 
             }
@@ -142,7 +143,7 @@ function get_orderslist(MarketID, State, PageCnt = 1, orderRule = 'desc')
             if(error) { reject(error); } 
             else 
             { 
-                console.log(body); 
+                if(debug) { console.log(body); } 
                 body = JSON.parse(body);
                 resolve(body); 
             }
@@ -181,8 +182,8 @@ function input_orders(MarketID, Side, Volume, Price, Order_Type)
             if(error) { reject(error); } 
             else 
             { 
-                console.log(body); 
-                body = JSON.parse(body);
+                if(debug) { console.log(body); } 
+                //body = JSON.parse(body);
                 resolve(body); 
             }
         });
@@ -217,7 +218,7 @@ function cancel_orders(UUID)
             if(error) { reject(error); } 
             else 
             { 
-                console.log(body); 
+                if(debug) { console.log(body); } 
                 body = JSON.parse(body);
                 resolve(body); 
             }
@@ -240,7 +241,7 @@ function getMarketCodeList()
             if(error) { reject(error); } 
             else 
             { 
-                console.log(body); 
+                if(debug) { console.log(body); } 
                 body = JSON.parse(body);
                 resolve(body); 
             }
@@ -301,7 +302,7 @@ function getCandleData(MarketID, Time, Unit, Count = 200, To = "")
             if(error) { reject(error); } 
             else 
             { 
-                //console.log(body); 
+                //if(debug) { console.log(body); } 
                 body = JSON.parse(body);
                 resolve(body); 
             }
@@ -328,7 +329,7 @@ function getTodayTransactionList(MarketID, Count = 500, To = "")
             if(error) { reject(error); } 
             else 
             { 
-                console.log(body); 
+                if(debug) { console.log(body); } 
                 body = JSON.parse(body);
                 resolve(body); 
             }
@@ -357,7 +358,7 @@ function getCurrentPriceInfo(MarketID)
             if(error) { reject(error); } 
             else 
             { 
-                console.log(body); 
+                if(debug) { console.log(body); } 
                 body = JSON.parse(body);
                 resolve(body); 
             }
@@ -386,7 +387,7 @@ function getOrderBookInfo(MarketID)
             if(error) { reject(error); } 
             else 
             { 
-                console.log(body); 
+                if(debug) { console.log(body); } 
                 body = JSON.parse(body);
                 resolve(body); 
             }
@@ -396,6 +397,7 @@ function getOrderBookInfo(MarketID)
 
 module.exports = 
 { 
+    debug,
     get_accountbalance, // 현 계좌의 잔고 현황 표시
     get_chance, // 주문가능 정보 
     get_orderinfo, // UUID기반 개별주문 조회
