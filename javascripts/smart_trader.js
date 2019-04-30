@@ -1,4 +1,5 @@
 const sleep = require('sleep');
+const fse = require('fs-extra');
 const upbit = require("./upbit_restapi");
 
 const tradefee = 0.0005;
@@ -14,8 +15,8 @@ var config_param = {
     slot_2nd_Bid_KRW : 10000,  //* after 1st slot, investment moeny (unit : KRW)
     check_period : 5,           //* The price check duration of main loop, unit is second. (unit : Sec)
     retry_cnt : 5,              //* set retry count when restapi fails 
-    target_rate : 5,            //* The ratio of liquidation margin in each slot. (unit : %)
-    target_rate_adj : 1,        //* The adjustment ratio of target_rate
+    target_rate : 0.5,            //* The ratio of liquidation margin in each slot. (unit : %)
+    target_rate_adj : 0.05,        //* The adjustment ratio of target_rate
     new_slot_Create_Ratio : -0.5,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
     new_slot_Create_Ratio_adj : -0.05, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
     new_addbid_Create_Ratio : -1.1,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
@@ -51,6 +52,7 @@ var bid_info = {
 
 
 var statics_info = {
+    current_price : 0,
     sum_amount : 0,
     sum_amount_done : 0, 
     sum_amount_wait : 0,
@@ -191,7 +193,8 @@ async function smart_coin_trader()
                 // uuid로 정보를 조회하여 완료된 uuid / wait 중인 uuid 분류하고 statics를 정리한다.
                 add_updateTrInfo_Statics(marketID, priceinfo);
 
-                // 최종 정리된 DB 기준으로 수익율을 조사하고 수익이 났으면 청산한다.(마지막 slot이면 청산하지 않고 수익분만 청산하고 초기 투자 금액은 유지한다.)
+                // 최종 정리된 DB 기준으로 수익율을 조사하고 수익이 났으면 청산한다.
+                // (마지막 하나 남은 slot이면 청산하지 않고 수익분만 청산하고 초기 투자 금액은 유지한다. 또는 청산하고 last bid price 기준 하락시 new slot을 생성한다. 우선 후자로 결정함.)
                 liquidation_slots(marketID, priceinfo);
 
                 // expired 된 거래에 대해 취소여부를 결정하고 취소/유지 처리를 한다.
@@ -214,7 +217,7 @@ async function add_slot(marketID, current, priceinfo)
     let config = portfolio_info[marketID]['config'];
     let last_bid_price = portfolio_info[marketID]['last_bid_info']['tr_price'];
     let current_price = priceinfo[0]['trade_price'];
-    let fall_gap_ratio = (current_price - last_bid_price)*100 / last_bid_price;
+    let fall_gap_ratio = (current_price - last_bid_price)*100 / (last_bid_price + 1); // +1 to protect divid by zero
 
     if(slots_length >= config['max_slot_cnt']) 
     {
@@ -223,10 +226,20 @@ async function add_slot(marketID, current, priceinfo)
         return; 
     }
 
-    if(slots_length > 0 && (fall_gap_ratio > (config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj'])))
+    if(slots_length > 0 && (fall_gap_ratio > (config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj']))) { return; }
+
+    if(slots_length === 0)
     {
-        return;
+        if(last_bid_price === 0) // 1st slot creation operation
+        {
+        }
+        else // all slots are liquidated, there is no slots --> need to create new 1st slot when cur_price *  < last_bid_price)  
+        {
+            fall_gap_ratio = (current_price - last_bid_price)*100 / last_bid_price;
+            if((fall_gap_ratio > (config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj']))) { return; } // -5% > -6% return, -7% <= -6% : create new slot.
+        }
     }
+
 
     // create new slot condition.
     let new_slot = JSON.parse(JSON.stringify(slot_info));
@@ -326,7 +339,7 @@ async function add_slot(marketID, current, priceinfo)
             portfolio_info[marketID]['last_bid_info']['tr_price'] = new_slot['last_bid_info']['tr_price'];
         } 
         
-        console.log(JSON.stringify(portfolio_info));
+        if(staticPrint[marketID]) { console.log(JSON.stringify(portfolio_info)); }
     }
 }
 
@@ -430,7 +443,7 @@ async function add_bid(marketID, current, priceinfo)
                         portfolio_info[marketID]['last_bid_info']['timetick'] = slots[i]['last_bid_info']['timetick'];
                         portfolio_info[marketID]['last_bid_info']['tr_price'] = slots[i]['last_bid_info']['tr_price'];
                     } 
-                    console.log(JSON.stringify(portfolio_info));
+                    if(staticPrint[marketID]) { console.log(JSON.stringify(portfolio_info)); }
                 }
             } 
         }
@@ -504,6 +517,8 @@ async function liquidation_slots(marketID, priceinfo)
                 }
                 else { console.log("[", marketID, "][slots", i, "] **********Check Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
             }
+            console.log(liquidation_DB[marketID]);
+            Save_JSON_file(liquidation_DB[marketID], "../test/" + marketID + "_liquidation.json");
         }
     }
 }
@@ -514,7 +529,7 @@ async function liquidation_slots(marketID, priceinfo)
 */
 async function add_updateTrInfo_Statics(marketID, priceinfo)
 {
-    if(staticPrint[marketID] == false) { return; }
+    //if(staticPrint[marketID] == false) { return; }
 
     let slots = portfolio_info[marketID]['slots'];
     let config = portfolio_info[marketID]['config'];
@@ -540,6 +555,7 @@ async function add_updateTrInfo_Statics(marketID, priceinfo)
                 }
             }
             bidinfo['status'] = orderinfo['state'];
+            statics['current_price'] = current_price;
             statics['sum_amount'] += orderinfo['volume'];
             statics['sum_amount_done'] += orderinfo['executed_volume'];
             statics['sum_amount_wait'] += orderinfo['remaining_volume'];
@@ -631,6 +647,22 @@ async function get_MACD(market, TimeVal, min, signal, MACD)
     {
         console.log("[ERROR] Fail to get candle data from server...")
     }
+}
+
+
+/*
+  Save_JSON_file : 전달된 JSON객체를 filename(Path정보 포함)으로 저장한다.
+*/
+function Save_JSON_file(jsonObject, filename)
+{
+  var json = JSON.stringify(jsonObject);
+  fse.outputFileSync(filename, json, 'utf-8', function(e){
+    if(e){
+      console.log(e);
+    }else{
+      console.log("Download is done!");	
+    }
+  });
 }
 
 
