@@ -32,10 +32,11 @@ var config_param = {
 }
 */
 var config_param = {
+    trade_mode : 'mode1',
     max_slot_cnt : 10,          //* The limitation number of creating slots (unit : EA) 
     slot_1st_Bid_KRW : 5000,   //* fisrt investment moeny (unit : KRW)
     slot_2nd_Bid_KRW : 10000,  //* after 1st slot, investment moeny (unit : KRW)
-    check_period : 0.5,           //* The price check duration of main loop, unit is second. (unit : Sec)
+    check_period : 5,           //* The price check duration of main loop, unit is second. (unit : Sec)
     retry_cnt : 5,              //* set retry count when restapi fails 
     target_rate : 5,            //* The ratio of liquidation margin in each slot. (unit : %)
     target_rate_adj : 1,        //* The adjustment ratio of target_rate
@@ -89,8 +90,9 @@ var slot_info = {
 }
 
 
-var portfolio = { config : config_param, last_bid_info : { timetick : 0, tr_price : 0 }, slots : [] }; // slot config & info......
+var portfolio = { config : { }, last_bid_info : { timetick : 0, tr_price : 0 }, slots : [] }; // slot config & info......
 var portfolio_info = { };
+
 
 
 var MACD = { T5min : {}, T15min : {}, T30min : {}, T60min : {}, T240min : {}, T1day : {}, Tweek : {} };
@@ -116,6 +118,11 @@ var timerID_info = { }
 var liquidation_DB = { }; // { 'KRW-EOS' : [ { }, { } .... ], };
 
 
+// 1. make portfolio_info
+var portpolio_list = { 'KRW-EOS_ID1' : config_param, 'KRW-EOS_ID2' : config_param, };
+
+
+
 function * price_generator(min, max, step)
 {
     var direction = false; //'descent';
@@ -136,15 +143,24 @@ function * price_generator(min, max, step)
     }
 }
 
+var getPrice = { 'KRW-EOS' : { 'ID1' : 0, 'ID2' : 0 } };
+getPrice['KRW-EOS']['ID1'] = price_generator(10, 10000, 10); // Generator
+getPrice['KRW-EOS']['ID2'] = price_generator(10, 10000, 10); // Generator
+
+/*
 var getPrice = { };
 getPrice['KRW-EOS'] = price_generator(10, 10000, 10); // Generator
 getPrice['KRW-XRP'] = price_generator(5, 500, 1); // Generator
+*/
+
 /*
 for(let count = 0; count < 2000; count++)
 {
     console.log(getPrice.next().value);
 }
 */
+
+
 
 /*
  1. db로 부터 market에 대한 config value를 읽어온다.
@@ -165,46 +181,64 @@ async function smart_coin_trader()
     //console.log("portfolio = ", portfolio);
     let retry_cnt = 0;
 
-    // 1. make portfolio_info
-    let portpolio_list = [ 'KRW-EOS', 'KRW-XRP' ];
-    for (index in portpolio_list)
+    //let portpolio_list = [ 'KRW-EOS', 'KRW-XRP' ];
+    for (key in portpolio_list)
     {
-        let marketID = portpolio_list[index]
+        let market, marketID;
+        market = marketID = key;
+        marketID = marketID.split('_')[1];
+        market = market.split('_')[0];
+        
         let pfolio = JSON.parse(JSON.stringify(portfolio));
-        pfolio['config'] = JSON.parse(JSON.stringify(config_param));  // todo : portfolio에 편입된 marketID별 config를 설정해야 함.
+        pfolio['config'] = JSON.parse(JSON.stringify(portpolio_list[key]));  // todo : portfolio에 편입된 marketID별 config를 설정해야 함.
         pfolio['slots'] = []; 
-        portfolio_info[marketID] = JSON.parse(JSON.stringify(pfolio));
-        liquidation_DB[marketID] = [];
+        
+        if(portfolio_info.hasOwnProperty(market) === false) { portfolio_info[market] = { }; }
+        portfolio_info[market][marketID] = JSON.parse(JSON.stringify(pfolio));
+        
+        if(liquidation_DB.hasOwnProperty(market) === false) { liquidation_DB[market] = {}; }
+        liquidation_DB[market][marketID] = [];
     }
     console.log("portfolio_info = ", JSON.stringify(portfolio_info));
-
+    console.log("liquidation_DB = ", JSON.stringify(liquidation_DB));
+    
     // 2. make MACD Information.
-    for(index in portpolio_list)
+    const MACD_Period = 1000*60*1; // 2min
+    for(pfkey in portpolio_list)
     {
-        let marketID = portpolio_list[index];
-        timerID_info[marketID] = JSON.parse(JSON.stringify(timerID));
-        for(key in timerID_info[marketID])
+        let market, marketID;
+        market = marketID = pfkey;
+        marketID = marketID.split('_')[1];
+        market = market.split('_')[0];
+
+        timerID_info[market] = JSON.parse(JSON.stringify(timerID));
+        for(key in timerID_info[market])
         {
             let data = [];
             let timeval = "MIN";
             if(key === "days") { timeval = "DAY"; } else if(key === "weeks") { timeval = "WEEK"; } else { timeval = "MIN"; }
 
-            console.log("start timer : key = ", key, " marketID = ", marketID, "time = ", timerID_Minval[key], timerID_info[marketID][key]);
-            if(timerID_info[marketID][key] === 0)
+            console.log("start timer : key = ", key, " market = ", market, "time = ", timerID_Minval[key], timerID_info[market][key]);
+            if(timerID_info[market][key] === 0)
             {
-                data = await get_MACD(marketID, timeval, timerID_Minval[key], 9, 26);
-                if(data.length > 0 && (data != "error")) { MACD_info[marketID] = data; }
+                data = await get_MACD(market, timeval, timerID_Minval[key], 9, 26);
+                if(data.length > 0 && (data != "error")) 
+                { 
+                    if(MACD_info.hasOwnProperty(market) === false) { MACD_info[market] = {}; }
+                    MACD_info[market][key] = data; 
+                }
                 data = []; 
-                //console.log("First Init ==> MACD_info[", marketID, "]", " = ", JSON.stringify(MACD_info[marketID]));
+                //console.log("First Init ==> MACD_info[", market, "][", key, "] MACD_info = ", JSON.stringify(MACD_info[market][key]));
             }
 
             // create timer
-            timerID_info[marketID][key] = setInterval(async function () {
-                data = await get_MACD(marketID, timeval, timerID_Minval[key], 9, 26);
-                if(data.length > 0 && (data != "error")) { MACD_info[marketID] = data; } 
-                //console.log("MACD_info[", marketID, "]", " = ", JSON.stringify(MACD_info[marketID]));
-            }, timerID_Minval[key]*1000*60*2); 
-            //console.log("TimerID_info[", marketID, "][", key, "] = ", timerID_info[marketID][key]);
+            timerID_info[market][key] = setInterval(async function () {
+                data = await get_MACD(market, timeval, timerID_Minval[key], 9, 26);
+                if(data.length > 0 && (data != "error")) { MACD_info[market][key] = data; } 
+                //console.log("MACD_info[", market, "][", key, "] MACD_info = ", JSON.stringify(MACD_info[market][key]));
+                //Save_JSON_file(MACD_info, "macd_infomation.json");
+            }, timerID_Minval[key]*MACD_Period); 
+            //console.log("TimerID_info[", market, "][", key, "] = ", timerID_info[market][key]);
         }
     }
 
@@ -214,43 +248,61 @@ async function smart_coin_trader()
         //current = new Date();
         current = moment().locale('ko');
 
-        for(marketID in portfolio_info)
+        for(market in portfolio_info)
         {
-            staticPrint[marketID] = false;
-            if(previous.hasOwnProperty(marketID) === false) { previous[marketID] = 0; }
-            if(elapsed.hasOwnProperty(marketID) === false) { elapsed[marketID] = 0; }
-            elapsed[marketID] = (current - previous[marketID])/1000;
-            if(elapsed[marketID] > portfolio_info[marketID]['config']['check_period'])
+            if(staticPrint.hasOwnProperty(market) === false) { staticPrint[market] = { }; }
+            if(previous.hasOwnProperty(market) === false) { previous[market] = { }; }
+            if(elapsed.hasOwnProperty(market) === false) { elapsed[market] = { }; }
+    
+            for(marketID in portfolio_info[market])
             {
-                let priceinfo = [ {} ];
-                previous[marketID] = current;
                 if(algorithm_test)
                 {
-                    let cur_p = getPrice[marketID].next().value;
-                    console.log("[", marketID, "] Current = ", current, " Generator Price = ", cur_p);
-                    priceinfo[0]['trade_price'] = cur_p;
+                    if(getPrice.hasOwnProperty(market) === false) { getPrice[market] = { }; }
+                    if(getPrice[market].hasOwnProperty(marketID) === false) { getPrice[market][marketID] = price_generator(10, 10000, 10); } // Generator 
                 }
-                else
+
+                staticPrint[market][marketID] = false;
+                if(previous[market].hasOwnProperty(marketID) === false) { previous[market][marketID] = 0; }
+                if(elapsed[market].hasOwnProperty(marketID) === false) { elapsed[market][marketID] = 0; }
+                elapsed[market][marketID] = (current - previous[market][marketID])/1000;
+
+                if(elapsed[market][marketID] > portfolio_info[market][marketID]['config']['check_period'])
                 {
-                    //console.log("Market = ", marketID, portfolio_info[marketID]['config']['check_period'], " sec priodic routine....");
-                    priceinfo = await upbit.getCurrentPriceInfo(marketID);
-                    //console.log(marketID, " Price = ", JSON.stringify(priceinfo), "\n");
+                    let priceinfo = { };
+                    priceinfo[market] = { };
+                    previous[market][marketID] = current;
+                    if(algorithm_test)
+                    {
+                        let cur_p = getPrice[market][marketID].next().value;
+                        console.log("[", market, "] Current = ", current, " Generator Price = ", cur_p);
+                        priceinfo[market]['trade_price'] = cur_p;
+                    }
+                    else
+                    {
+                        console.log("[", market, "] ", portfolio_info[market][marketID]['config']['check_period'], " sec priodic routine....");
+                        let cur_price = await upbit.getCurrentPriceInfo(market);
+                        priceinfo[market] = cur_price[0];
+                        console.log("[", market, "][Price] = ", JSON.stringify(priceinfo[market]), "\n");
+                        Save_JSON_file(priceinfo, "cur_price.json");
+                    }
+                    /*
+                    // last bid price 기준으로 slot을 먼저 만들것인가? add_bid를 먼저 만들것인가? 고민이 필요 함. - 현재는 slot을 먼저 만드는 것으로 함.
+                    add_slot(marketID, current, priceinfo);
+
+                    // slot별로 탐색하여 add bid 조건에 맞는 case가 있는지 조사하고 조건에 맞다면 add_bid를 (물타기) 진행한다.
+                    add_bid(marketID, current, priceinfo); 
+
+                    // uuid로 정보를 조회하여 완료된 uuid / wait 중인 uuid 분류하고 statics를 정리한다.
+                    add_updateTrInfo_Statics(marketID, priceinfo);
+
+                    // 최종 정리된 DB 기준으로 수익율을 조사하고 수익이 났으면 청산한다.
+                    // (마지막 하나 남은 slot이면 청산하지 않고 수익분만 청산하고 초기 투자 금액은 유지한다. 또는 청산하고 last bid price 기준 하락시 new slot을 생성한다. 우선 후자로 결정함.)
+                    liquidation_slots(marketID, current, priceinfo);
+
+                    // expired 된 거래에 대해 취소여부를 결정하고 취소/유지 처리를 한다.
+                    */
                 }
-
-                // last bid price 기준으로 slot을 먼저 만들것인가? add_bid를 먼저 만들것인가? 고민이 필요 함. - 현재는 slot을 먼저 만드는 것으로 함.
-                add_slot(marketID, current, priceinfo);
-
-                // slot별로 탐색하여 add bid 조건에 맞는 case가 있는지 조사하고 조건에 맞다면 add_bid를 (물타기) 진행한다.
-                add_bid(marketID, current, priceinfo); 
-
-                // uuid로 정보를 조회하여 완료된 uuid / wait 중인 uuid 분류하고 statics를 정리한다.
-                add_updateTrInfo_Statics(marketID, priceinfo);
-
-                // 최종 정리된 DB 기준으로 수익율을 조사하고 수익이 났으면 청산한다.
-                // (마지막 하나 남은 slot이면 청산하지 않고 수익분만 청산하고 초기 투자 금액은 유지한다. 또는 청산하고 last bid price 기준 하락시 new slot을 생성한다. 우선 후자로 결정함.)
-                liquidation_slots(marketID, current, priceinfo);
-
-                // expired 된 거래에 대해 취소여부를 결정하고 취소/유지 처리를 한다.
             }
         }
     }
