@@ -5,6 +5,53 @@
         width: 1100px;
         border: 1px solid;
     }
+    .linkarea {
+
+    }
+</style>
+
+<!-- tab style -->
+<style>
+    .tabWrap { width: 1000px; height: 700px; }
+    .tab_Menu { margin: 0px; padding: 0px; list-style: none; }
+    .tabMenu { width: 150px; margin: 0px; text-align: center;
+                padding-top: 10px; padding-bottom: 10px; float: left; }
+    .tabMenu a { color: #000000; font-weight: bold; text-decoration: none; }
+    .current { background-color: #FFFFFF;
+                border: 1px solid blue; border-bottom:hidden; }
+    .tabPage { width: 900px; height: 600px; float: left;
+                border: 1px solid blue; }
+</style>
+
+<!-- table style -->
+<style>
+    .custom_table {
+        width : 100%;
+        border-collapse : collapse;
+        border-spacing : 0px 0px;
+        border : 1px solid #7f7f7f;
+        text-align : center;
+    }
+
+    .custom_table th {
+        padding : 0px;
+        spacing : 0px;
+        border : 1px solid #7f7f7f;
+        text-align : center;
+    }
+    .custom_table td {
+        padding : 0px;
+        spacing : 0px;
+        border : 1px solid #7f7f7f;
+        text-align : center;
+    }
+    .custom_table tr {
+        padding : 0px;
+        spacing : 0px;
+        border : 1px solid #7f7f7f;
+        text-align : center;
+    }
+
 </style>
 
 <html>
@@ -13,6 +60,8 @@
     <meta charset="utf-8">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <!-- for google chart -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     </head>
     <body>
         <div id = "text field example">
@@ -82,19 +131,19 @@
                     <option value="KIA">E</option>
             </select>
         </div>
-        <div id = "radio_checkbox example">
+        <div id = "radio_checkbox example" style="width:300px">
             Radio button Example : 
             <fieldset>
-                <input type="radio" name="chk_info" value="HTML">HTML
-                <input type="radio" name="chk_info" value="CSS" checked="checked">CSS
-                <input type="radio" name="chk_info" value="웹디자인">웹디자인
+                <input type="radio" name="chk_info" value="HTML"/>HTML<br>
+                <input type="radio" name="chk_info" value="CSS" checked="checked"/>CSS<br>
+                <input type="radio" name="chk_info" value="웹디자인"/>웹디자인<br>
             </fieldset>
             <br>                            
             Checked button Example : 
             <fieldset>
-                <input type="checkbox" name="chk_info" value="HTML">HTML
-                <input type="checkbox" name="chk_info" value="CSS" checked="checked">CSS
-                <input type="checkbox" name="chk_info" value="웹디자인">웹디자인
+                <input type="checkbox" name="chk_info" value="HTML"/>HTML
+                <input type="checkbox" name="chk_info" value="CSS" checked="checked"/>CSS
+                <input type="checkbox" name="chk_info" value="웹디자인"/>웹디자인
             </fieldset>
         </div>                        
         <div id = "file selection example">
@@ -104,6 +153,71 @@
                 <input type="file" name="FileName">
             </form>
         </div>
+        <br>
+        <div class="tabWrap">
+            Tab Menu Example :
+            <ul class="tab_Menu">
+                <li class="tabMenu current">
+                    <a href="#tabContent01" >Tab 1</a>
+                </li>
+                <li class="tabMenu">
+                    <a href="#tabContent02" >Tab 2</a>
+                </li>
+                <li class="tabMenu">
+                    <a href="#tabContent03" >Tab 3</a>
+                </li>
+            </ul>
+            <div class="tab_Content_Wrap">
+                <div id="tabContent01" class="tabPage">
+                    Tab1 Content
+                </div>
+                <div id="tabContent02" class="tabPage">
+                    Tab2 Content
+                </div>
+                <div id="tabContent03" class="tabPage">
+                    Tab3 Content
+                </div>
+            </div>
+        </div>
+        <br>
+        <div id = "config table">
+            <table id = "config" class=custom_table>
+                <thead id = "config_thead">
+                    <tr>
+                        <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Row Span = 2</th>
+                        <th colspan="24" style="text-align: center; background-color:rgb(217,217,217); font-weight: bold"> Col Span = 10</th>
+                    </tr>
+                    <tr>
+                        <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">COL1</th>
+                        <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">COL2</th>
+                        <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">COL3</th>
+                        <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">COL4</th>
+                        <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">COL5</th>
+                        <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">COL6</th>
+                        <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">COL7</th>
+                        <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">COL8</th>
+                        <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">COL9</th>
+                        <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">COL10</th>
+                    </tr>
+                </thead>
+                <tbody id = "config_body">
+                    <tr id="tr1"><td colspan="3">col=1</td><td>col=2</td><td>col=3</td><td>col=4</td><td>col=5</td><td>col=6</td><td>col=7</td><td>col=8</td><td>col=9</td></tr>
+                    <tr id="tr2"><td>col=1</td><td>col=2</td><td>col=3</td><td>col=4</td><td>col=5</td><td>col=6</td><td>col=7</td><td>col=8</td><td>col=9</td><td>col=10</td><td>col=11</td></tr>
+                    <tr id="tr3"><td>col=1</td><td>col=2</td><td>col=3</td><td>col=4</td><td>col=5</td><td>col=6</td><td>col=7</td><td>col=8</td><td>col=9</td><td>col=10</td><td>col=11</td></tr>
+                    <tr id="tr4"><td>col=1</td><td>col=2</td><td>col=3</td><td>col=4</td><td>col=5</td><td>col=6</td><td>col=7</td><td>col=8</td><td>col=9</td><td>col=10</td><td>col=11</td></tr>
+                    <tr id="tr5"><td>col=1</td><td>col=2</td><td>col=3</td><td>col=4</td><td>col=5</td><td>col=6</td><td>col=7</td><td>col=8</td><td>col=9</td><td>col=10</td><td>col=11</td></tr>
+                    <tr id="tr6"><td>col=1</td><td>col=2</td><td>col=3</td><td>col=4</td><td>col=5</td><td>col=6</td><td>col=7</td><td>col=8</td><td>col=9</td><td>col=10</td><td>col=11</td></tr>
+                    <tr id="tr7"><td>col=1</td><td>col=2</td><td>col=3</td><td>col=4</td><td>col=5</td><td>col=6</td><td>col=7</td><td>col=8</td><td>col=9</td><td>col=10</td><td>col=11</td></tr>
+                    <tr id="tr8"><td>col=1</td><td>col=2</td><td>col=3</td><td>col=4</td><td>col=5</td><td>col=6</td><td>col=7</td><td>col=8</td><td>col=9</td><td>col=10</td><td>col=11</td></tr>
+                    <tr id="tr9"><td>col=1</td><td>col=2</td><td>col=3</td><td>col=4</td><td>col=5</td><td>col=6</td><td>col=7</td><td>col=8</td><td>col=9</td><td>col=10</td><td>col=11</td></tr>
+                    <tr id="tr10"><td>col=1</td><td>col=2</td><td>col=3</td><td>col=4</td><td>col=5</td><td>col=6</td><td>col=7</td><td>col=8</td><td>col=9</td><td>col=10</td><td>col=11</td></tr>
+                </tbody>
+                <tfoot id = "config_foot">
+                    <tr><td colspan = "5">schedule information</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td></tr>
+                </tfoot>
+            </table>
+        </div>
+        <br>
         <div id = "Marquee example">
             Marquee Example : <br>
             <marquee direction="right">오른쪽 방향으로 흐르는 텍스트...</marquee>
@@ -114,6 +228,77 @@
             <marquee scrollamount="10">scrollamount 속성을 10픽셀로 지정</marquee>
             <marquee loop="1">loop 속성을 1로 지정</marquee>
         </div>
+        <div id="workflow" style = "position:relative">
+            Image Test : <br>
+            <img src="/images/workflow.png" alt="Smiley face" width="800" height="600">
+            <div class="linkarea" style="top: 30px; left: 0px; width: 30px; height: 30px; cursor: pointer; position:absolute;" clicklink="http://www.naver.com">naver</div>
+            <div class="linkarea" style="top: 30px; left: 300px; width: 30px; height: 30px; cursor: pointer; position:absolute;" clicklink="http://www.daum.net">daum</div>
+        </div>
+        <!-- google chart -->
+        <div id="curve_chart" style="width: 800px; height: 400px"></div>
+        <div id="chart_div" style="width: 800px; height: 400px"></div>
+        <br>
+        <table id="ConfigurationTable" classe=custom_table>
+            <thead id="ConfigurationTable_head">
+                <tr>
+                    <th colspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category1</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category2</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category3</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category4</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category5</th>
+                </tr>
+                <tr>
+                    <th colspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> market</th>
+                    <th id="market_category1"></th>
+                    <th id="market_category2"></th>
+                    <th id="market_category3"></th>
+                    <th id="market_category4"></th>
+                    <th id="market_category5"></th>
+                </tr>
+            </thead>
+            <tbody id="ConfigurationTable_body">
+                <tr id="max_slot_cnt">
+                    <td rowspan="11"> Config</td><td> max_slot_cnt</td>
+                </tr>
+                <tr id="slot_1st_Bid_KRW">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="slot_2nd_Bid_KRW">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="check_period">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="retry_cnt">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="retry_delaysec">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="target_rate">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="target_rate_adj">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="new_slot_create_ratio">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="new_slot_create_ratio_adj">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="max_add_bid_cnt">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="status">
+                    <td colspan="2"> status</td>
+                </tr>
+                <tr id="controlBtn">
+                    <td colspan="2">control Btn</td>
+                </tr>
+            </tbody>
+        </table>
     </body>
 </html>
 
@@ -136,12 +321,27 @@
     $(":button")	Selects all <button> elements and <input> elements of type="button"	
     $("tr:even")	Selects all even <tr> elements	
     $("tr:odd")	    Selects all odd <tr> elements
+
+    object define
+    var obj = $('<tagname>')
+    obj.css().attr().attr()
 -->
 
 <script type="text/javascript">
     //$(document).ready(function() {  // long syntax
     $(function() {        // short syntax
-         alert("load completed");
+        tabSetting();
+        CreateTable("ConfigurationTable_body", plistx, plisty);
+        // for google chart
+        /*
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        google.charts.setOnLoadCallback(drawVisualization);
+        */
+        //alert("load completed");
+        var obj = $("<input>").attr("type", "button").attr("value", "buttonXXXX").att;
+        $('body').append(obj);
+        setDivLinks();
     });
 
     function buttton1_handler()
@@ -149,48 +349,511 @@
         alert("Hello world!!!!");
     }
 
+    function setDivLinks()
+    {
+        $('div.linkarea').each(function(){
+            let link = $(this).attr("clicklink");
+            if(link != undefined && link != "")
+            {
+                $(this).css("cursor", "pointer").click(function(){
+                    window.open($(this).attr("clicklink"));
+                })
+            }
+        });
+    }
+
+    // for google chart
+    function drawChart() 
+    {
+        var data = google.visualization.arrayToDataTable([
+          ['Year', 'Sales', 'Expenses'],
+          ['2004',  1000,      400],
+          ['2005',  1170,      460],
+          ['2006',  660,       1120],
+          ['2007',  1030,      540]
+        ]);
+
+        var options = {
+          title: 'Company Performance',
+          curveType: 'function',
+          legend: { position: 'bottom' }
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+        chart.draw(data, options);
+        var chart = new google.visualization.LineChart(document.getElementById('tabContent01'));
+        chart.draw(data, options);
+    }
+
+    function drawVisualization() 
+    {
+        // Some raw data (not necessarily accurate)
+        var data = google.visualization.arrayToDataTable([
+          ['Month', 'Bolivia', 'Ecuador', 'Madagascar', 'Papua New Guinea', 'Rwanda', 'Average'],
+          ['2004/05',  165,      938,         522,             998,           450,      614.6],
+          ['2005/06',  135,      1120,        599,             1268,          288,      682],
+          ['2006/07',  157,      1167,        587,             807,           397,      623],
+          ['2007/08',  139,      1110,        615,             968,           215,      609.4],
+          ['2008/09',  136,      691,         629,             1026,          366,      569.6]
+        ]);
+
+        var options = {
+          title : 'Monthly Coffee Production by Country',
+          vAxis: {title: 'Cups'},
+          hAxis: {title: 'Month'},
+          seriesType: 'bars',
+          series: { 5 : {type: 'line'}},
+        };
+
+        var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+        var chart = new google.visualization.ComboChart(document.getElementById('tabContent02'));
+        chart.draw(data, options);
+    }
+
+    function tabSetting() {
+        // 탭 컨텐츠 hide 후 현재 탭메뉴 페이지만 show
+        $('.tabPage').hide();
+        $($('.current').find('a').attr('href')).show();
+ 
+        // Tab 메뉴 클릭 이벤트 생성
+        $('li').click(function (event) {
+            var tagName = event.target.tagName; // 현재 선택된 태그네임
+            var selectedLiTag = (tagName.toString() == 'A') ? $(event.target).parent('li') : $(event.target); // A태그일 경우 상위 Li태그 선택, Li태그일 경우 그대로 태그 객체
+            var currentLiTag = $('li[class~=current]'); // 현재 current 클래그를 가진 탭
+            var isCurrent = false; 
+             
+            // 현재 클릭된 탭이 current를 가졌는지 확인
+            isCurrent = $(selectedLiTag).hasClass('current');
+
+            //alert($(selectedLiTag).text()); 
+            if($(selectedLiTag).text().indexOf("Tab 1") != -1) 
+            { 
+                $('.tabPage').show();
+                $($('#tabContent02')).hide();
+                $($('#tabContent01')).show();
+                $($('#tabContent03')).hide();
+                google.charts.load('current', {'packages':['corechart']});
+                google.charts.setOnLoadCallback(drawChart);
+            }
+            if($(selectedLiTag).text().indexOf("Tab 2") != -1) 
+            { 
+                $($('#tabContent01')).hide();
+                $($('#tabContent02')).show();
+                $($('#tabContent03')).hide();
+                google.charts.load('current', {'packages':['corechart']});
+                google.charts.setOnLoadCallback(drawVisualization);
+            }
+
+            // current를 가지지 않았을 경우만 실행
+            if (!isCurrent) {
+                $($(currentLiTag).find('a').attr('href')).hide();
+                $(currentLiTag).removeClass('current');
+ 
+                $(selectedLiTag).addClass('current');
+                $($(selectedLiTag).find('a').attr('href')).show();
+            }
+ 
+            return false;
+        });
+    }
+
+
+    var plistx = [ "P1", "P2", "P3", "P4", "P5" ];
+    var plisty = [ "max_slot_cnt", "slot_1st_Bid_KRW", "slot_2nd_Bid_KRW", "check_period", "retry_cnt", "retry_delaysec", "target_rate", "target_rate_adj", "new_slot_create_ratio", "new_slot_create_ratio_adj", "max_add_bid_cnt", "status", "controlBtn" ];
+    let portflist = ["menu0", "menu1", "menu2", "menu3", "menu4" ];
+    let slotcnt = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10" ];
+
+    function CreateTable(table_bodyID, xlabel, ylabel)
+    {
+        var index = 0;
+        var selecterID = "#" + table_bodyID + " > tr";
+        //alert(selecterID);
+        $(selecterID).each(function () {
+        //$("#ConfigurationTable_body > tr").each(function () {
+            createTds(index++, $(this), xlabel, ylabel);
+        });
+
+        makeListBox("#market_category1", "portf1", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
+        makeListBox("#market_category2", "portf2", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
+        makeListBox("#market_category3", "portf3", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
+        makeListBox("#market_category4", "portf4", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
+        makeListBox("#market_category5", "portf5", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
+
+        makeListBox("#Cell_max_slot_cnt_P1", "slotcnt1", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
+        makeListBox("#Cell_max_slot_cnt_P2", "slotcnt2", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
+        makeListBox("#Cell_max_slot_cnt_P3", "slotcnt3", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
+        makeListBox("#Cell_max_slot_cnt_P4", "slotcnt4", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
+        makeListBox("#Cell_max_slot_cnt_P5", "slotcnt5", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
+
+        //function makeInputBox(ParentID, ID, type, defaultval, classID, style, callback)
+        makeInputBox("#Cell_slot_1st_Bid_KRW_P1", "firstbidKRW1", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_slot_1st_Bid_KRW_P2", "firstbidKRW2", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_slot_1st_Bid_KRW_P3", "firstbidKRW3", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_slot_1st_Bid_KRW_P4", "firstbidKRW4", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_slot_1st_Bid_KRW_P5", "firstbidKRW5", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+
+        makeInputBox("#Cell_slot_2nd_Bid_KRW_P1", "secondbidKRW1", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 100, InputBoxHandler);
+        makeInputBox("#Cell_slot_2nd_Bid_KRW_P2", "secondbidKRW2", "number", 5000, "css_style1", "width: 100px", 5000, 100000, 100, InputBoxHandler);
+        makeInputBox("#Cell_slot_2nd_Bid_KRW_P3", "secondbidKRW3", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 100, InputBoxHandler);
+        makeInputBox("#Cell_slot_2nd_Bid_KRW_P4", "secondbidKRW4", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 100, InputBoxHandler);
+        makeInputBox("#Cell_slot_2nd_Bid_KRW_P5", "secondbidKRW5", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 100, InputBoxHandler);
+
+
+        makeInputBox("#Cell_check_period_P1", "checkperiod1", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
+        makeInputBox("#Cell_check_period_P2", "checkperiod2", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
+        makeInputBox("#Cell_check_period_P3", "checkperiod3", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
+        makeInputBox("#Cell_check_period_P4", "checkperiod4", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
+        makeInputBox("#Cell_check_period_P5", "checkperiod5", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
+
+
+        makeInputBox("#Cell_retry_cnt_P1", "retrycnt1", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_cnt_P2", "retrycnt2", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_cnt_P3", "retrycnt3", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_cnt_P4", "retrycnt4", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_cnt_P5", "retrycnt5", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+
+        makeInputBox("#Cell_retry_delaysec_P1", "retry_delaysec1", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_delaysec_P2", "retry_delaysec2", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_delaysec_P3", "retry_delaysec3", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_delaysec_P4", "retry_delaysec4", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_delaysec_P5", "retry_delaysec5", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
+
+        makeInputBox("#Cell_target_rate_P1", "target_rate1", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_P2", "target_rate2", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_P3", "target_rate3", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_P4", "target_rate4", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_P5", "target_rate5", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+
+        makeInputBox("#Cell_target_rate_adj_P1", "target_rate_ajd1", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_adj_P2", "target_rate_ajd2", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_adj_P3", "target_rate_ajd3", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_adj_P4", "target_rate_ajd4", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_adj_P5", "target_rate_ajd5", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+
+        makeInputBox("#Cell_new_slot_create_ratio_P1", "new_slot_create_ratio1", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_P2", "new_slot_create_ratio2", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_P3", "new_slot_create_ratio3", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_P4", "new_slot_create_ratio4", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_P5", "new_slot_create_ratio5", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+
+        makeInputBox("#Cell_new_slot_create_ratio_adj_P1", "new_slot_create_ratio_adj1", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_adj_P2", "new_slot_create_ratio_adj2", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_adj_P3", "new_slot_create_ratio_adj3", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_adj_P4", "new_slot_create_ratio_adj4", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_adj_P5", "new_slot_create_ratio_adj5", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+
+        makeInputBox("#Cell_max_add_bid_cnt_P1", "max_add_bid_cnt1", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_max_add_bid_cnt_P2", "max_add_bid_cnt2", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_max_add_bid_cnt_P3", "max_add_bid_cnt3", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_max_add_bid_cnt_P4", "max_add_bid_cnt4", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_max_add_bid_cnt_P5", "max_add_bid_cnt5", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+
+        makeInputBox("#Cell_status_P1", "status1", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_status_P2", "status2", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_status_P3", "status3", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_status_P4", "status4", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_status_P5", "status5", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+
+        makeButton("#Cell_controlBtn_P1", "submitBtn1", "Start", ButtonClickhandler, "css_style1", "width: 100px");
+        makeButton("#Cell_controlBtn_P2", "submitBtn2", "Start", ButtonClickhandler, "css_style1", "width: 100px");
+        makeButton("#Cell_controlBtn_P3", "submitBtn3", "Start", ButtonClickhandler, "css_style1", "width: 100px");
+        makeButton("#Cell_controlBtn_P4", "submitBtn4", "Start", ButtonClickhandler, "css_style1", "width: 100px");
+        makeButton("#Cell_controlBtn_P5", "submitBtn5", "Start", ButtonClickhandler, "css_style1", "width: 100px");
+    }
+
+
+    function createTds(index, obj, xlabel, ylabel) {
+        var cellname = "";
+        for(var i = 0; i < xlabel.length; i++)
+        {
+            cellname = "Cell_" + ylabel[index] +"_"+ xlabel[i];
+            //obj.append($("<td>").css("text-align","center").html('<a href = "https://www.naver.com" target = "_blank">0</a>').attr("statusname", cellname));
+            //obj.append($("<td>").css("text-align","center").text('-').attr("cellname", cellname));
+            obj.append($("<td>").css("text-align","center").text('').attr("id", cellname));
+        }
+    }
+
+    function attachWidgetToTable(tdID, WidgetCategory) {
+        let accessID = "#" + tdID;
+
+        switch(WidgetCategory)
+        {
+            case "ListBox" : 
+                let ht = '<div><select id = selectbox1 name="single_selection"><option value="volvo">A</option><option value="saab">B</option><option value="opel" selected="selected">C</option><option value="audi">D</option></select></div>'
+                $(accessID).text('').append(ht);
+                break;
+            
+        }
+    }
+
+    /*
+    List Box
+
+    <div id = "select box example">
+    Single Select Box with initial valule - Example : <br>
+    <select id = selectbox1 name="single_selection">
+        <option value="volvo">A</option>
+        <option value="saab">B</option>
+        <option value="opel" selected="selected">C</option>
+        <option value="audi">D</option>
+    </select>
+    <br>
+    Multiple Select Box Example : <br>
+    <select id = selectbox2 name="multi_selection" multiple="multiple" size=5 style="width: 200px">
+            <option value="volvo">A</option>
+            <option value="saab">B</option>
+            <option value="opel">C</option>
+            <optgroup label="audi">
+                <option value="audi2">E</option>
+                <option value="audi3">F</option>
+                <option value="audi4">G</option>
+            </optgroup>
+        </select>
+    <br>
+    Select Box with scroll - Example : <br>
+    <select id = selectbox3 name="single_selection" size=3>
+            <option value="volvo">A</option>
+            <option value="saab">B</option>
+            <option value="opel">C</option>
+            <option value="audi">D</option>
+            <option value="KIA">E</option>
+    </select>
+    </div>
+    */
+    function makeListBox(ParentID, ID, datalist, callback, classID, style, defaultIndex, option, size)
+    {
+        /*
+        let result = $('<div><select>');
+        //result = result.find('select').attr("id", "selecterID").attr("size", 5).attr("multiple", "multiple").attr("style", "width: 200px").append("<option value = a>aa").attr("selected", "selected").append("<option value = b>BB");
+        result.find('select').attr("id", "selecterID").append("<option value = a>aa").attr("selected", "selected").append("<option value = b>BB");
+        $('#Cell_max_slot_cnt_P3').append(result);
+        */
+        var Obj = null;
+        Obj = $('<div><select>')
+        if(option == "multiple") { Obj.find('select').attr("size", size).attr("id", ID).attr("class", classID).attr("style", style).attr("multiple", "multiple"); }
+        else { Obj.find('select').attr("size", size).attr("id", ID).attr("class", classID).attr("style", style); }
+ 
+        let finalhtml = "";
+        for(i = 0; i < datalist.length; i++)
+        {
+            if(i == defaultIndex) { html = "<option value=" + datalist[i] + " selected=selected>" + datalist[i]; } else { html = "<option value="+datalist[i] + ">" + datalist[i]; }
+            finalhtml += html;
+        }
+        Obj.find('select').append(finalhtml);
+        // on binding
+        Obj.find('select').bind("change", function() { return callback(this, datalist); });
+        $(ParentID).append(Obj);
+    }
+
+    /*
+    List Box onchange Callback.... Event 종류 참조 : https://heavening.tistory.com/23
+    */
+
+    function ListBox_handleChange (self, itemList) 
+    {
+        //console.log("ListBox_handleChange = ", self);
+        for(i = 0; i < itemList.length; i++)
+        {
+            if(self[i].selected) { console.log("Selected Item[", i, "] = ", self[i].value); }
+        }
+    }
+
+    /*
+    get selected item value from listbox....
+    */
+    function getListBox_values(id) 
+    {
+        id = "#" + id;
+        console.log(id);
+        let Obj = $(id).find('option');
+        console.log(Obj);
+        let selval = [];
+        let j = 0;
+        for(i = 0; i < Obj.length; i++)
+        {
+            if(Obj[i].selected) 
+            { 
+                //console.log("[getListBox_values] Selected Item[", i, "] = ", Obj[i].value); 
+                selval.push(Obj[i].value); 
+            }
+        }
+        console.log("Selected Items in ListBox is ", selval);
+        if(selval.length == 1) { return selval[0]; }
+        return selval;
+    }
+
+
+
+    /*
+    Button 생성
+    <div">
+        <button id = button1, type="button" onclick=buttton1_handler()>Button1</button>
+    </div>
+    */
+    function makeButton(ParentID, ID, Name, callback, classID, style)
+    {
+        var Obj = $('<div><button>');
+        Obj.find('button').attr("id", ID).attr("class", classID).attr("style", style).attr("typpe", "button").text(Name);
+        Obj.find('button').bind("click", function() { return callback(this, ID); }); 
+        $(ParentID).append(Obj);
+    }
+
+    /*
+    Button Click Handler.......
+    */
+    function ButtonClickhandler(self, ID)
+    {
+        console.log(" ButtonClickhandler = ", self);
+        console.log("Button ID = ", ID);
+        //alert("Button clicked.........");
+        
+        send_ConfigParam(ID);
+    }
+
+    /*
+    text input box
+    <div id = "text field example">
+        Text field Input : <input type="text" id="msginput", name="member_name" value="text를 입력하세요...">
+        Text field Input : <input type="number" id="msginput", name="member_name" value="text를 입력하세요...">
+    </div>
+    */
+    function makeInputBox(ParentID, ID, type, defaultstr, classID, style, min, max, step, callback)
+    {
+        var Obj = $('<div><input>');
+        Obj.find('input').attr("type", type).attr("id", ID).attr("class", classID).attr("style", style).val(defaultstr);
+        if(type === "number") 
+        { 
+            Obj.find('input').attr('min', min).attr('max', max).attr('step', step);
+            //Obj.find('input').bind("keyup", function() { return callback(this, min, max); });
+            Obj.find('input').bind("focusout", function() { return callback(this, min, max); });
+        }
+        $(ParentID).append(Obj);
+    }
+
+    function InputBoxHandler(self, min, max)
+    {
+        //console.log("InputBoxHandler = ", self);
+        if(self.value < min ) { self.value = min; console.log("force fix min value"); }
+        if(self.value > max ) { self.value = max; console.log("force fix max value"); }
+    }
+
+
+    /*
+    get value from inputbox....
+    */
+    function getInputBox_values(id) 
+    {
+        id = "#" + id;
+        let Obj = $(id)
+        console.log(Obj);
+        console.log("Input Box value is ", Obj[0].value);
+        return Obj[0].value;
+    }
+
+
+
+    function send_ConfigParam(ID)
+    {
+        let ConfigParams = 
+        { 
+            max_slot_cnt : 0,
+            slot_1st_Bid_KRW : 0, 
+            slot_2nd_Bid_KRW : 0, 
+            check_period : 0,
+            retry_cnt : 0,
+            retry_delaysec : 0,
+            target_rate : 0,
+            target_rate_adj : 0,
+            new_slot_create_ratio : 0,
+            new_slot_create_ratio_adj : 0,
+            max_add_bid_cnt : 0,
+            status : 0,
+        };
+        
+        let index = ID.replace("submitBtn", '');
+        let keyID = getListBox_values("portf"+index);
+        console.log("keyID = ", keyID);
+        ConfigParams['max_slot_cnt'] = getListBox_values("slotcnt"+index);
+        ConfigParams['slot_1st_Bid_KRW'] = getInputBox_values("firstbidKRW"+index);
+        ConfigParams['slot_2nd_Bid_KRW'] = getInputBox_values("secondbidKRW"+index);
+        ConfigParams['check_period'] = getInputBox_values("checkperiod"+index);
+        ConfigParams['retry_cnt'] = getInputBox_values("retrycnt"+index);
+        ConfigParams['retry_delaysec'] = getInputBox_values("retry_delaysec"+index);
+        ConfigParams['target_rate'] = getInputBox_values("target_rate"+index);
+        ConfigParams['target_rate_adj'] = getInputBox_values("target_rate_ajd"+index);
+        ConfigParams['new_slot_create_ratio'] = getInputBox_values("new_slot_create_ratio"+index);
+        ConfigParams['new_slot_create_ratio_adj'] = getInputBox_values("new_slot_create_ratio_adj"+index);
+        ConfigParams['max_add_bid_cnt'] = getInputBox_values("max_add_bid_cnt"+index);
+        //ConfigParams['status'] = getListBox_values("status"+index);
+
+        let jsonObj = { };
+        let indexID = "ID" + index;
+        jsonObj[keyID] = { };
+        jsonObj[keyID][indexID] = { 'marketID' : keyID + "_" + indexID, inserted_at : 0, config : ConfigParams };
+        console.log("jsonObj = ", JSON.stringify(jsonObj));
+
+        let CRUD_url = "";
+        let CRUD_method = "";
+        if(index == 7) // PUT : update
+        {
+            CRUD_url = "http://10.186.115.57:7000/config/post";
+            CRUD_method = "PUT"
+        }
+        else
+        {
+            CRUD_url = "http://10.186.115.57:7000/config/update";
+            CRUD_method = "PUT"
+        }
+
+        let settings = {
+            async : true,
+            crossDomain : true,
+            url : CRUD_url,
+            method : CRUD_method,
+            headers : {
+                "Content-Type": "application/json",
+            },
+            //data : JSON.stringify(ConfigParams), 
+            data : JSON.stringify(jsonObj), 
+            success : function (result) { console.log("CRUD_Index] = ", index, " upload suceess!!! = ", result); },
+            error : function (error) { console.log("CRUD_Index] = ", index, " upload fail!!! = ", error); }
+        }
+
+        $.ajax(settings).done(function (response) {
+            console.log("Respones... : ", response);
+        });
+    }
+
+/*
+const SchemaDefine = { 
+    market1 :  
+    {
+        ID1 : {
+            marketID : "market1_ID1",
+            inserted_at : 111, 
+            config : 222 
+            },
+        ID2 : {
+            marketID : "market1_ID2",
+            inserted_at : 111, 
+            config : 222 
+            }
+    },
+    market2 :  
+    {
+        ID1 : {
+            marketID : "market2_ID1",
+            inserted_at : 111, 
+            config : 222 
+            },
+        ID2 : {
+            marketID : "market2_ID2",
+            inserted_at : 111, 
+            config : 222 
+            }
+    },
+}
+*/
 </script>
 
-<!--
-var slotinfo = { 
-    timetick : '2019-04-09T10:00:00',
-    market : '---',
-    type : 'first/others',
-    trends_prev : 'descent/ascent/parallel',
-    trends_create : 'descent', 
-    trends_cur : 'descent',
-    config : { },
-    status : 'running / liquidation / suspend', 
-    liqudation_uid : 'uid-xx-dd-wewerew-dd-00',
-    statics : {
-        sum_amount : 100,
-        sum_amount_done : 90, 
-        sum_amount_wait : 10,
-        sum_amount_done_ratio : 'amount_done/amount',
-        sum_bidkw : 'sum(bidkw)',
-        sum_restkw : 'sum(restkw)',
-        sum_investkw : 'sum(investkw)',
-        average : 'sum_bidkw/sum_amount_done',
-        cur_eval_net_ratio : 0.05,
-        cur_eval_net_krw : 'cur_eval_net_ratio*sum_bidkw',
-    },
-    last_bid_info : { timetick : '2019-04-09T10:00:00', tr_price : 6300 },
-    add_bid : [
-        {
-            timetick : '2019-04-09T10:00:00',
-            UID : 'uid-xx-dd-wewerew-dd-00',
-            status : 'done/wait/wait_expired', 
-            p : 0,
-            gap : 0,
-            amount : 100,
-            amount_done : 90, 
-            amount_wait : 10,
-            amount_done_ratio : 'amount_done/amount',
-            bidkw : 'p*amount_done',
-            restkw : 'p*amount_wait',
-            investkw : 'p*amount',
-            deadline : '2019-04-10T10:00:00',
-        },
-    ],
-}
--->
