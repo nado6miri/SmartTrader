@@ -1,109 +1,723 @@
 const sleep = require('sleep');
+const fse = require('fs-extra');
+var moment = require('moment-timezone')
+
 const upbit = require("./upbit_restapi");
+
+const tradefee = 0.0005;
+const simulation = true;
+//const simulation = false;
+const algorithm_test = true;
+var filesave_count = 0;
+const filesave_period = 12; // check_period * count = 5sec * 10 = 50sec
+var CtrlPrint = { };
+
+// default config value.......
 /*
-var config = {
-    market : 'KRW-EOS',         // market name
-    cur_status : 'running',     // 'running, suspend, closed'
-    run_mode : 0,               // 0 : init (clear - liquidation), 1 : running, 2 : suspend
-    retry_cnt : 5,              // set retry count when restapi fails 
-    retry_delay : 5,            // set retry delay seconds when restapi fails (unit : Sec)
-    slot_cnt : 0,               // The number of slots in current market.
-    total_crcy_amount : 000,    // Total amount of cryptocurrency in current market. (unit : EA)
-    total_invest_krw : 000,     // Total investment money in current market. (unit : KRW)
-    total_eval_krw : 200,       // The amount of evaluation (평가금액) in current market. (unit : KRW)
-    limit_invest_krw : 0000,    // The limitation of invest money in current market. (unit : KRW)
-    limit_invest_amount : 0000, // The limitation of cryptocurrency amount in current market. (unit : EA)
-    cur_slot_net_ratio : 20,    // The ratio of net margin in current market. (unit : %)
-    cur_slot_net_krw : 20,      // The amount(KRW) of net margin in current market. (unit : KRW) 
-
-    check_preiod : 5,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    target_rate : 5,            //* The ratio of liquidation margin in each slot. (unit : %)
-    target_rate_adj : 1,        //* The adjustment ratio of target_rate
-    new_slot_Create_Ratio : -3,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
-    new_slot_Create_Ratio_adj : -0.3, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
-    max_addbid_cnt : 10,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
-    addbid_Ratio : [ 95, 95, 95, 95, 95, 95, 95, 95, 95, 95 ], //* 5% descent ratio.
-    slot_1st_Bid_KRW : 50000,   //* fisrt investment moeny (unit : KRW)
-    slot_2nd_Bid_KRW : 100000,  //* after 1st slot, investment moeny (unit : KRW)
-    max_slot_cnt : 10,          //* The limitation number of creating slots (unit : EA) 
-    slots : [],
-}
-*/
-
-
-// template...
 var config_param = {
     max_slot_cnt : 10,          //* The limitation number of creating slots (unit : EA) 
-    slot_1st_Bid_KRW : 50000,   //* fisrt investment moeny (unit : KRW)
-    slot_2nd_Bid_KRW : 100000,  //* after 1st slot, investment moeny (unit : KRW)
+    slot_1st_Bid_KRW : 5000,   //* fisrt investment moeny (unit : KRW)
+    slot_2nd_Bid_KRW : 10000,  //* after 1st slot, investment moeny (unit : KRW)
     check_period : 5,           //* The price check duration of main loop, unit is second. (unit : Sec)
     retry_cnt : 5,              //* set retry count when restapi fails 
-    target_rate : 5,            //* The ratio of liquidation margin in each slot. (unit : %)
-    target_rate_adj : 1,        //* The adjustment ratio of target_rate
-    new_slot_Create_Ratio : -3,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
-    new_slot_Create_Ratio_adj : -0.3, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
+    target_rate : 0.5,            //* The ratio of liquidation margin in each slot. (unit : %)
+    target_rate_adj : 0.05,        //* The adjustment ratio of target_rate
+    new_slot_Create_Ratio : -0.5,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
+    new_slot_Create_Ratio_adj : -0.05, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
+    new_addbid_Create_Ratio : -1.1,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
+    new_addbid_Create_Ratio_adj : -0.01, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
     max_addbid_cnt : 10,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
     retry_delay : 2,            // set retry delay seconds when restapi fails (unit : Sec)
     limit_invest_krw : 0000,    // The limitation of invest money in current market. (unit : KRW)
     limit_invest_amount : 0000, // The limitation of cryptocurrency amount in current market. (unit : EA)
 }
-
-
-
-var bidinfo = {
-    timetick : '2019-04-09T10:00:00',
-    UID : 'uid-xx-dd-wewerew-dd-00',
-    status : 'done/wait/wait_expired', 
-    price : 0,
-    gap : 0,
-    amount : 100,
-    amount_done : 90, 
-    amount_wait : 10,
-    amount_done_ratio : 'amount_done/amount',
-    bidkw : 'p*amount_done',
-    restkw : 'p*amount_wait',
-    investkw : 'p*amount',
-    deadline : '2019-04-10T10:00:00',
-}
-
-// template...
-var slotinfo = { 
-    timetick : '2019-04-09T10:00:00',
-    market : "KRW-EOS",
-    type : 'first/others',
-    trends_prev : 'descent/ascent/parallel',
-    trends_create : 'descent', 
-    trends_cur : 'descent',
-    config : { },
-    status : 'running / liquidation / suspend', 
-    liqudation_uid : 'uid-xx-dd-wewerew-dd-00',
-    statics : {
-        sum_amount : 100,
-        sum_amount_done : 90, 
-        sum_amount_wait : 10,
-        sum_amount_done_ratio : 'amount_done/amount',
-        sum_bidkw : 'sum(bidkw)',
-        sum_restkw : 'sum(restkw)',
-        sum_investkw : 'sum(investkw)',
-        average : 'sum_bidkw/sum_amount_done',
-        cur_eval_net_ratio : 0.05,
-        cur_eval_net_krw : 'cur_eval_net_ratio*sum_bidkw',
-    },
-    //last_bid_info : { timetick : '2019-04-09T10:00:00', tr_price : 6300 },
-    add_bid : [ bidinfo, bidinfo, ],
-}
-
-var last_tr_info = { timetick : '2019-04-09T10:00:00', tr_price : 6300 };
-
-var portfolio = {
-    "KRW-EOS" : { config : config_param, last_bid_info : last_tr_info, slots : [] }, // slot config & info......
-    "KRW-BTC" : { config : config_param, last_bid_info : last_tr_info, slots : [] }, // slot config & info......
-    "KRW-ETH" : { config : config_param, last_bid_info : last_tr_info, slots : [] }, // slot config & info......
-    "KRW-XRP" : { config : config_param, last_bid_info : last_tr_info, slots : [] }, // slot config & info......
+*/
+var config_param = {
+    trade_mode : 'mode1',
+    max_slot_cnt : 10,          //* The limitation number of creating slots (unit : EA) 
+    slot_1st_Bid_KRW : 5000,   //* fisrt investment moeny (unit : KRW)
+    slot_2nd_Bid_KRW : 10000,  //* after 1st slot, investment moeny (unit : KRW)
+    check_period : 1,           //* The price check duration of main loop, unit is second. (unit : Sec)
+    retry_cnt : 5,              //* set retry count when restapi fails 
+    target_rate : 5,            //* The ratio of liquidation margin in each slot. (unit : %)
+    target_rate_adj : 1,        //* The adjustment ratio of target_rate
+    new_slot_Create_Ratio : -3,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
+    new_slot_Create_Ratio_adj : 0, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
+    new_addbid_Create_Ratio : -5,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
+    new_addbid_Create_Ratio_adj : 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
+    max_addbid_cnt : 10,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
+    retry_delay : 2,            // set retry delay seconds when restapi fails (unit : Sec)
+    limit_invest_coin : 0000,    // The limitation of invest coin in current market. (unit : EA)
+    limit_invest_krw : 0000,    // The limitation of invest money in current market. (unit : KRW)
+    limit_invest_amount : 0000, // The limitation of cryptocurrency amount in current market. (unit : EA)
 }
 
 
-async function get_MACD(market, min, signal, MACD)
+var bid_info = {
+    order_info : 0, 
+    deadline : 0, //'2019-04-10T10:00:00',
+    price_info : 0,
+    amount : 0,
+    invest_KRW : 0, //'p*amount',
+    status : 'none', //'none/done/wait/wait_expired', 
+}
+
+
+var statics_info = {
+    current_price : 0,
+    sum_amount : 0,
+    sum_amount_done : 0, 
+    sum_amount_wait : 0,
+    sum_amount_done_ratio : 0, //'amount_done/amount',
+    sum_bid_KRW : 0, //'sum(bidkw)',
+    sum_rest_KRW : 0, //'sum(restkw)',
+    sum_invest_KRW : 0, //'sum(investkw)',
+    average : 0, //'sum_bidkw/sum_amount_done',
+    cur_eval_net_ratio : 0,
+    cur_eval_net_KRW : 0, //'cur_eval_net_ratio*sum_bidkw',
+}
+
+var slot_info = { 
+    timetick : 0,
+    market : 0, //"KRW-EOS",
+    marketID : 0, // ID1, ID2 ...
+    type : 0, //'first/others',
+    trends_prev : 0, //'descent/ascent/parallel',
+    trends_create : 0, //'descent', 
+    trends_cur : 0, //'descent',
+    status : 0, //'running / liquidation / suspend', 
+    liquidation_orderinfo : 0, //'uid-xx-dd-wewerew-dd-00',
+    statics : {},
+    add_bid : [], //[ bid_info, ],
+    last_bid_info : { timetick : 0, tr_price : 0 },
+}
+
+
+var portfolio = { config : { }, last_bid_info : { timetick : 0, tr_price : 0 }, slots : [] }; // slot config & info......
+var portfolio_info = { };
+
+
+
+var MACD = { T5min : {}, T15min : {}, T30min : {}, T60min : {}, T240min : {}, T1day : {}, Tweek : {} };
+/*
+var MACD_info = { 
+    "KRW-EOS" : { T5min : {}, T15min : {}, T30min : {}, T60min : {}, T240min : {}, T1day : {}, Tweek : {} },
+    "KRW-BTC" : { T5min : {}, T15min : {}, T30min : {}, T60min : {}, T240min : {}, T1day : {}, Tweek : {} }, 
+};
+*/
+var MACD_info = { };
+
+var timerID = { T5min : 0, T15min : 0, T30min : 0, T60min : 0, T240min : 0, days : 0, weeks : 0 };  // common data for all coin.
+var timerID_Minval = { T5min : 1, T15min : 1, T30min : 1, T60min : 1, T240min : 1, days : 1, weeks : 1 };  // common data for all coin.
+/*
+var timerID_info = { 
+    "KRW-EOS" : { T5min : 0, T15min : 0, T30min : 0, T60min : 0, T240min : 0, T1day : 0, Tweek : 0 },
+    "KRW-BTC" : { T5min : 0, T15min : 0, T30min : 0, T60min : 0, T240min : 0, T1day : 0, Tweek : 0 }, 
+}
+*/
+var timerID_info = { }
+
+
+var liquidation_DB = { }; //{ 'KRW-EOS' : { ID1 : [ { }, { } ], ID2 : [ {}, {}] }, };
+
+
+// 1. make portfolio_info
+var portpolio_list = { 'KRW-EOS_ID1' : config_param, 'KRW-EOS_ID2' : config_param, };
+
+
+
+function * price_generator(min, max, step, start, direction)
+{
+    let max_price = max;
+    let min_price = min;
+    let cur_price = start;
+
+    while(1)
+    {
+        if(direction)   // true : increase
+        {
+            if(max > cur_price+step) { cur_price += step; } else { direction = false; }
+        }
+        else    // false : decrease
+        {
+            if(cur_price > step) { cur_price -= step; } else { direction = true; }
+        }
+        yield cur_price;
+    }
+}
+
+var getPrice = { 'KRW-EOS' : { 'ID1' : 0, 'ID2' : 0 } };
+getPrice['KRW-EOS']['ID1'] = price_generator(10, 10000, 50, 8000, false); // Generator
+getPrice['KRW-EOS']['ID2'] = price_generator(10, 10000, 50, 9000, false); // Generator
+
+/*
+var getPrice = { };
+getPrice['KRW-EOS'] = price_generator(10, 10000, 10); // Generator
+getPrice['KRW-XRP'] = price_generator(5, 500, 1); // Generator
+*/
+
+/*
+for(let count = 0; count < 2000; count++)
+{
+    console.log(getPrice.next().value);
+}
+*/
+
+
+
+/*
+ 1. db로 부터 market에 대한 config value를 읽어온다.
+ 2. db로 부터 portfolio market list를 얻어온다.
+ 3. 현재 marketID가 있으면 config value가 변경되었는지 확인 / 적용한다.
+ 4. marketID가 신규로 추가되었다면 portfolio_info에 추가하여 거래가 이루어 지도록 한다.
+ 5. marketID가 기존대비 삭제 되었다면 portfolio_info에서 삭제하여 bot이 동작하지 않도록 한다. 
+*/ 
+
+/*
+전체 계좌 조회 : 보유 원화, 토큰에 대한 잔고 및 lock 수량, 평단가 제공.
+*/
+async function smart_coin_trader()
+{
+    let current = 0;
+    let previous = {};
+    let elapsed = {};
+    let retry_cnt = 0;
+
+    for (key in portpolio_list)
+    {
+        let market, marketID;
+        market = marketID = key;
+        marketID = marketID.split('_')[1];
+        market = market.split('_')[0];
+        
+        let pfolio = JSON.parse(JSON.stringify(portfolio));
+        pfolio['config'] = JSON.parse(JSON.stringify(portpolio_list[key]));  // todo : portfolio에 편입된 marketID별 config를 설정해야 함.
+        pfolio['slots'] = []; 
+        
+        if(portfolio_info.hasOwnProperty(market) === false) { portfolio_info[market] = { }; }
+        portfolio_info[market][marketID] = JSON.parse(JSON.stringify(pfolio));
+        
+        if(liquidation_DB.hasOwnProperty(market) === false) { liquidation_DB[market] = {}; }
+        if(liquidation_DB[market].hasOwnProperty(marketID) === false) { liquidation_DB[market][marketID] = []; }
+    }
+    console.log("portfolio_info = ", JSON.stringify(portfolio_info));
+    console.log("liquidation_DB = ", JSON.stringify(liquidation_DB));
+    
+    // 2. make MACD Information.
+    const MACD_Period = 1000*60*1; // 2min
+    for(pfkey in portpolio_list)
+    {
+        let market, marketID;
+        market = marketID = pfkey;
+        market = market.split('_')[0];
+        marketID = marketID.split('_')[1];
+
+        timerID_info[market] = JSON.parse(JSON.stringify(timerID));
+        for(key in timerID_info[market])
+        {
+            let data = [];
+            let timeval = "MIN";
+            if(key === "days") { timeval = "DAY"; } else if(key === "weeks") { timeval = "WEEK"; } else { timeval = "MIN"; }
+
+            console.log("start timer : key = ", key, " market = ", market, "time = ", timerID_Minval[key], timerID_info[market][key]);
+            if(timerID_info[market][key] === 0)
+            {
+                data = await get_MACD(market, timeval, timerID_Minval[key], 9, 26);
+                if(data.length > 0 && (data != "error")) 
+                { 
+                    if(MACD_info.hasOwnProperty(market) === false) { MACD_info[market] = {}; }
+                    MACD_info[market][key] = data; 
+                }
+                data = []; 
+                //console.log("First Init ==> MACD_info[", market, "][", key, "] MACD_info = ", JSON.stringify(MACD_info[market][key]));
+            }
+
+            // create timer
+            timerID_info[market][key] = setInterval(async function () {
+                data = await get_MACD(market, timeval, timerID_Minval[key], 9, 26);
+                if(data.length > 0 && (data != "error")) { MACD_info[market][key] = data; } 
+                //console.log("MACD_info[", market, "][", key, "] MACD_info = ", JSON.stringify(MACD_info[market][key]));
+                //Save_JSON_file(MACD_info, "macd_infomation.json");
+            }, timerID_Minval[key]*MACD_Period); 
+            //console.log("TimerID_info[", market, "][", key, "] = ", timerID_info[market][key]);
+        }
+    }
+
+    // 3. create the first slot
+    while(1)
+    {
+        //current = new Date();
+        current = moment().locale('ko');
+
+        for(market in portfolio_info)
+        {
+            if(CtrlPrint.hasOwnProperty(market) === false) { CtrlPrint[market] = { }; }
+            if(previous.hasOwnProperty(market) === false) { previous[market] = { }; }
+            if(elapsed.hasOwnProperty(market) === false) { elapsed[market] = { }; }
+    
+            for(marketID in portfolio_info[market])
+            {
+                if(CtrlPrint[market].hasOwnProperty(marketID) === false) { CtrlPrint[market][marketID] = { }; }
+
+                if(algorithm_test)
+                {
+                    if(getPrice.hasOwnProperty(market) === false) { getPrice[market] = { }; }
+                    if(getPrice[market].hasOwnProperty(marketID) === false) { getPrice[market][marketID] = price_generator(10, 10000, 10); } // Generator 
+                }
+
+                CtrlPrint[market][marketID]['crslot'] = false;
+                CtrlPrint[market][marketID]['addbid'] = false;
+                CtrlPrint[market][marketID]['liquid'] = false;
+                if(previous[market].hasOwnProperty(marketID) === false) { previous[market][marketID] = 0; }
+                if(elapsed[market].hasOwnProperty(marketID) === false) { elapsed[market][marketID] = 0; }
+                elapsed[market][marketID] = (current - previous[market][marketID])/1000;
+
+                if(elapsed[market][marketID] > portfolio_info[market][marketID]['config']['check_period'])
+                {
+                    let priceinfo = { };
+                    priceinfo[market] = { };
+                    previous[market][marketID] = current;
+                    if(algorithm_test)
+                    {
+                        let cur_p = getPrice[market][marketID].next().value;
+                        priceinfo[market]['trade_price'] = cur_p;
+                        console.log("[", market, "] Current = ", current, " priceinfo[market]['trade_price'] = ", priceinfo[market]['trade_price']);
+                    }
+                    else
+                    {
+                        console.log("[", market, "] ", portfolio_info[market][marketID]['config']['check_period'], " sec priodic routine....");
+                        let cur_price = await upbit.getCurrentPriceInfo(market);
+                        priceinfo[market] = cur_price[0];
+                        console.log("[", market, "][Price] = ", JSON.stringify(priceinfo[market]), "\n");
+                        Save_JSON_file(priceinfo, "cur_price.json");
+                    }
+                    // last bid price 기준으로 slot을 먼저 만들것인가? add_bid를 먼저 만들것인가? 고민이 필요 함. - 현재는 slot을 먼저 만드는 것으로 함.
+                    add_slot(market, marketID, current, priceinfo[market]);
+
+                    // slot별로 탐색하여 add bid 조건에 맞는 case가 있는지 조사하고 조건에 맞다면 add_bid를 (물타기) 진행한다.
+                    add_bid(market, marketID, current, priceinfo[market]); 
+
+                    // uuid로 정보를 조회하여 완료된 uuid / wait 중인 uuid 분류하고 statics를 정리한다.
+                    add_updateTrInfo_Statics(market, marketID, priceinfo[market]);
+
+                    // 최종 정리된 DB 기준으로 수익율을 조사하고 수익이 났으면 청산한다.
+                    // (마지막 하나 남은 slot이면 청산하지 않고 수익분만 청산하고 초기 투자 금액은 유지한다. 또는 청산하고 last bid price 기준 하락시 new slot을 생성한다. 우선 후자로 결정함.)
+                    liquidation_slots(market, marketID, current, priceinfo[market]);
+
+                    // expired 된 거래에 대해 취소여부를 결정하고 취소/유지 처리를 한다.
+
+                    filesave_count++;
+                }
+            }
+        }
+    }
+}
+
+/*
+//upbit.get_orderslist('KRW-EOS', 'done', 1, 'desc');  // param wait / done / cancel
+//upbit.get_orderslist('KRW-EOS', 'wait', 1, 'desc');  // param wait / done / cancel
+//upbit.get_orderinfo("9d59aacb-7184-42e4-a78e-3b49beb041b4");
+//upbit.input_orders('KRW-EOS', 'ask', 1, 9300, 'limit')
+//upbit.input_orders('KRW-EOS', 'bid', 1, 5000, 'limit')
+//upbit.cancel_orders('a0e58d55-8421-40ac-bf71-98b6899c8e2b');
+*/
+async function add_slot(market, marketID, current, priceinfo)
+{
+    let slots_length = portfolio_info[market][marketID]['slots'].length;
+    let config = portfolio_info[market][marketID]['config'];
+    let last_bid_price = portfolio_info[market][marketID]['last_bid_info']['tr_price'];
+    let current_price = priceinfo['trade_price'];
+    let fall_gap_ratio = (current_price - last_bid_price)*100 / (last_bid_price + 1); // +1 to protect divid by zero
+
+    if(slots_length >= config['max_slot_cnt']) 
+    {
+        console.log("[", market, "][", marketID, "] The number of slots exceed max_slot_cnt !!!, slots count = ", slots_length);
+        //console.log(JSON.stringify(portfolio_info));
+        return; 
+    }
+
+    if(slots_length > 0 && (fall_gap_ratio > (config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj']))) { return; }
+
+    if(slots_length === 0)
+    {
+        if(last_bid_price === 0) // 1st slot creation operation
+        {
+        }
+        else // all slots are liquidated, there is no slots --> need to create new 1st slot when cur_price *  < last_bid_price)  
+        {
+            fall_gap_ratio = (current_price - last_bid_price)*100 / last_bid_price;
+            if((fall_gap_ratio > (config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj']))) { return; } // -5% > -6% return, -7% <= -6% : create new slot.
+        }
+    }
+
+
+    // create new slot condition.
+    let new_slot = JSON.parse(JSON.stringify(slot_info));
+    let new_bid = JSON.parse(JSON.stringify(bid_info));
+
+    // slot is empty...
+    if(slots_length == 0)
+    {
+        console.log("[", market, "][", marketID, "] Create New 1st Slots. Price = ", current_price);
+        new_slot['type'] = "first";
+        new_bid['amount'] = portfolio_info[market][marketID]['config']['slot_1st_Bid_KRW'] / current_price; //priceinfo['trade_price'];
+        new_bid['amount'] = new_bid['amount'] * (1 - tradefee);  // minus trade fee
+        new_bid['invest_KRW'] = portfolio_info[market][marketID]['config']['slot_1st_Bid_KRW'];
+    }
+    else // second/others slot creation condition.
+    {
+        console.log("[", market, "][", marketID, "] Create additional Slots. Price = ", current_price, "Fall Gap = ", (config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj']));
+        new_slot['type'] = "others";
+        new_bid['amount'] = portfolio_info[market][marketID]['config']['slot_2nd_Bid_KRW'] / current_price; //priceinfo['trade_price'];
+        new_bid['amount'] = new_bid['amount'] * (1 - tradefee);  // minus trade fee
+        new_bid['invest_KRW'] = portfolio_info[market][marketID]['config']['slot_2nd_Bid_KRW'];
+    }
+
+    // Order Input (add bid)
+    let orderinfo = { };
+    if(simulation)
+    {
+        orderinfo['state'] = "done";
+        orderinfo['volume'] = new_bid['amount'];                            
+        orderinfo['executed_volume'] = new_bid['amount'];   
+        orderinfo['remaining_volume'] = 0;
+        orderinfo['price'] = current_price; 
+    }
+    else
+    {
+        // 잔고 Check후 input order
+        let balance = await upbit.get_chance(market);
+        let order_money = (new_bid['amount'] * current_price);
+        order_money = order_money * (1 + tradefee);
+        if(balance['bid_account']['currency'] === "KRW" && balance['market']['id'] === market)
+        {
+            if(balance['bid_account']['balance'] >= order_money) // Order Input (add bid)
+            {
+                //orderinfo = await upbit.input_orders(market, 'bid', new_bid['amount'], current_price, 'limit');
+                orderinfo = await upbit.input_orders(market, 'bid', 1, (current_price*0.7), 'limit');
+                console.log("[", market, "][", marketID, "] Balance(KRW) = ", balance['bid_account']['balance'], " price = ", current_price, " input order amount = ", new_bid['amount'], " Invest KRW(order_money) = ", order_money);
+            }
+            else if(balance['bid_account']['balance'] >= minimum_order_KRW)  // system 최소 주문 금액보다 커야 주문을 낼 수 있다.
+            {
+                let org_bid = new_bid['amount'];
+                order_money = balance['bid_account']['balance'];
+                new_bid['amount'] = order_money / current_price;
+                new_bid['amount'] = new_bid['amount']  * (1 - tradefee);  // minus trade fee
+                //orderinfo = await upbit.input_orders(market, 'bid', new_bid['amount'], current_price, 'limit');
+                orderinfo = await upbit.input_orders(market, 'bid', 1, (current_price*0.7), 'limit');
+                console.log("[", market, "][", marketID, "] Insuffient Balance on your account!!! adjust input order amount!!");
+                console.log("[", market, "][", marketID, "] Balance(KRW) = ", balance['bid_account']['balance'], " orgBid = ", org_bid, " price = ", current_price, " input order amount = ", new_bid['amount'], " Invest KRW(order_money) = ", order_money);
+            }
+            else { console.log("[", market, "][", marketID, "] **********Check Minimum Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
+        }
+        else { console.log("[", market, "][", marketID, "] **********Check Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
+    }
+
+    if("error" in orderinfo) 
+    { 
+        console.log ("[", market, "][", marketID, "] Input Order Error : Can't create new slot...+++++++++++++++++++++++++++++++++++++++++++++++++++"); 
+        console.log ("[", market, "][", marketID, "] Message = ", orderinfo['error']['message']); 
+    }
+    else 
+    { 
+        new_slot['timetick'] = current;
+        new_slot['market'] = market;
+        new_slot['marketID'] = marketID;
+        new_slot['trends_prev'] = 0; // need to call MACD and check trends.
+        new_slot['trends_create'] = 0; // need to call
+        new_slot['trends_cur'] = 0;
+        new_slot['status'] = "running";
+        new_slot['liquidation_orderinfo'] = 0;
+
+        // bid information
+        new_bid['order_info'] = orderinfo;
+        new_bid['deadline'] = new Date(Date.now() + 1*24*60*60*1000); // cur = new Date();
+        //console.log("add_slot****************current = ", current); 
+        //new_bid['deadline'] = moment(current).add(24, 'Hour');
+        new_bid['price_info'] = priceinfo; 
+        new_bid['status'] = orderinfo['state'];
+        new_slot['add_bid'].push(new_bid);
+        CtrlPrint[market][marketID]['crslot'] = true;
+        console.log("[", market, "][", marketID, "] ################### New Slot - 1st Bid is added ################################");
+
+        // check bid status : wait / done / 
+        new_slot['last_bid_info']['timetick'] = current;
+        new_slot['last_bid_info']['tr_price'] = current_price; //priceinfo['trade_price'];
+        portfolio_info[market][marketID]['slots'].push(JSON.parse(JSON.stringify(new_slot)));
+
+        // Update last_bid_info : this is basic routine... To find the lowest bid price, search all slots and bids price and compare it with for loop.
+        if(portfolio_info[market][marketID]['last_bid_info']['tr_price'] == 0 
+            || portfolio_info[market][marketID]['last_bid_info']['tr_price'] > new_slot['last_bid_info']['tr_price'])
+        {
+            console.log("Update Last Bid Price infomation....Old = ", portfolio_info[market][marketID]['last_bid_info']['tr_price'], "Latest = ", new_slot['last_bid_info']['tr_price'])
+            portfolio_info[market][marketID]['last_bid_info']['timetick'] = new_slot['last_bid_info']['timetick'];
+            portfolio_info[market][marketID]['last_bid_info']['tr_price'] = new_slot['last_bid_info']['tr_price'];
+        } 
+        
+        //if(CtrlPrint[market][marketID]['crslot']) { console.log(JSON.stringify(portfolio_info)); }
+    }
+}
+
+
+/*
+물타기 함수 : 현재 slot 기준에서 last bid에서 config에 정의된 하락율을 초과할 경우 물타기 진행함.
+*/
+async function add_bid(market, marketID, current, priceinfo)
+{
+    let slots = portfolio_info[market][marketID]['slots'];
+    let config = portfolio_info[market][marketID]['config'];
+    let current_price = priceinfo['trade_price'];
+
+    let i = 0, j = 0;
+    for(i = 0; i < slots.length; i++)
+    {
+        let bid_sum = 0;
+        let last_bid_price = 0; //slots[i]['last_bid_info']['tr_price'];
+        let bid = slots[i]['add_bid'];
+        for(j = 0; j < bid.length; j++)
+        {
+            bid_sum += bid[j]['amount'];
+            last_bid_price = bid[j]['price_info']['trade_price'];
+        }
+
+        let fall_gap_ratio = (current_price - last_bid_price)*100 / last_bid_price;
+
+        if(bid.length >= config['max_addbid_cnt']) 
+        //if(j >= config['max_addbid_cnt']) 
+        { 
+            console.log("[", market, "][", marketID, "][", i, "] bid.length(count) = ", bid.length, " j = ", j, " exceed max_addbid_cnt[",config['max_addbid_cnt'], "]" );
+        }
+        else
+        {
+            if(fall_gap_ratio < (config['new_addbid_Create_Ratio'] + config['new_addbid_Create_Ratio_adj'])) 
+            {
+                // Order Input (add bid)
+                let orderinfo = { };
+                if(simulation)
+                {
+                    orderinfo['state'] = "done";
+                    orderinfo['volume'] = bid_sum;
+                    orderinfo['executed_volume'] = bid_sum;
+                    orderinfo['remaining_volume'] = 0;
+                    orderinfo['price'] = current_price; 
+                }
+                else
+                {
+                    // 잔고 Check후 input order
+                    let balance = await upbit.get_chance(market);
+                    let order_money = (bid_sum * current_price);
+                    order_money = order_money * (1 + tradefee);
+                    if(balance['bid_account']['currency'] == "KRW" && balance['market']['id'] === market)
+                    {
+                        if(balance['bid_account']['balance'] >= order_money) // Order Input (add bid)
+                        {
+                            //orderinfo = await upbit.input_orders(market, 'bid', bid_sum, current_price, 'limit');
+                            orderinfo = await upbit.input_orders(market, 'bid', 1, (current_price*0.7), 'limit');
+                            console.log("[", market, "][", marketID, "] Balance(KRW) = ", balance['bid_account']['balance'], " price = ", current_price, " input order amount = ", bid_sum, " Invest KRW(order_money) = ", order_money);
+                        }
+                        else if(balance['bid_account']['balance'] >= minimum_order_KRW)  // system 최소 주문 금액보다 커야 주문을 낼 수 있다.
+                        {
+                            order_money = balance['bid_account']['balance'];
+                            let org_bid_sum = bid_sum;
+                            bid_sum = order_money / current_price;
+                            bid_sum = bid_sum  * (1 - tradefee);  // minus trade fee
+                            //orderinfo = await upbit.input_orders(market, 'bid', bid_sum, current_price, 'limit');
+                            orderinfo = await upbit.input_orders(market, 'bid', 1, (current_price*0.7), 'limit');
+                            console.log("[", market, "][", marketID, "] Insuffient Balance on your account!!! adjust input order amount!!");
+                            console.log("[", market, "][", marketID, "] Balance(KRW) = ", balance['bid_account']['balance'], " orgBid_sum = ", org_bid_sum, " price = ", current_price, " input order amount = ", bid_sum, " Invest KRW(order_money) = ", order_money);
+                        }
+                        else { console.log("[", market, "][", marketID, "] **********Check Minimum Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
+                    }
+                    else { console.log("[", market, "][", marketID, "] **********Check Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
+                }
+
+                if("error" in orderinfo) 
+                {
+                    console.log ("[", market, "][", marketID, "] Input Order Error : Can't create new additional bid...+++++++++++++++++++++++++++++++++++++++++++++++++++"); 
+                    console.log ("[", market, "][", marketID, "] Message = ", orderinfo['error']['message']); 
+                }
+                else
+                {
+                    let new_bid = JSON.parse(JSON.stringify(bid_info));
+                    // bid information
+                    new_bid['order_info'] = orderinfo;
+                    new_bid['deadline'] = new Date(Date.now() + 1*24*60*60*1000); // cur = new Date();
+                    //new_bid['deadline'] = moment(current).add(24, 'Hour');
+                    //console.log("add_bid****************current = ", current); 
+                    new_bid['price_info'] = priceinfo; 
+                    new_bid['amount'] = bid_sum;
+                    new_bid['invest_KRW'] = bid_sum * current_price;
+                    new_bid['invest_KRW'] = new_bid['invest_KRW'] * (1 + tradefee);  // add trade fee to total investment money.
+                    new_bid['status'] = orderinfo['state'];
+                    slots[i]['add_bid'].push(new_bid);
+                    CtrlPrint[market][marketID]['addbid'] = true;
+                    console.log("[", market, "][", marketID, "][", i, "][", j, "] Amount = ", bid_sum, " ################### Additional Bid is added ################################");
+
+                    // Update last_bid_info : this is basic routine... To find the lowest bid price, search all slots and bids price and compare it with for loop.
+                    slots[i]['last_bid_info']['timetick'] = current;
+                    slots[i]['last_bid_info']['tr_price'] = current_price;
+                
+                    if(portfolio_info[market][marketID]['last_bid_info']['tr_price'] > slots[i]['last_bid_info']['tr_price'])
+                    {
+                        console.log("Update Last Bid Price infomation....Old = ", portfolio_info[market][marketID]['last_bid_info']['tr_price'], "Latest = ", slots[i]['last_bid_info']['tr_price'])
+                        portfolio_info[market][marketID]['last_bid_info']['timetick'] = slots[i]['last_bid_info']['timetick'];
+                        portfolio_info[market][marketID]['last_bid_info']['tr_price'] = slots[i]['last_bid_info']['tr_price'];
+                    } 
+                    //if(CtrlPrint[market][marketID]['addbid']) { console.log(JSON.stringify(portfolio_info)); }
+                }
+            } 
+        }
+    }
+}
+
+/*
+수익실현 함수 : 현재 slot 단위로 config에 정의된 target rate를 초과한 이익이 발생할 경우 수익 실현을 한다. 
+*/
+async function liquidation_slots(market, marketID, current, priceinfo)
+{
+    let slots = portfolio_info[market][marketID]['slots'];
+    let config = portfolio_info[market][marketID]['config'];
+    let current_price = priceinfo['trade_price'];
+
+    for(i = 0; i < slots.length; i++)
+    {
+        let target = config['target_rate'] + config['target_rate_adj'];
+        let cur_slot_statics = slots[i]['statics'];
+        let cur_eval_net_ratio = cur_slot_statics['cur_eval_net_ratio'];
+        let sum_amount_done = cur_slot_statics['sum_amount_done'];
+        let average = cur_slot_statics['average'];
+        let sum_invest_KRW = cur_slot_statics['sum_invest_KRW'];
+        let cur_eval_net_KRW = cur_slot_statics['cur_eval_net_KRW'];
+
+        if((cur_eval_net_ratio*100) > target) 
+        {
+            console.log("################### Liquidation ######################")
+            console.log("[", market, "][", marketID, "][slots", i, "] Target = ", target, " Current Eval net Ratio = ", (cur_eval_net_ratio*100), "%"); 
+            console.log("[", market, "][", marketID, "][slots", i, "] Average Price = ", average, " Liquidation Price = ", current_price, " Amount = ", sum_amount_done); 
+            console.log("[", market, "][", marketID, "][slots", i, "] sum_invest_KRW = ", sum_invest_KRW, " Sum of Net Profit(KRW,이익) = ", cur_eval_net_KRW); 
+            let orderinfo = { };
+            if(simulation)
+            {
+                orderinfo['state'] = "liquidation";
+                orderinfo['volume'] = sum_amount_done;
+                orderinfo['executed_volume'] = sum_amount_done;
+                orderinfo['remaining_volume'] = 0;
+                orderinfo['price'] = current_price; 
+                console.log("[", market, "][", marketID, "][slots", i, "] price = ", current_price, " input order amount = ", sum_amount_done, " cur_eval_net_KRW = ", cur_eval_net_KRW);
+                slots[i]['status'] = "liquidation"; // ask is completed
+                slots[i]['liquidation_orderinfo'] = orderinfo;
+                liquidation_DB[market][marketID].push(slots[i]);
+                slots.splice(i, 1);
+                CtrlPrint[market][marketID]['liquid'] = true;
+                // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
+                if(i == 0) 
+                { 
+                    portfolio_info[market][marketID]['last_bid_info']['timetick'] = current;
+                    portfolio_info[market][marketID]['last_bid_info']['tr_price'] = current_price;
+                }
+            }
+            else
+            {
+                // 잔고 Check후 input order
+                let balance = await upbit.get_chance(market);
+                if(balance['market']['id'] === market)
+                {
+                    if(balance['ask_account']['balance'] >= sum_amount_done) // Order Input (add ask)
+                    {
+                        //orderinfo = await upbit.input_orders(market, 'ask', sum_amount_done, current_price, 'limit');
+                        orderinfo = await upbit.input_orders(market, 'ask', 1, current_price, 'limit');
+                        console.log("[", market, "][", marketID, "][slots", i, "] Balance(Coin) = ", balance['ask_account']['balance'], " price = ", current_price, " input order amount = ", sum_amount_done, " cur_eval_net_KRW = ", cur_eval_net_KRW);
+                        slots[i]['status'] = "liquidation"; // ask is completed
+                        slots[i]['liquidation_orderinfo'] = orderinfo;
+                        liquidation_DB[market][marketID].push(slots[i]);
+                        slots.splice(i, 1);
+                        CtrlPrint[market][marketID]['liquid'] = true;
+                        // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
+                        if(i == 0) 
+                        { 
+                            portfolio_info[market][marketID]['last_bid_info']['timetick'] = current;
+                            portfolio_info[market][marketID]['last_bid_info']['tr_price'] = current_price;
+                        }
+                    }
+                    else
+                    {
+                        // 잔고 부족시 남은 잔고라도 익절을 할지.... 그냥 slot을 유지할지.....고민 필요함. 우선 그냥 error message만 표시하고 유지하는 것으로 작성함.
+                        //orderinfo = await upbit.input_orders(market, 'ask', balance['ask_account']['balance'], current_price, 'limit');
+                        //orderinfo = await upbit.input_orders(market, 'ask', 1, current_price, 'limit');
+                        console.log("[", market, "][", marketID, "][slots", i, "] Insuffient Coin Balance on your account!!! Please check your Coin Balance!!");
+                        console.log("[", market, "][", marketID, "][slots", i, "] Balance(Coin) = ", balance['ask_account']['balance'], " price = ", current_price, " input order amount = ", sum_amount_done);
+                    }
+                }
+                else { console.log("[", market, "][", marketID, "][slots", i, "] **********Check Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
+            }
+
+            if(CtrlPrint[market][marketID]['liquid'])
+            {
+                console.log("################### Liquidation ######################")
+                //console.log(JSON.stringify(liquidation_DB));
+                Save_JSON_file(liquidation_DB, "liquidation.json");
+                console.log("######################################################");
+            }
+        }
+    }
+}
+
+
+/*
+통계 집계 : 현재 slot 단위로 관리되는 거래에 대한 통계를 작성 및 관리한다.
+*/
+async function add_updateTrInfo_Statics(market, marketID, priceinfo)
+{
+    //if(CtrlPrint[market][marketID] == false) { return; }
+
+    let slots = portfolio_info[market][marketID]['slots'];
+    let config = portfolio_info[market][marketID]['config'];
+    let current_price = priceinfo['trade_price'];
+
+    let i = 0, j = 0;
+    for(i = 0; i < slots.length; i++)
+    {
+        // unit slot 
+        let statics = JSON.parse(JSON.stringify(statics_info)); 
+        for(j = 0; j < slots[i]['add_bid'].length; j++)
+        {
+            let bidinfo = slots[i]['add_bid'][j];
+            let orderinfo = bidinfo['order_info'];
+            if(bidinfo['status'] !== "done")
+            {
+                let uuid = bidinfo['order_info']['uuid'];
+                orderinfo = await upbit.get_orderinfo(uuid);
+                if("error" in orderinfo) 
+                { 
+                    console.log("[", market, "][", marketID, "][", i, "][", j, "] UUID = ", uuid , " [add_updateTrInfo] ERROR Get Order info ################################");
+                    continue; //break;  // TBT (to be tested)
+                }
+            }
+            bidinfo['status'] = orderinfo['state'];
+            statics['current_price'] = current_price;
+            statics['sum_amount'] += orderinfo['volume'];
+            statics['sum_amount_done'] += orderinfo['executed_volume'];
+            statics['sum_amount_wait'] += orderinfo['remaining_volume'];
+            statics['sum_bid_KRW'] += orderinfo['executed_volume']*orderinfo['price'];
+            statics['sum_rest_KRW'] += orderinfo['remaining_volume']*orderinfo['price'];
+            statics['sum_invest_KRW'] += orderinfo['volume']*orderinfo['price'];
+            statics['sum_invest_KRW'] = statics['sum_invest_KRW'] * (1 + tradefee);
+        }
+        statics['sum_amount_done_ratio'] = statics['sum_amount_done']/statics['sum_amount'];
+        statics['average'] = statics['sum_bid_KRW']/statics['sum_amount_done'];
+        statics['cur_eval_net_ratio'] = (current_price - statics['average'])/statics['average'];
+        statics['cur_eval_net_KRW'] = statics['cur_eval_net_ratio'] * statics['sum_invest_KRW'];
+        slots[i]['statics'] = statics;
+    }
+    //console.log("#####################[Static Information]######################################");
+    //console.log("Statics[", market, "][", marketID, "] = ", JSON.stringify(portfolio_info));
+    if(filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./portfoilio.json"); }
+}
+
+/*
+ 1/3/5/10/15/30/60/240 분봉 데이터를 이용하여 MACD 정보를 가공한다.
+*/
+async function get_MACD(market, TimeVal, min, signal, MACD)
 {
     let db = [];
     let signalkey = "MACD_average" + String(signal);
@@ -111,12 +725,15 @@ async function get_MACD(market, min, signal, MACD)
     let MACD_Shortkey = "MACD" + String(signal);
     let MACD_Longkey = "MACD" + String(MACD);
     let retry_cnt = 0;
-
+    var data = 0;
     try{
-        var data = await upbit.getCandleData(market, "MIN", min, 200);  // 분봉
-
+        do{
+            data = await upbit.getCandleData(market, TimeVal, min, 200);  
+            //console.log("data = ", data, "Retry getCandleData = ", retry_cnt)
+        }while(("error" in data) && retry_cnt++ < 5);
+    
         return new Promise(function (resolve, reject) {  
-            if("error" in data) { console.log("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"); resolve("error"); }
+            if("error" in data) { resolve("error"); }
 
             // Calculate MACD Short Term Signal average 
             let i = 0; j = 0;
@@ -172,71 +789,23 @@ async function get_MACD(market, min, signal, MACD)
     }
 }
 
+
 /*
-전체 계좌 조회 : 보유 원화, 토큰에 대한 잔고 및 lock 수량, 평단가 제공.
+  Save_JSON_file : 전달된 JSON객체를 filename(Path정보 포함)으로 저장한다.
 */
-async function smart_coin_trader()
+function Save_JSON_file(jsonObject, filename)
 {
-    let current = 0;
-    let previous = {};
-    let elapsed = {};
-    //console.log("portfolio = ", portfolio);
-    let retry_cnt = 0;
-    let data = 0;
-    do {
-        data = await get_MACD("KRW-EOS", 240, 9, 26);
-    }while(data === "error" && retry_cnt++ < 5);
-
-    console.log("MACD Data = ", JSON.stringify(data));
-
-    while(0)
-    {
-        current = new Date();
-        for(key in portfolio)
-        {
-            if(previous.hasOwnProperty(key) === false) { previous[key] = 0; }
-            if(elapsed.hasOwnProperty(key) === false) { elapsed[key] = 0; }
-            elapsed[key] = (current - previous[key])/1000;
-            if(elapsed[key] > portfolio[key]['config']['check_period'])
-            {
-                console.log("Market = ", key, portfolio[key]['config']['check_period'], " sec priodic routine....");
-                let priceinfo = await upbit.getCurrentPriceInfo(key);
-                previous[key] = current;
-                /*
-                [{"market":"KRW-EOS",
-                "trade_date":"20190420",
-                "trade_time":"133320",
-                "trade_date_kst":"20190420",
-                "trade_time_kst":"223320",
-                "trade_timestamp":1555767200000,
-                "opening_price":6315.00000000,
-                "high_price":6345.00000000,
-                "low_price":6270.00000000,
-                "trade_price":6290.0,
-                "prev_closing_price":6315.00000000,
-                "change":"FALL",
-                "change_price":25.00000000,
-                "change_rate":0.0039588282,
-                "signed_change_price":-25.00000000,
-                "signed_change_rate":-0.0039588282,
-                "trade_volume":4.87723901,
-                "acc_trade_price":4420158457.698110350,
-                "acc_trade_price_24h":7191068779.42364380,
-                "acc_trade_volume":700750.28812355,
-                "acc_trade_volume_24h":1140790.80574210,
-                "highest_52_week_price":25170.00000000,
-                "highest_52_week_date":"2018-04-29",
-                "lowest_52_week_price":1745.00000000,
-                "lowest_52_week_date":"2018-12-07",
-                "timestamp":1555767200973}]
-                */
-            }
-        }
+  var json = JSON.stringify(jsonObject);
+  fse.outputFileSync(filename, json, 'utf-8', function(e){
+    if(e){
+      console.log(e);
+    }else{
+      console.log("Download is done!");	
     }
+  });
 }
 
 
-//upbit.getCurrentPriceInfo("KRW-EOS");
 smart_coin_trader();
 
 module.exports = 
