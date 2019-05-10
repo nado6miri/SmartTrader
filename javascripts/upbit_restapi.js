@@ -1,4 +1,11 @@
 const upbit = require("../config/upbit_configuration");
+/*
+
+const AccessKey = 'sfsdfsdfadsfaghhjgrthtrhtrhtrhgfbhgfhgfh'; // fake key
+const SecretKey = 'afd4gtrtgg34t43b43b435vg534f43534b3434gv'; // fake key
+module.exports = { AccessKey, SecretKey };
+
+*/
 const jwt = require("jsonwebtoken")
 const request = require("request")
 const queryEncode = require("querystring").encode
