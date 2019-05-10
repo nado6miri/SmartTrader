@@ -174,12 +174,10 @@ var liquidation_DB = { }; //{ 'KRW-EOS' : { ID1 : [ { }, { } ], ID2 : [ {}, {}] 
 // 1. make portfolio_info
 var portpolio_list = { 
     'KRW-EOS_ID1' : config_bid_param, 
-    /*
-    'KRW-EOS_ID2' : config_bid_param, 
-    'KRW-EOS_ID3' : config_bid_param, 
+    'KRW-ETH_ID2' : config_bid_param, 
+    'KRW-BCH_ID3' : config_bid_param, 
     'KRW-XRP_ID4' : config_bid_param, 
     'KRW-BTC_ID5' : config_bid_param, 
-    */
 };
 
 var cancel_orderlist = { };
@@ -209,13 +207,15 @@ var getPrice = {
     'KRW-EOS' : {  },
     'KRW-XRP' : {  },
     'KRW-BTC' : {  },
+    'KRW-BCH' : {  },
+    'KRW-ETH' : {  },
 };
 
-getPrice['KRW-EOS']['ID1'] = price_generator(10, 10000, 50, 8000, false); // Generator
-getPrice['KRW-EOS']['ID2'] = price_generator(10, 10000, 50, 9000, false); // Generator
-getPrice['KRW-EOS']['ID3'] = price_generator(10, 10000, 50, 9000, false); // Generator
-getPrice['KRW-XRP']['ID4'] = price_generator(10, 500, 1, 500, false); // Generator
-getPrice['KRW-BTC']['ID5'] = price_generator(10, 7000000, 5000, 3000000, true); // Generator
+getPrice['KRW-EOS']['ID1'] = price_generator(1000, 10000, 10, 10000, false); // Generator
+getPrice['KRW-ETH']['ID2'] = price_generator(100000, 200000, 50, 200000, false); // Generator
+getPrice['KRW-BCH']['ID3'] = price_generator(100000, 330000, 50, 330000, false); // Generator
+getPrice['KRW-XRP']['ID4'] = price_generator(100, 500, 1, 500, false); // Generator
+getPrice['KRW-BTC']['ID5'] = price_generator(3000000, 7000000, 5000, 3000000, true); // Generator
 
 
 /*
@@ -679,7 +679,10 @@ async function ask_sellCoin_getKRW(market, marketID, current, priceinfo)
                 console.log("[", market, "][", marketID, "][slots", i, "] price = ", current_price, " input order amount = ", sum_amount_done, " cur_eval_net_KRW = ", cur_eval_net_KRW);
                 slots[i]['status'] = "liquidation"; // ask is completed
                 slots[i]['liquidation_orderinfo'] = orderinfo;
-                liquidation_DB[market][marketID].push(slots[i]);
+                let liquidData = slots[i];
+                liquidData['config'] = config;
+                //liquidation_DB[market][marketID].push(slots[i]);
+                liquidation_DB[market][marketID].push(liquidData);
                 slots.splice(i, 1);
                 CtrlPrint[market][marketID]['liquid'] = true;
                 // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
@@ -702,7 +705,10 @@ async function ask_sellCoin_getKRW(market, marketID, current, priceinfo)
                         console.log("[", market, "][", marketID, "][slots", i, "] Balance(Coin) = ", balance['ask_account']['balance'], " price = ", current_price, " input order amount = ", sum_amount_done, " cur_eval_net_KRW = ", cur_eval_net_KRW);
                         slots[i]['status'] = "liquidation"; // ask is completed
                         slots[i]['liquidation_orderinfo'] = orderinfo;
-                        liquidation_DB[market][marketID].push(slots[i]);
+                        let liquidData = slots[i];
+                        liquidData['config'] = config;
+                        //liquidation_DB[market][marketID].push(slots[i]);
+                        liquidation_DB[market][marketID].push(liquidData);
                         slots.splice(i, 1);
                         CtrlPrint[market][marketID]['liquid'] = true;
                         // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
