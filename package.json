@@ -13,14 +13,10 @@
     "http-errors": "~1.6.2",
     "jade": "~1.11.0",
     "jsonwebtoken": "^8.5.1",
-<<<<<<< HEAD
     "moment-timezone": "^0.5.25",
     "mongodb": "^3.2.3",
     "mongoose": "^5.5.5",
-=======
     "moment": "^2.24.0",
-    "moment-timezone": "^0.5.25",
->>>>>>> a92bf1511d2e0e6ba3c5c8893d1668e0f6d5acbb
     "morgan": "~1.9.0",
     "request": "^2.88.0",
     "sleep": "^6.0.0",
