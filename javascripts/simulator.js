@@ -1,8 +1,11 @@
 //const sleep = require('sleep');
+var fs = require('fs');
 const fse = require('fs-extra');
 var moment = require('moment-timezone')
 
 const upbit = require("./upbit_restapi");
+const NConfig = require("../config/Normal_trade_config");
+const RConfig = require("../config/Reverse_trade_config");
 
 const tradefee = 0.0005;
 const expiredtime = 1*24*60*60*1000; // 24Hours
@@ -17,51 +20,6 @@ const expired_chk_period = 12; // check_period * count = 5sec * 12 = 60sec
 var sellcoin_count = {}; // reverse mode에서 현재까지 매도된 coin 수량
 var total_invest_KRW = {}; // normal mode에서 현재까지 매수/투자된 KRW 합
 const trade_fee = {}; // { MARKET : { ASK : 0.05, BID : 0.05 } }
-
-// normal mode
-var config_bid_param = {
-    trade_mode: 'normal',
-    max_slot_cnt: 10,          //* The limitation number of creating slots (unit : EA) 
-    slot_1st_Bid_KRW: 5000,   //* fisrt investment moeny (unit : KRW)
-    slot_2nd_Bid_KRW: 10000,  //* after 1st slot, investment moeny (unit : KRW)
-    check_period: 1,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    retry_cnt: 5,              //* set retry count when restapi fails 
-    target_ask_rate: 5,            //* The ratio of liquidation margin in each slot. (unit : %)
-    target_ask_rate_adj: 1,        //* The adjustment ratio of target_rate
-    new_slot_Create_Ratio: -3,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
-    new_slot_Create_Ratio_adj: 0, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
-    new_addbid_Create_Ratio: -5,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
-    new_addbid_Create_Ratio_adj: 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
-    max_addbid_cnt: 10,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
-    retry_delay: 2,            // set retry delay seconds when restapi fails (unit : Sec)
-    limit_invest_coin: 0000,    // The limitation of invest coin in current market. (unit : EA)
-    limit_invest_KRW: 1000000000,    // The limitation of invest money in current market. (unit : KRW)
-    minimum_order_KRW: 500,
-    minimum_order_coin: 0.1,    // KRW 500 / Current price = minimum_order_coin
-}
-
-
-// reverse mode
-var config_ask_param = {
-    trade_mode: 'reverse',
-    max_slot_cnt: 10,          //* The limitation number of creating slots (unit : EA) 
-    slot_1st_Ask_Coin: 1,   //* fisrt investment coint (unit : EA)
-    slot_2nd_Ask_Coin: 2,  //* after 1st slot, investment coin (unit : EA)
-    check_period: 1,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    retry_cnt: 5,              //* set retry count when restapi fails 
-    target_bid_rate: 5,            //* The ratio of reverse liquidation margin in each slot. (unit : %)
-    target_bid_rate_adj: 1,        //* The adjustment ratio of target_rate
-    new_slot_Create_Ratio: 3,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
-    new_slot_Create_Ratio_adj: 0, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
-    new_addask_Create_Ratio: 5,       //* The gap of last transaction price to create new add_ask. (unit : %, always minus value)
-    new_addask_Create_Ratio_adj: 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
-    max_addask_cnt: 10,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
-    retry_delay: 2,            // set retry delay seconds when restapi fails (unit : Sec)
-    limit_invest_coin: 200000,    // The limitation of invest coin in current market. (unit : EA)
-    limit_invest_KRW: 0000,    // The limitation of invest money in current market. (unit : KRW)
-    minimum_order_KRW: 500,
-    minimum_order_coin: 0.1,    // KRW 500 / Current price = minimum_order_coin
-}
 
 
 // normal mode
@@ -186,9 +144,10 @@ var increasecoin_DB = {}; //{ 'KRW-EOS' : { ID1 : [ { }, { } ], ID2 : [ {}, {}] 
 
 
 // 1. make portfolio_info
-var portpolio_list = { 
-    'KRW-EOS_ID1': config_bid_param, 
-    //'KRW-EOS_ID2': config_ask_param, 
+var portpolio_list = {
+    'KRW-EOS_ID1': RConfig.Reverse_Simulation_Mode,
+    //'KRW-EOS_ID1': RConfig.Reverse_Mode1, 
+    //'KRW-EOS_ID2': config_bid_param, 
     /*
     'KRW-ETH_ID2' : config_bid_param, 
     'KRW-BCH_ID3' : config_bid_param, 
@@ -224,12 +183,18 @@ var getPrice = {
     'KRW-ETH' : {  },
 };
 
-getPrice['KRW-EOS']['ID1'] = price_generator(600, 10000, 50, 10000, false); // Generator
-getPrice['KRW-EOS']['ID2'] = price_generator(1000, 3300, 10, 1000, true); // Generator
+getPrice['KRW-EOS']['ID1'] = price_generator(5000, 11000, 10, 7700, true); // Generator
+/*
+getPrice['KRW-EOS']['ID2'] = price_generator(600, 10000, 50, 10000, false); // Generator
 getPrice['KRW-ETH']['ID2'] = price_generator(100000, 200000, 50, 200000, false); // Generator
 getPrice['KRW-BCH']['ID3'] = price_generator(100000, 330000, 50, 330000, false); // Generator
 getPrice['KRW-XRP']['ID4'] = price_generator(100, 500, 1, 500, false); // Generator
 getPrice['KRW-BTC']['ID5'] = price_generator(3000000, 7000000, 5000, 3000000, true); // Generator
+*/
+
+var date = new Date();
+var suffix = date.getFullYear().toString() + "-" + date.getMonth().toString() + "-" + date.getDay().toString() + "T" + date.getHours().toString() + date.getMinutes().toString();
+var config_filename = {}; 
 
 
 /*
@@ -269,11 +234,19 @@ async function Config_Simulator()
 
     for (market in portfolio_info)
     {
+        config_filename[market] = {};
         priceinfo[market] = {};
         priceinfo[market]['trade_price'] = 0;
         prev_priceinfo[market] = {};
         prev_priceinfo[market]['trade_price'] = 0;
+        for (marketID in portfolio_info[market])
+        {
+            config_filename[market][marketID] = "Config[" + market + "][" + marketID + "]";
+            Save_JSON_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
+        }
     }
+    console.log("Config_FileName = ", JSON.stringify(config_filename));
+
 
     // 2. create the first slot
     //while (config['max_slot_cnt'] || config['max_addbid_cnt'])
@@ -295,6 +268,7 @@ async function Config_Simulator()
 
                 //if (elapsed[market][marketID] > portfolio_info[market][marketID]['config']['check_period'])
                 {
+                    portfolio_info[market][marketID]['config'] = await Load_ConfigDB("./output/" + config_filename[market][marketID]);
                     let tradeMode = portfolio_info[market][marketID]['config']['trade_mode'];
                     let cur_p = getPrice[market][marketID].next().value;
 
@@ -338,7 +312,7 @@ async function Config_Simulator()
         }
         disiplay_statics(current, 5);
     }
-    Save_JSON_file(portfolio_info, "./simulation_portfoilio.json");
+    Save_JSON_file(portfolio_info, "./output/simulation_portfoilio");
 }
 
 
@@ -843,26 +817,51 @@ function disiplay_statics(current, display_period)
                 let average = 0;
                 console.log("*************************************** Current Running Slots Information ***********************************************************");
                 console.log("=====================================================================================================================================");
-                for (let i = 0; i < slots.length; i++) {
+                if (mode === 'normal') {
+                    console.log("[N][", market, "][", marketID, "][", (config_filename[market][marketID] + "_" + suffix), "], [Period] = ", config['check_period']);
+                    console.log("[N][", market, "][", marketID, "][Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
+                    console.log("[N][", market, "][", marketID, "][Max 투입제한 금액] = ", config['limit_invest_KRW'], ", [1st 투입금액] = ", config['slot_1st_Bid_KRW'], ", [2nd 이후 투입금액] = ", config['slot_2nd_Bid_KRW']);
+                    console.log("[N][", market, "][", marketID, "][max_slot_cnt] = ", config['max_slot_cnt'], ", [max_addbid_cnt] = ", config['max_addbid_cnt']);;
+                    console.log("[N][", market, "][", marketID, "][익절 Rate] = ", config['target_ask_rate'] + config['target_ask_rate_adj']);
+                    console.log("[N][", market, "][", marketID, "][신규 Slot 생성 Rate] = ", config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj']);
+                    console.log("[N][", market, "][", marketID, "][Add Bid(물타기) Rate] = ", config['new_addbid_Create_Ratio'] + config['new_addbid_Create_Ratio_adj']);
+                    console.log("=====================================================================================================================================");
+                }
+                else {
+                    console.log("[R][", market, "][", marketID, "][", (config_filename[market][marketID] + "_" + suffix), "], [Period] = ", config['check_period']);
+                    console.log("[R][", market, "][", marketID, "][Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
+                    console.log("[R][", market, "][", marketID, "][Max 매도제한 Coin 개수] = ", config['limit_invest_coin'], ", [1st 매도 Coin 개수] = ", config['slot_1st_Ask_Coin'], " [2nd 이후 매도 Coin 개수] = ", config['slot_2nd_Ask_Coin']);
+                    console.log("[R][", market, "][", marketID, "][max_slot_cnt] = ", config['max_slot_cnt'], ", [max_addask_cnt] = ", config['max_addask_cnt']);;
+                    console.log("[R][", market, "][", marketID, "][Coin 재매수 Rate] = ", config['target_bid_rate'] + config['target_bid_rate_adj']);
+                    console.log("[R][", market, "][", marketID, "][신규 Slot 생성 Rate - 이전 slot 대비 상승율] = ", config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj']);
+                    console.log("[R][", market, "][", marketID, "][Add Ask(Coin 고점팔기) Rate] = ", config['new_addask_Create_Ratio'] + config['new_addask_Create_Ratio_adj']);
+                    console.log("=====================================================================================================================================");
+                }
+                for (let i = 0; i < slots.length; i++)
+                {
                     let statics = slots[i]['statics'];
-                    if (mode === 'normal') {
+                    if (mode === 'normal')
+                    {
                         console.log("[N][", market, "][", marketID, "][ Slot", i, "][ Bid", slots[i]['add_bid'].length, "] Cur_Price =", statics['current_price'],
                             " Average = ", statics['average_withfee'].toFixed(2), " Coin Balance = ", statics['sum_amount_done'].toFixed(2), " Net Ratio = ",
-                            statics['cur_eval_net_ratio'].toFixed(2), " Net KRW = ", statics['cur_eval_net_KRW'].toFixed(2));
+                            statics['cur_eval_net_ratio'].toFixed(2), "%", " Net KRW = ", statics['cur_eval_net_KRW'].toFixed(2));
                         sum_org_KRW += statics['sum_invest_KRW_withfee'];
                         sum_net_KRW += statics['cur_eval_net_KRW'];
                         sum_org_coin += statics['sum_amount_done'];
                     }
-                    else {
+                    else
+                    {
                         console.log("[R][", market, "][", marketID, "][ Slot", i, "][ Ask", slots[i]['add_ask'].length, "] Cur_Price =", statics['current_price'],
                             " Average = ", statics['average_withfee'].toFixed(2), " Ask Coin = ", statics['sum_amount_done'], " Reclaim KRW Balance = ",
-                            statics['sum_ask_KRW_withfee'].toFixed(2), " Net Ratio = ", statics['cur_eval_net_ratio'].toFixed(2), " Net Coin = ", statics['cur_eval_net_Coin'].toFixed(2));
+                            statics['sum_ask_KRW_withfee'].toFixed(2), " Net Ratio = ", statics['cur_eval_net_ratio'].toFixed(2), "%", " Net Coin = ", statics['cur_eval_net_Coin'].toFixed(2));
+                        sum_org_KRW += statics['sum_ask_KRW_withfee'];
                         sum_org_coin += statics['sum_amount_done'];
                         sum_net_coin += statics['cur_eval_net_Coin'];
                     }
                 }
                 console.log("=====================================================================================================================================");
-                if (mode === 'normal') {
+                if (mode === 'normal')
+                {
                     let net_KRW_ratio = (sum_net_KRW / (sum_org_KRW + 0.000001)) * 100;
                     net_KRW_ratio = net_KRW_ratio.toFixed(2);
                     average = sum_org_KRW / sum_org_coin;
@@ -872,10 +871,13 @@ function disiplay_statics(current, display_period)
                     console.log("=====================================================================================================================================");
                     console.log("\n")
                 }
-                else {
+                else
+                {
                     let net_Coin_ratio = (sum_net_coin / (sum_org_coin + 0.000001)) * 100;
                     net_Coin_ratio = net_Coin_ratio.toFixed(2);
-                    console.log("[R][", market, "][", marketID, "] Coin 매도수량 = ", sum_org_coin.toFixed(2), " Coin 손익 = ", sum_net_coin.toFixed(2), "Net Ratio = ", net_Coin_ratio);
+                    average = sum_org_KRW / sum_org_coin;
+                    average = average.toFixed(2) * 1;
+                    console.log("[R][", market, "][", marketID, "] Coin 매도수량 = ", sum_org_coin.toFixed(2), " 매도 평단가 = ", average, " Coin 손익 = ", sum_net_coin.toFixed(2), "Net Ratio = ", net_Coin_ratio);
                     console.log("=====================================================================================================================================");
                     console.log("\n")
                 }
@@ -892,7 +894,8 @@ function disiplay_statics(current, display_period)
 function Save_JSON_file(jsonObject, filename)
 {
     var json = JSON.stringify(jsonObject);
-    fse.outputFileSync(filename, json, 'utf-8', function(e){
+    filename = filename + "_" + suffix + ".json";
+    fse.outputFileSync(filename, json, 'utf-8', function (e) {
           if(e){
               console.log(e);
           }else{
@@ -901,6 +904,25 @@ function Save_JSON_file(jsonObject, filename)
     });
 }
 
+
+
+/*
+  Load JSON File : filename(Path정보 포함)을 읽어 initiative_DB 객체(JSON)으로 Loading한다.
+*/
+function Load_ConfigDB(filename)
+{
+    filename = filename + "_" + suffix + ".json";
+
+    return new Promise(function (resolve, reject) {
+        fs.exists(filename, (exist) => {
+            if (exist) {
+                let config = fs.readFileSync(filename, 'utf8');
+                resolve(JSON.parse(config));
+            }
+            else { console.log("Can't find config file, use default settings"); resolve(portfolio_info[market][marketID]['config']); }  // file read 실패시 기존값 return함.
+        });
+    });
+}
 
 Config_Simulator();
 
