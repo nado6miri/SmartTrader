@@ -183,7 +183,7 @@ var getPrice = {
     'KRW-ETH' : {  },
 };
 
-getPrice['KRW-EOS']['ID1'] = price_generator(5000, 11000, 10, 7700, true); // Generator
+getPrice['KRW-EOS']['ID1'] = price_generator(8000, 20000, 10, 9500, true); // Generator
 /*
 getPrice['KRW-EOS']['ID2'] = price_generator(600, 10000, 50, 10000, false); // Generator
 getPrice['KRW-ETH']['ID2'] = price_generator(100000, 200000, 50, 200000, false); // Generator
