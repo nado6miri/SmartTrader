@@ -5,15 +5,16 @@ var RSimulation_Mode = {
     simulation: true,
     real_test_mode: false,
     check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    slot_1st_Ask_Coin: 50,   //* fisrt investment coint (unit : EA)
-    slot_2nd_Ask_Coin: 100,  //* after 1st slot, investment coin (unit : EA)
+    slot_Ask_Coin : [ 20, 60, 60, 60, 60, 60, 60, 60, 60, 60 ],
+//    slot_1st_Ask_Coin: 50,   //* fisrt investment coint (unit : EA)
+//    slot_2nd_Ask_Coin: 100,  //* after 1st slot, investment coin (unit : EA)
     max_slot_cnt: 100,          //* The limitation number of creating slots (unit : EA) 
-    max_addask_cnt: 5,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
-    target_bid_rate: 1,            //* The ratio of reverse liquidation margin in each slot. (unit : %)
+    max_addask_cnt: 10,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
+    target_bid_rate: 2,            //* The ratio of reverse liquidation margin in each slot. (unit : %)
     target_bid_rate_adj: 0.5,        //* The adjustment ratio of target_rate
-    new_slot_Create_Ratio: 4,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
+    new_slot_Create_Ratio: 5,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
     new_slot_Create_Ratio_adj: 0, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
-    new_addask_Create_Ratio: 7,       //* The gap of last transaction price to create new add_ask. (unit : %, always minus value)
+    new_addask_Create_Ratio: 10,       //* The gap of last transaction price to create new add_ask. (unit : %, always minus value)
     new_addask_Create_Ratio_adj: 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
     restart_flag: 0,            // if flag != 0, set last_bidask_price = current price to restart trader when slot is empty.
     limit_invest_coin: 15000,    // The limitation of invest coin in current market. (unit : EA)
@@ -30,8 +31,9 @@ var RMode1 = {
     simulation: true,
     real_test_mode: false,
     check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    slot_1st_Ask_Coin: 50,   //* fisrt investment coint (unit : EA)
-    slot_2nd_Ask_Coin: 100,  //* after 1st slot, investment coin (unit : EA)
+    slot_Ask_Coin: [20, 60, 60, 60, 60, 60, 60, 60, 60, 60],
+//    slot_1st_Ask_Coin: 50,   //* fisrt investment coint (unit : EA)
+//    slot_2nd_Ask_Coin: 100,  //* after 1st slot, investment coin (unit : EA)
     max_slot_cnt: 100,          //* The limitation number of creating slots (unit : EA) 
     max_addask_cnt: 5,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
     target_bid_rate: 1,            //* The ratio of reverse liquidation margin in each slot. (unit : %)
@@ -55,8 +57,9 @@ var RMode2 = {
     simulation: true,
     real_test_mode: false,
     check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    slot_1st_Ask_Coin: 50,   //* fisrt investment coint (unit : EA)
-    slot_2nd_Ask_Coin: 100,  //* after 1st slot, investment coin (unit : EA)
+    slot_Ask_Coin: [20, 60, 60, 60, 60, 60, 60, 60, 60, 60],
+//    slot_1st_Ask_Coin: 50,   //* fisrt investment coint (unit : EA)
+//    slot_2nd_Ask_Coin: 100,  //* after 1st slot, investment coin (unit : EA)
     max_slot_cnt: 100,          //* The limitation number of creating slots (unit : EA) 
     max_addask_cnt: 5,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
     target_bid_rate: 1,            //* The ratio of reverse liquidation margin in each slot. (unit : %)

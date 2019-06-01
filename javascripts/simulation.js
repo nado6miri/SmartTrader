@@ -112,7 +112,7 @@ var slot_ask_info = {
     last_bidask_info : { timetick : 0, tr_price : 0 },
 }
 
-var portfolio = { config : { }, last_bidask_info : { timetick : 0, tr_price : 0 }, slots : [] }; // slot config & info......
+var portfolio = { config: {}, last_bidask_info: { timetick: 0, tr_price: 0 }, slots: [], idle: false }; // slot config & info......
 var portfolio_info = { };
 
 
@@ -450,21 +450,22 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
     if (slots.length === 0)
     {
         new_slot['type'] = "first";
-        new_bid['amount'] = portfolio_info[market][marketID]['config']['slot_1st_Bid_KRW'] / current_price; //priceinfo['trade_price'];
+        new_bid['amount'] = portfolio_info[market][marketID]['config']['slot_Bid_KRW'][0] * 1000 / current_price; //priceinfo['trade_price'];
         new_bid['amount'] = 1 * new_bid['amount'].toFixed(6);
-        new_bid['invest_KRW'] = portfolio_info[market][marketID]['config']['slot_1st_Bid_KRW'];
+        new_bid['invest_KRW'] = portfolio_info[market][marketID]['config']['slot_Bid_KRW'][0] * 1000;
         //console.log("[", market, "][", marketID, "] Create New 1st Slots. Price = ", current_price);
         if (new_bid['invest_KRW'] >= config['limit_invest_KRW']) { return; }
     }
     else // second/others slot creation condition.
     {
+        let amountIndex = slots.length;
+        if (amountIndex >= 10) { amountIndex = 9; }
         new_slot['type'] = "others";
-        new_bid['amount'] = portfolio_info[market][marketID]['config']['slot_2nd_Bid_KRW'] / current_price; //priceinfo['trade_price'];
+        new_bid['amount'] = portfolio_info[market][marketID]['config']['slot_Bid_KRW'][amountIndex] * 1000 / current_price; //priceinfo['trade_price'];
         new_bid['amount'] = 1 * new_bid['amount'].toFixed(6);
-        new_bid['invest_KRW'] = portfolio_info[market][marketID]['config']['slot_2nd_Bid_KRW'];
+        new_bid['invest_KRW'] = portfolio_info[market][marketID]['config']['slot_Bid_KRW'][amountIndex] * 1000;
         //console.log("[", market, "][", marketID, "] Create additional Slots. Price = ", current_price, "Fall Gap = ", (config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj']));
-        if((total_invest_KRW[market][marketID] + new_bid['invest_KRW']) >= config['limit_invest_KRW'])
-        {
+        if ((total_invest_KRW[market][marketID] + new_bid['invest_KRW']) >= config['limit_invest_KRW']) {
             //console.log("[Create New Slots] == (total_invest_KRW[market][marketID] + orderinfo['invest_KRW']) >= limit_invest_KRW");
             return;
         }
@@ -717,24 +718,24 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
     let orderinfo = {};
 
     // slot is empty...
-    if (slots.length == 0)
-    {
+    if (slots.length == 0) {
         new_slot['type'] = "first";
-        new_ask['amount'] = portfolio_info[market][marketID]['config']['slot_1st_Ask_Coin']; 
-        new_ask['amount'] = new_ask['amount'] * 1;  
+        new_ask['amount'] = portfolio_info[market][marketID]['config']['slot_Ask_Coin'][0];
+        new_ask['amount'] = new_ask['amount'] * 1;
         new_ask['amount'] = 1 * new_ask['amount'].toFixed(6);
         //console.log("[", market, "][", marketID, "] Create New 1st Slots. Price = ", current_price);
         if (new_ask['amount'] >= config['limit_invest_coin']) { return; }
     }
     else // second/others slot creation condition.
     {
+        let amountIndex = slots.length;
+        if (amountIndex >= 10) { amountIndex = 9; }
         new_slot['type'] = "others";
-        new_ask['amount'] = portfolio_info[market][marketID]['config']['slot_2nd_Ask_Coin']; 
-        new_ask['amount'] = new_ask['amount'] * 1;  
+        new_ask['amount'] = portfolio_info[market][marketID]['config']['slot_Ask_Coin'][amountIndex];
+        new_ask['amount'] = new_ask['amount'] * 1;
         new_ask['amount'] = 1 * new_ask['amount'].toFixed(6);
         //console.log("[", market, "][", marketID, "] Create additional Slots. Price = ", current_price, "Rising Gap = ", (config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj']));
-        if ((sellcoin_count[market][marketID] + new_ask['amount']) >= config['limit_invest_coin'])
-        {
+        if ((sellcoin_count[market][marketID] + new_ask['amount']) >= config['limit_invest_coin']) {
             //console.log("(sellcoin_count[market][marketID] + orderinfo['volume']) >= limit_invest_coin");
             return;
         }
@@ -1074,28 +1075,29 @@ async function disiplay_statics(current, price_infoDB)
 
                 console.log("*************************************** Current Running Slots Information ***********************************************************");
                 console.log("=====================================================================================================================================");
-                if (mode === 'normal') {
-                    console.log("[N][", market, "][", marketID, "][", (config_filename[market][marketID] + "_" + suffix), "], [Period] = ", config['check_period'], ", [Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
+                if (mode === 'normal')
+                {
+                    console.log("[N][", market, "][", marketID, "][", config_filename[market][marketID], "], [Period] = ", config['check_period'], ", [Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
                     //console.log("[N][", market, "][", marketID, "][Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
-                    console.log("[N][", market, "][", marketID, "][Max 투입제한 금액] = ", config['limit_invest_KRW'], ", [1st 투입금액] = ", config['slot_1st_Bid_KRW'], ", [2nd 이후 투입금액] = ", config['slot_2nd_Bid_KRW']);
+                    console.log("[N][", market, "][", marketID, "][Max 투입제한 금액] = ", config['limit_invest_KRW'], ", [Slot별 투입금액(천원)] = ", config['slot_Bid_KRW']);
                     console.log("[N][", market, "][", marketID, "][max_slot_cnt] = ", config['max_slot_cnt'], ", [max_addbid_cnt] = ", config['max_addbid_cnt'], ", [익절 Rate] = ", config['target_ask_rate'] + config['target_ask_rate_adj']);
                     //console.log("[N][", market, "][", marketID, "][익절 Rate] = ", config['target_ask_rate'] + config['target_ask_rate_adj']);
                     console.log("[N][", market, "][", marketID, "][신규 Slot 생성 Rate] = ", config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj'], ", [Add Bid(물타기) Rate] = ", config['new_addbid_Create_Ratio'] + config['new_addbid_Create_Ratio_adj']);
                     //console.log("[N][", market, "][", marketID, "][Add Bid(물타기) Rate] = ", config['new_addbid_Create_Ratio'] + config['new_addbid_Create_Ratio_adj']);
                     console.log("=====================================================================================================================================");
-                    console.log("[N][", market, "][", marketID, "] 현재 Coin 가격 = ", cur_price, ", Last Trade Price = ", last_bidask_price, ", Gap Ratio = ", gap_ratio, "%");
+                    console.log("[N][", market, "][", marketID, "] Idle = ", portfolio_info[market][marketID]['idle'], ", 현재 Coin 가격 = ", cur_price, ", Last Trade Price = ", last_bidask_price, ", Gap Ratio = ", gap_ratio, "%");
                 }
                 else
                 {
-                    console.log("[R][", market, "][", marketID, "][", (config_filename[market][marketID] + "_" + suffix), "], [Period] = ", config['check_period'], ", [Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
+                    console.log("[R][", market, "][", marketID, "][", config_filename[market][marketID], "], [Period] = ", config['check_period'], ", [Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
                     //console.log("[R][", market, "][", marketID, "][Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
-                    console.log("[R][", market, "][", marketID, "][Max 매도제한 Coin 개수] = ", config['limit_invest_coin'], ", [1st 매도 Coin 개수] = ", config['slot_1st_Ask_Coin'], " [2nd 이후 매도 Coin 개수] = ", config['slot_2nd_Ask_Coin']);
+                    console.log("[R][", market, "][", marketID, "][Max 매도제한 Coin 개수] = ", config['limit_invest_coin'], ", [Slot별 매도 Coin 개수] = ", config['slot_Ask_Coin']);
                     console.log("[R][", market, "][", marketID, "][max_slot_cnt] = ", config['max_slot_cnt'], ", [max_addask_cnt] = ", config['max_addask_cnt'], ", [Coin 재매수 Rate] = ", config['target_bid_rate'] + config['target_bid_rate_adj']);
                     //console.log("[R][", market, "][", marketID, "][Coin 재매수 Rate] = ", config['target_bid_rate'] + config['target_bid_rate_adj']);
                     console.log("[R][", market, "][", marketID, "][신규 Slot 생성 Rate - 이전 slot 대비 상승율] = ", config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj'], " [Add Ask(Coin 고점팔기) Rate] = ", config['new_addask_Create_Ratio'] + config['new_addask_Create_Ratio_adj']);
                     //console.log("[R][", market, "][", marketID, "][Add Ask(Coin 고점팔기) Rate] = ", config['new_addask_Create_Ratio'] + config['new_addask_Create_Ratio_adj']);
                     console.log("=====================================================================================================================================");
-                    console.log("[R][", market, "][", marketID, "] 현재 Coin 가격 = ", cur_price, ", Last Trade Price = ", last_bidask_price, ", Gap Ratio = ", gap_ratio, "%");
+                    console.log("[R][", market, "][", marketID, "] Idle = ", portfolio_info[market][marketID]['idle'], ", 현재 Coin 가격 = ", cur_price, ", Last Trade Price = ", last_bidask_price, ", Gap Ratio = ", gap_ratio, "%");
                 }
                 console.log("=====================================================================================================================================");
 

@@ -6,8 +6,9 @@ var NSimulation_Mode = {
     simulation: true,
     real_test_mode: false,
     check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
-    slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
+    slot_Bid_KRW: [50,60,70,80,90,100,110,120,130,140],
+//    slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
+//    slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
     max_slot_cnt: 10,          //* The limitation number of creating slots (unit : EA) 
     max_addbid_cnt: 10,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
     target_ask_rate: 6,            //* The ratio of liquidation margin in each slot. (unit : %)
@@ -30,8 +31,9 @@ var NMode1 = {
     simulation: true,
     real_test_mode: false,
     check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
-    slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
+    slot_Bid_KRW: [50, 60, 70, 80, 90, 100, 110, 120, 130, 140],
+//    slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
+//    slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
     max_slot_cnt: 10,          //* The limitation number of creating slots (unit : EA) 
     max_addbid_cnt: 10,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
     target_ask_rate: 6,            //* The ratio of liquidation margin in each slot. (unit : %)
@@ -55,8 +57,9 @@ var NMode2 = {
     simulation: false,
     real_test_mode: false,
     check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
-    slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
+    slot_Bid_KRW: [50, 60, 70, 80, 90, 100, 110, 120, 130, 140],
+//    slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
+//    slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
     max_slot_cnt: 10,          //* The limitation number of creating slots (unit : EA) 
     max_addbid_cnt: 10,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
     target_ask_rate: 6,            //* The ratio of liquidation margin in each slot. (unit : %)
