@@ -16,7 +16,7 @@ var total_invest_KRW = {}; // normal mode에서 현재까지 매수/투자된 KR
 const trade_fee = {}; // { MARKET : { ASK : 0.05, BID : 0.05 } }
 
 var filesave_count = 0;
-const filesave_period = 12; // check_period * count = 5sec * 12 = 60sec
+const filesave_period = 200; // check_period * count = 5sec * 12 = 60sec
 var expired_chk_count = 0;
 const expired_chk_period = 12; // check_period * count = 5sec * 12 = 60sec
 
@@ -151,11 +151,11 @@ function * price_generator(min, max, step, start, direction)
     {
         if(direction)   // true : increase
         {
-            if(max > cur_price) { cur_price += step; } else { direction = false; }
+            if(max > cur_price) { cur_price += step; } //else { direction = false; }
         }
         else    // false : decrease
         {
-            if(cur_price > min) { cur_price -= step; } else { direction = true; }
+            if(cur_price > min) { cur_price -= step; } //else { direction = true; }
         }
         yield cur_price;
     }
@@ -180,7 +180,6 @@ getPrice['KRW-BCH']['ID3'] = price_generator(100000, 330000, 50, 330000, false);
 getPrice['KRW-XRP']['ID4'] = price_generator(100, 500, 1, 500, false); // Generator
 getPrice['KRW-BTC']['ID5'] = price_generator(3000000, 7000000, 5000, 3000000, true); // Generator
 */
-
 let nowdate = new Date();
 let year = nowdate.getFullYear().toString();
 let month = nowdate.getMonth() + 1; month = month.toString(); month.padStart(2, '0');
@@ -194,7 +193,7 @@ var config_filename = {};
 async function register_trade_markets()
 {
     // read portfolio json file.... : 투자목록 list를 portfolio_list 에서 가져온다.
-    portfolio_list = await Load_JsonDB("./parameters/" + "portfolio_list");
+    portfolio_list = await Load_JsonDB("./parameters/" + "simul_portfolio_list");
     //console.log("portfolio_list = ", JSON.stringify(portfolio_list));
 
     // initialize portfolio info DB...
@@ -208,8 +207,8 @@ async function register_trade_markets()
         let pfolio = JSON.parse(JSON.stringify(portfolio));
         let configparam = {};
         let direction = true;
-
         if (portfolio_list[key][0] == 'N') { configparam = NConfig.params[portfolio_list[key][1]]; direction = false; } else { configparam = RConfig.params[portfolio_list[key][1]]; direction = true; }
+
         pfolio['config'] = configparam;
         pfolio['slots'] = [];
 
@@ -222,8 +221,8 @@ async function register_trade_markets()
             // config file naming and create config file and latest file.
             config_filename[market] = {};
             config_filename[market][marketID] = "Config[" + market + "][" + marketID + "]";
-            Save_JSON_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
-            Save_JSON_latest_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
+            //Save_JSON_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
+            //Save_JSON_latest_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
             getPrice[market][marketID] = price_generator(portfolio_list[key][2], portfolio_list[key][3], portfolio_list[key][4], portfolio_list[key][5], direction);
         }
         else
@@ -233,8 +232,8 @@ async function register_trade_markets()
                 portfolio_info[market][marketID] = JSON.parse(JSON.stringify(pfolio));
                 // config file naming and create config file and latest file.
                 config_filename[market][marketID] = "Config[" + market + "][" + marketID + "]";
-                Save_JSON_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
-                Save_JSON_latest_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
+                //Save_JSON_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
+                //Save_JSON_latest_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
                 getPrice[market][marketID] = price_generator(portfolio_list[key][2], portfolio_list[key][3], portfolio_list[key][4], portfolio_list[key][5], direction);
             }
         }
@@ -316,7 +315,7 @@ async function smart_coin_trader()
     await register_trade_markets();
 
     // 2. make MACD Information.
-    await register_MACD_Timers(portfolio_list);
+    //await register_MACD_Timers(portfolio_list);
 
     // 3. create the first slot
     while(1)
@@ -339,15 +338,15 @@ async function smart_coin_trader()
                 if(previous[market].hasOwnProperty(marketID) === false) { previous[market][marketID] = 0; }
                 if(elapsed[market].hasOwnProperty(marketID) === false) { elapsed[market][marketID] = 0; }
 
-                elapsed[market][marketID] = (current - previous[market][marketID])/1000;
+                elapsed[market][marketID] = (current - previous[market][marketID]) / 1000;
 
-                if (portfolio_info[market][marketID]['config']['simulation']) { portfolio_info[market][marketID]['config']['check_period'] = 1; }
+                if (portfolio_info[market][marketID]['config']['simulation']) { portfolio_info[market][marketID]['config']['check_period'] = 0.001; }
 
                 if (elapsed[market][marketID] > portfolio_info[market][marketID]['config']['check_period'])
                 {
                     // 신규로 trading coin이 추가되면 DB 구성하고 Config file 생성 후 다시 config를 읽어 들인다.
-                    await register_trade_markets();
-                    portfolio_info[market][marketID]['config'] = await Load_JsonDB("./output/" + config_filename[market][marketID]);
+                    //await register_trade_markets();
+                    //portfolio_info[market][marketID]['config'] = await Load_JsonDB("./output/" + config_filename[market][marketID]);
                     let controlMode = portfolio_info[market][marketID]['config']['control_mode'];
                     let tradeMode = portfolio_info[market][marketID]['config']['trade_mode'];
 
@@ -380,10 +379,6 @@ async function smart_coin_trader()
 
                         // uuid로 정보를 조회하여 완료된 uuid / wait 중인 uuid 분류하고 statics를 정리한다.
                         await update_Normal_TrInfo_Statics(market, marketID, priceinfo[market][marketID]);
-
-                        // 최종 정리된 DB 기준으로 수익율을 조사하고 수익이 났으면 청산한다.
-                        // (마지막 하나 남은 slot이면 청산하지 않고 수익분만 청산하고 초기 투자 금액은 유지한다. 또는 청산하고 last bid price 기준 하락시 new slot을 생성한다. 우선 후자로 결정함.)
-                        await ask_sellCoin_buyKRW(market, marketID, current, priceinfo[market][marketID]);
                     }
                     else if(tradeMode === "reverse")
                     {
@@ -395,10 +390,6 @@ async function smart_coin_trader()
 
                         // uuid로 정보를 조회하여 완료된 uuid / wait 중인 uuid 분류하고 statics를 정리한다.
                         await update_Reverse_TrInfo_Statics(market, marketID, priceinfo[market][marketID]);
-
-                        // 최종 정리된 DB 기준으로 수익율을 조사하고 수익이 났으면 청산한다.
-                        // (마지막 하나 남은 slot이면 청산하지 않고 수익분만 청산하고 초기 투자 금액은 유지한다. 또는 청산하고 last bid price 기준 하락시 new slot을 생성한다. 우선 후자로 결정함.)
-                        await bid_sellKRW_buyCoin(market, marketID, current, priceinfo[market][marketID]);
                     }
                     else
                     {
@@ -406,9 +397,6 @@ async function smart_coin_trader()
                         console.log("========= Configuration Error =============");
                         console.log("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
                     }
-
-                    // expired 된 거래에 대해 취소여부를 결정하고 취소/유지 처리를 한다. 
-                    if (expired_chk_count >= expired_chk_period) { fexpired_chk_count = 0; await cancel_oldorders(market, marketID, current); }
                     filesave_count++;
                     expired_chk_count++;
                 }
@@ -438,16 +426,12 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
     {
         if (slots.length == 0)
         {
-            if (config['restart_flag'] == 0)
-            {
-                //console.log("[N][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is FALSE, go to Idle state!!");
-                return;
-            }
+            if (config['restart_flag'] == 0) { console.log("[N][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is FALSE, go to Idle state!!"); return; }
             else
             {
                 console.log("[N][", market, "][", marketID, "]*** Restart Trader with current price, make new first slot!!! ***");
                 config['restart_flag'] = 0; // restart_flag를 0으로 초기화 안해주면 자동 auto start mode가 됨. 마지막 last bidask 값에서 정해놓은 % 하락시 재매수함.
-                Save_JSON_latest_file(config, "./output/" + config_filename[market][marketID]);
+                //Save_JSON_latest_file(config, "./output/" + config_filename[market][marketID]);
             } 
         }
         else
@@ -495,62 +479,7 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
         orderinfo['executed_volume'] = new_bid['amount'];   
         orderinfo['remaining_volume'] = 0;
         orderinfo['price'] = current_price; 
-    }
-    else
-    {
-        // 잔고 Check후 input order
-        let SYM = market.split('-')[0]; // KRW
-        let balance = await upbit.get_chance(market);
-        let order_money = (new_bid['amount'] * current_price);
 
-        trade_fee[market]['bid_fee'] = balance['bid_fee'], trade_fee[market]['ask_fee'] = balance['ask_fee'];
-        order_money = order_money * (1 + tradefee); // 매수 주문시 잔고는 수수료 포함해서 주문량보다 많거나 같아야 함.
-
-        if (balance['bid_account']['currency'] === SYM && balance['market']['id'] === market)
-        {
-            if(balance['bid_account']['balance'] >= order_money) // Order Input (add bid)
-            {
-                if (config['real_test_mode'])
-                {
-                    orderinfo = await upbit.input_orders(market, 'bid', 1, current_price, 'limit'); new_bid['amount'] = 1; new_bid['invest_KRW'] = new_bid['amount'] * current_price;
-                }
-                else // real mode
-                {
-                    orderinfo = await upbit.input_orders(market, 'bid', new_bid['amount'], current_price, 'limit');
-                }
-                //console.log("[", market, "][", marketID, "] Balance(KRW) = ", balance['bid_account']['balance'], " price = ", current_price, " input order amount = ", new_bid['amount'], " Invest KRW(order_money) = ", order_money);
-            }
-            else if (balance['bid_account']['balance'] >= config['minimum_order_KRW'])  // system 최소 주문 금액보다 커야 주문을 낼 수 있다.
-            {
-                let org_bid = new_bid['amount'];
-                order_money = balance['bid_account']['balance'];
-                new_bid['amount'] = order_money / current_price;
-                new_bid['amount'] = new_bid['amount'] * (1 - tradefee);  // minus trade fee - 수수료 고려하여 주문할 수 있는 최대 코인을 주문한다.
-                new_bid['amount'] = 1 * new_bid['amount'].toFixed(6);
-
-                if (config['real_test_mode'])
-                {
-                    orderinfo = await upbit.input_orders(market, 'bid', 1, current_price, 'limit'); new_bid['amount'] = 1; new_bid['invest_KRW'] = new_bid['amount'] * current_price;
-                }
-                else
-                {
-                    orderinfo = await upbit.input_orders(market, 'bid', new_bid['amount'], current_price, 'limit');
-                }
-                console.log("[", market, "][", marketID, "] Insuffient Balance on your account!!! adjust input order amount!!");
-                console.log("[", market, "][", marketID, "] Balance(KRW) = ", balance['bid_account']['balance'], " orgBid = ", org_bid, " price = ", current_price, " input order amount = ", new_bid['amount'], " Invest KRW(order_money) = ", order_money);
-            }
-            else { console.log("[", market, "][", marketID, "] **********Check Minimum Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
-        }
-        else { console.log("[", market, "][", marketID, "] **********Check Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
-    }
-
-    if("error" in orderinfo) 
-    { 
-        console.log ("[", market, "][", marketID, "] Input Order Error : Can't create new slot...+++++++++++++++++++++++++++++++++++++++++++++++++++"); 
-        console.log ("[", market, "][", marketID, "] Message = ", orderinfo['error']['message']); 
-    }
-    else 
-    { 
         orderinfo['volume'] *= 1;
         orderinfo['executed_volume'] *= 1;
         orderinfo['remaining_volume'] *= 1;
@@ -642,59 +571,7 @@ async function add_bid_to_slot(market, marketID, current, priceinfo)
                     orderinfo['executed_volume'] = bid_sum;
                     orderinfo['remaining_volume'] = 0;
                     orderinfo['price'] = current_price; 
-                }
-                else
-                {
-                    // 잔고 Check후 input order
-                    let balance = await upbit.get_chance(market);
-                    let order_money = (new_bid['amount'] * current_price);
-                    trade_fee[market]['bid_fee'] = balance['bid_fee'], trade_fee[market]['ask_fee'] = balance['ask_fee'];
-                    order_money = order_money * (1 + tradefee); // 수수료 포함 매입 코인 금액이 잔고보다 커야 정상 bid 됨.  
-                    if(balance['bid_account']['currency'] == "KRW" && balance['market']['id'] === market)
-                    {
-                        if(balance['bid_account']['balance'] >= order_money) // Order Input (add bid)
-                        {
-                            if (config['real_test_mode'])
-                            {
-                                orderinfo = await upbit.input_orders(market, 'bid', 2, current_price, 'limit'); new_bid['amount'] = bid_sum = 1;
-                            }
-                            else
-                            {
-                                orderinfo = await upbit.input_orders(market, 'bid', new_bid['amount'], current_price, 'limit');
-                            }
-                            //console.log("[", market, "][", marketID, "] Balance(KRW) = ", balance['bid_account']['balance'], " price = ", current_price, " input order amount = ", new_bid['amount'], " Invest KRW(order_money) = ", order_money);
-                        }
-                        else if (balance['bid_account']['balance'] >= config['minimum_order_KRW'])  // system 최소 주문 금액보다 커야 주문을 낼 수 있다.
-                        {
-                            order_money = balance['bid_account']['balance'];
-                            let org_bid_sum = new_bid['amount'];
-                            new_bid['amount'] = order_money / current_price;
-                            new_bid['amount'] = new_bid['amount'] * (1 - tradefee);  // minus trade fee - 수수료 고려하여 주문할 수 있는 최대 코인을 주문한다.
-                            new_bid['amount'] = 1 * new_bid['amount'].toFixed(6);
 
-                            if (real_test_mode)
-                            {
-                                orderinfo = await upbit.input_orders(market, 'bid', 1, current_price, 'limit'); new_bid['amount'] = bid_sum = 1;
-                            }
-                            else
-                            {
-                                orderinfo = await upbit.input_orders(market, 'bid', new_bid['amount'], current_price, 'limit');
-                            }
-                            console.log("[", market, "][", marketID, "] Insuffient Balance on your account!!! adjust input order amount!!");
-                            console.log("[", market, "][", marketID, "] Balance(KRW) = ", balance['bid_account']['balance'], " orgBid_sum = ", org_bid_sum, " price = ", current_price, " input order amount = ", new_bid['amount'], " Invest KRW(order_money) = ", order_money);
-                        }
-                        else { console.log("[", market, "][", marketID, "] **********Check Minimum Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
-                    }
-                    else { console.log("[", market, "][", marketID, "] **********Check Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
-                }
-
-                if("error" in orderinfo) 
-                {
-                    console.log ("[", market, "][", marketID, "] Input Order Error : Can't create new additional bid...+++++++++++++++++++++++++++++++++++++++++++++++++++"); 
-                    console.log ("[", market, "][", marketID, "] Message = ", orderinfo['error']['message']); 
-                }
-                else
-                {
                     orderinfo['volume'] *= 1;
                     orderinfo['executed_volume'] *= 1;
                     orderinfo['remaining_volume'] *= 1;
@@ -723,128 +600,6 @@ async function add_bid_to_slot(market, marketID, current, priceinfo)
                     } 
                 }
             } 
-        }
-    }
-}
-
-/*
-수익실현 함수 : 현재 slot 단위로 config에 정의된 target rate를 초과한 이익이 발생할 경우 Coin을 팔아 현금으로 수익 실현을 한다. 
-*/
-async function ask_sellCoin_buyKRW(market, marketID, current, priceinfo)
-{
-    let slots = portfolio_info[market][marketID]['slots'];
-    let config = portfolio_info[market][marketID]['config'];
-    let current_price = priceinfo['trade_price'];
-
-    for(i = 0; i < slots.length; i++)
-    {
-        let target = config['target_ask_rate'] + config['target_ask_rate_adj'];
-        let cur_slot_statics = slots[i]['statics'];
-        let cur_eval_net_ratio = cur_slot_statics['cur_eval_net_ratio'];
-        let sum_amount_done = cur_slot_statics['sum_amount_done'];
-        let average = cur_slot_statics['average_withfeee'];
-        let sum_invest_KRW = cur_slot_statics['sum_invest_KRW'];
-        let cur_eval_net_KRW = cur_slot_statics['cur_eval_net_KRW'];
-
-        if((cur_eval_net_ratio*100) > target) 
-        {
-            //console.log("################### Liquidation ######################")
-            //console.log("[", market, "][", marketID, "][slots", i, "] Target = ", target, " Current Eval net Ratio = ", (cur_eval_net_ratio*100), "%"); 
-            //console.log("[", market, "][", marketID, "][slots", i, "] Average Price = ", average, " Liquidation Price = ", current_price, " Amount = ", sum_amount_done); 
-            //console.log("[", market, "][", marketID, "][slots", i, "] sum_invest_KRW = ", sum_invest_KRW, " Sum of Net Profit(KRW,이익) = ", cur_eval_net_KRW); 
-            let orderinfo = { };
-            if(config['simulation'])
-            {
-                orderinfo['state'] = "done";
-                orderinfo['volume'] = sum_amount_done;
-                orderinfo['executed_volume'] = sum_amount_done;
-                orderinfo['remaining_volume'] = 0;
-                orderinfo['price'] = current_price; 
-                //console.log("[", market, "][", marketID, "][slots", i, "] price = ", current_price, " input order amount = ", sum_amount_done, " cur_eval_net_KRW = ", cur_eval_net_KRW);
-                slots[i]['status'] = "liquidation"; // ask is completed
-                slots[i]['liquidation_orderinfo'] = orderinfo;
-                let liquidData = slots[i];
-                liquidData['config'] = config;
-                //liquidation_DB[market][marketID].push(slots[i]);
-                liquidation_DB[market][marketID].push(liquidData);
-                slots.splice(i, 1);
-                // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
-                // config['restart_flag'] == 0 일경우 slots이 모두 청산되었을때 slot을 생성하지 않는 stop 상태(idle)로 대기해야 함.
-                if (i == 0) // Slots이 모두 청산되었을 경우
-                { 
-                    portfolio_info[market][marketID]['last_bidask_info']['timetick'] = current;
-                    portfolio_info[market][marketID]['last_bidask_info']['tr_price'] = current_price;
-                }
-            }
-            else
-            {
-                // 잔고 Check후 input order
-                let balance = await upbit.get_chance(market);
-                trade_fee[market]['bid_fee'] = balance['bid_fee'], trade_fee[market]['ask_fee'] = balance['ask_fee'];
-
-                if (balance['market']['id'] === market)
-                {
-                    if(balance['ask_account']['balance'] >= sum_amount_done) // Order Input (add ask)
-                    {
-                        orderinfo = await upbit.input_orders(market, 'ask', sum_amount_done, current_price, 'limit');
-                        //console.log("[", market, "][", marketID, "][slots", i, "] Balance(Coin) = ", balance['ask_account']['balance'], " price = ", current_price, " input order amount = ", sum_amount_done);
-                        slots[i]['status'] = "liquidation"; // ask is completed
-
-                        orderinfo['volume'] *= 1;
-                        orderinfo['executed_volume'] *= 1;
-                        orderinfo['remaining_volume'] *= 1;
-                        orderinfo['price'] *= 1;
-
-                        slots[i]['liquidation_orderinfo'] = orderinfo;
-                        let liquidData = slots[i];
-                        liquidData['config'] = config;
-                        //liquidation_DB[market][marketID].push(slots[i]);
-                        liquidation_DB[market][marketID].push(liquidData);
-                        slots.splice(i, 1);
-                        // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
-                        if (i == 0) // Slots이 모두 청산되었을 경우 
-                        {
-                            portfolio_info[market][marketID]['last_bidask_info']['timetick'] = current;
-                            portfolio_info[market][marketID]['last_bidask_info']['tr_price'] = current_price;
-                        }
-                    }
-                    else
-                    {
-                        if (balance['bid_account']['balance'] >= (sum_amount_done * 0.9))
-                        {
-                            // 잔고 부족시 남은 잔고라도 익절을 할지.... 그냥 slot을 유지할지.....고민 필요함. 우선 그냥 error message만 표시하고 유지하는 것으로 작성함.
-                            orderinfo = await upbit.input_orders(market, 'ask', balance['ask_account']['balance'], current_price, 'limit');
-                            console.log("[", market, "][", marketID, "][slots", i, "] Insuffient Coin Balance on your account!!! Please check your Coin Balance!!");
-                            console.log("[", market, "][", marketID, "][slots", i, "] Balance(Coin) = ", balance['ask_account']['balance'], " price = ", current_price, " input order amount = ", sum_amount_done);
-
-                            orderinfo['volume'] *= 1;
-                            orderinfo['executed_volume'] *= 1;
-                            orderinfo['remaining_volume'] *= 1;
-                            orderinfo['price'] *= 1;
-                            slots[i]['liquidation_orderinfo'] = orderinfo;
-                            slots[i]['status'] = "liquidation"; // ask is completed
-
-                            let liquidData = slots[i];
-                            liquidData['config'] = config;
-                            liquidation_DB[market][marketID].push(liquidData);
-                            slots.splice(i, 1);
-                            // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
-                            if (i == 0) // Slots이 모두 청산되었을 경우
-                            {
-                                portfolio_info[market][marketID]['last_bidask_info']['timetick'] = current;
-                                portfolio_info[market][marketID]['last_bidask_info']['tr_price'] = current_price;
-                            }
-                        }
-                        else
-                        {
-                            console.log("[", market, "][", marketID, "][slots", i, "] Insuffient Coin Balance on your account!!! Can't sell coin... Please check your Coin Balance!!");
-                            console.log("[", market, "][", marketID, "][slots", i, "] Balance(Coin) = ", balance['ask_account']['balance'], " price = ", current_price, " input order amount = ", sum_amount_done);
-                        }
-
-                    }
-                }
-                else { console.log("[", market, "][", marketID, "][slots", i, "] **********Check Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
-            }
         }
     }
 }
@@ -909,7 +664,7 @@ async function update_Normal_TrInfo_Statics(market, marketID, priceinfo)
     }
     //console.log("#####################[Static Information]######################################");
     //console.log("Statics[", market, "][", marketID, "] = ", JSON.stringify(portfolio_info));
-    if(filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output/portfoilio"); }
+    //if(filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output/simul_portfolio"); }
 }
 
 
@@ -945,9 +700,9 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
             else
             {
                 console.log("[N][", market, "][", marketID, "]*** Restart Trader with current price, make new first slot!!! ***");
-                config['restart_flag'] = 0;
-                Save_JSON_latest_file(config, "./output/" + config_filename[market][marketID]);
-            } // restart_flag를 0으로 초기화 안해주면 자동 auto start mode가 됨.
+                config['restart_flag'] = 0; // restart_flag를 0으로 초기화 안해주면 자동 auto start mode가 됨.
+                //Save_JSON_latest_file(config, "./output/" + config_filename[market][marketID]);
+            } 
         }
         else
         {
@@ -994,51 +749,7 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
         orderinfo['executed_volume'] = new_ask['amount'];   
         orderinfo['remaining_volume'] = 0;
         orderinfo['price'] = current_price; 
-    }
-    else
-    {
-        // 잔고 Check후 input order
-        let SYM = market.split('-')[1];
-        let balance = await upbit.get_chance(market);
-        trade_fee[market]['bid_fee'] = balance['bid_fee'], trade_fee[market]['ask_fee'] = balance['ask_fee'];
 
-        if(balance['ask_account']['currency'] === SYM && balance['market']['id'] === market) // Coin을 매도해야 하기 때문에 ask_account를 체크함.
-        {
-            if (balance['ask_account']['balance'] >= new_ask['amount']) // Order Input (add ask)
-            {
-                if (config['real_test_mode'])
-                {
-                    orderinfo = await upbit.input_orders(market, 'ask', 1, current_price, 'limit'); new_ask['amount'] = 1;
-                }
-                else
-                {
-                    orderinfo = await upbit.input_orders(market, 'ask', new_ask['amount'], current_price, 'limit');
-                }
-                console.log("[", market, "][", marketID, "] Balance(Coin) = ", balance['ask_account']['balance'], " price = ", current_price, " input order amount = ", new_ask['amount']);
-            }
-            else if (balance['ask_account']['balance'] >= config['minimum_order_coin'])  // 잔고 부족시 system 최소 주문 금액보다 커야 주문을 낼 수 있다.
-            {
-                let org_ask = new_ask['amount'];
-                new_ask['amount'] = balance['ask_account']['balance'];
-                //new_ask['amount'] = new_ask['amount'] * (1 - tradefee);  // minus trade fee
-                new_ask['amount'] = 1 * new_ask['amount'].toFixed(6);
-                orderinfo = await upbit.input_orders(market, 'ask', new_ask['amount'], current_price, 'limit');
-                console.log("[", market, "][", marketID, "] Insuffient Balance on your account!!! adjust input order amount!!");
-                console.log("[", market, "][", marketID, "] Balance(Coin) = ", balance['ask_account']['balance'], " orgAsk = ", org_ask, " price = ", current_price, " input order amount = ", new_ask['amount']);
-            }
-            else { console.log("[", market, "][", marketID, "] **********Check Minimum Coin Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
-        }
-        else { console.log("[", market, "][", marketID, "] **********Check Coin Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
-    }
-
-    if("error" in orderinfo) 
-    { 
-        console.log ("[", market, "][", marketID, "] Input Order Error : Can't create new slot...+++++++++++++++++++++++++++++++++++++++++++++++++++"); 
-        console.log ("[", market, "][", marketID, "] Message = ", orderinfo['error']['message']); 
-        //new_slot['status'] = "suspending";
-    }
-    else 
-    { 
         orderinfo['volume'] *= 1;
         orderinfo['executed_volume'] *= 1;
         orderinfo['remaining_volume'] *= 1;
@@ -1128,56 +839,6 @@ async function add_ask_to_slot(market, marketID, current, priceinfo)
                         //console.log("(sellcoin_count[market][marketID] + new_ask['amount']) >= limit_invest_coin");
                         return;
                     }
-                }
-                else
-                {
-                    // 잔고 Check후 input order
-                    let SYM = market.split('-')[1];
-                    let balance = await upbit.get_chance(market);
-
-                    trade_fee[market]['bid_fee'] = balance['bid_fee'], trade_fee[market]['ask_fee'] = balance['ask_fee'];
-                    new_ask['amount'] = ask_sum.toFixed(6) * 1;
-
-                    if ((sellcoin_count[market][marketID] + new_ask['amount']) >= config['limit_invest_coin'])
-                    {
-                        //console.log("(sellcoin_count[market][marketID] + new_ask['amount']) >= limit_invest_coin");
-                        return;
-                    }
-
-                    if(balance['ask_account']['currency'] === SYM && balance['market']['id'] === market)
-                    {
-                        if (balance['ask_account']['balance'] >= new_ask['amount']) // Order Input (add ASK)
-                        {
-                            if (config['real_test_mode'])
-                            {
-                                orderinfo = await upbit.input_orders(market, 'ask', 2, current_price, 'limit'); new_ask['amount'] = 2;
-                            }
-                            else
-                            {
-                                orderinfo = await upbit.input_orders(market, 'ask', new_ask['amount'], current_price, 'limit');
-                            }
-                            //console.log("[", market, "][", marketID, "] Balance(Coin) = ", balance['ask_account']['balance'], " price = ", current_price, " input order amount = ", new_ask['amount']);
-                        }
-                        else if (balance['ask_account']['balance'] >= config['minimum_order_coin'])  // system 최소 주문 금액보다 커야 주문을 낼 수 있다. 나머지 잔량 매도 처리함.
-                        {
-                            new_ask['amount'] = balance['ask_account']['balance'];
-                            new_ask['amount'] = 1 * new_ask['amount'].toFixed(6);
-                            orderinfo = await upbit.input_orders(market, 'ask', new_ask['amount'], current_price, 'limit');
-                            console.log("[", market, "][", marketID, "] Insuffient Coin Balance on your account!!! adjust input order amount!!");
-                            console.log("[", market, "][", marketID, "] Balance(Coin) = ", balance['ask_account']['balance'], " orgAsk_sum = ", org_ask_sum, " price = ", current_price, " input order amount = ", new_ask['amount']);
-                        }
-                        else { console.log("[", market, "][", marketID, "] **********Check Minimum Coin Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
-                    }
-                    else { console.log("[", market, "][", marketID, "] **********Check Coin Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
-                }
-
-                if("error" in orderinfo) 
-                {
-                    console.log ("[", market, "][", marketID, "] Input Order Error : Can't create new additional ask...+++++++++++++++++++++++++++++++++++++++++++++++++++"); 
-                    console.log ("[", market, "][", marketID, "] Message = ", orderinfo['error']['message']); 
-                }
-                else
-                {
                     orderinfo['volume'] *= 1;
                     orderinfo['executed_volume'] *= 1;
                     orderinfo['remaining_volume'] *= 1;
@@ -1269,147 +930,10 @@ async function update_Reverse_TrInfo_Statics(market, marketID, priceinfo)
     }
     //console.log("#####################[Static Information]######################################");
     //console.log("Statics[", market, "][", marketID, "] = ", JSON.stringify(portfolio_info));
-    if (filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output/portfoilio"); }
+    //if (filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output/simul_portfolio"); }
 }
 
 
-
-/*
-Coin 늘리기 함수 : 현재 slot 단위로 config에 정의된 target rate보다 큰 하락이 발생할 경우 coin을 매도했던 금액으로 Coin을 추매하여 Coin 보유량을 늘린다. 
-*/
-async function bid_sellKRW_buyCoin(market, marketID, current, priceinfo)
-{
-    let slots = portfolio_info[market][marketID]['slots'];
-    let config = portfolio_info[market][marketID]['config'];
-    let current_price = priceinfo['trade_price'];
-
-    for(i = 0; i < slots.length; i++)
-    {
-        let cur_slot_statics = slots[i]['statics'];
-        let average = cur_slot_statics['average_withfee'];
-        let cur_eval_net_Coin = cur_slot_statics['cur_eval_net_Coin'];
-        let sum_amount_done = cur_slot_statics['sum_amount_done'];
-
-        let target = config['target_bid_rate'] + config['target_bid_rate_adj'];  // Coin을 다시 사기위한 현재가격 대비 하락폭 설정
-        let cur_eval_net_ratio = cur_slot_statics['cur_eval_net_ratio'];
-        let sum_reclaim_KRW = cur_slot_statics['sum_reclaim_KRW_withfee'];
-        let order_coin_count = sum_reclaim_KRW / current_price;
-        order_coin_count = order_coin_count * (1 - tradefee);
-        order_coin_count = order_coin_count.toFixed(6) * 1;
-
-        if((cur_eval_net_ratio*100) > target) 
-        {
-            //console.log("################### Increase Coin ######################")
-            //console.log("[", market, "][", marketID, "][slots", i, "] Target = ", target, " Current Eval net Ratio = ", (cur_eval_net_ratio*100), "%"); 
-            //console.log("[", market, "][", marketID, "][slots", i, "] Buy Coin Price = ", current_price, " Amount = ", order_coin_count); 
-            //console.log("[", market, "][", marketID, "][slots", i, "] sum_reclaim_KRW = ", sum_reclaim_KRW, " Sum of Net Profit(Coin, 이익) = ", cur_eval_net_Coin); 
-
-            let orderinfo = { };
-            if(config['simulation'])
-            {
-                orderinfo['state'] = "done";
-                orderinfo['volume'] = order_coin_count;
-                orderinfo['executed_volume'] = order_coin_count;
-                orderinfo['remaining_volume'] = 0;
-                orderinfo['price'] = current_price; 
-                //console.log("[", market, "][", marketID, "][slots", i, "] price = ", current_price, " input order amount = ", orderinfo['volume'], " sum_reclaim_KRW = ", sum_reclaim_KRW);
-                slots[i]['status'] = "increase_coin"; // ask is completed
-                slots[i]['increasecoin_orderinfo'] = orderinfo;
-
-                let increaseData = slots[i];
-                increaseData['config'] = config;
-                increasecoin_DB[market][marketID].push(increaseData);
-                slots.splice(i, 1);
-
-                // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
-                if (i == 0) // Slots이 모두 청산되었을 경우
-                {
-                    portfolio_info[market][marketID]['last_bidask_info']['timetick'] = current;
-                    portfolio_info[market][marketID]['last_bidask_info']['tr_price'] = current_price;
-                }
-            }
-            else
-            {
-                // 잔고 Check후 input order
-                let SYM = market.split('-')[0];
-                let balance = await upbit.get_chance(market);
-                let order_money = sum_reclaim_KRW;
-
-                trade_fee[market]['bid_fee'] = balance['bid_fee'], trade_fee[market]['ask_fee'] = balance['ask_fee'];
-
-                if (balance['bid_account']['currency'] === SYM && balance['market']['id'] === market)  // Coin을 매입을 해야 하기 때문에 bid_account (KRW)를 체크함.
-                {
-                    if (balance['bid_account']['balance'] >= order_money) // Order Input (add ask)
-                    {
-                        orderinfo = await upbit.input_orders(market, 'bid', order_coin_count, current_price, 'limit');
-
-                        //console.log("[", market, "][", marketID, "][slots", i, "] Balance(KRW) = ", balance['bid_account']['balance'], " price = ", current_price, " input order amount = ", order_coin_count);
-                        orderinfo['volume'] *= 1;
-                        orderinfo['executed_volume'] *= 1;
-                        orderinfo['remaining_volume'] *= 1;
-                        orderinfo['price'] *= 1;
-                        slots[i]['increasecoin_orderinfo'] = orderinfo;
-                        slots[i]['status'] = "increase_coin"; // ask is completed
-
-                        let increaseData = slots[i];
-                        increaseData['config'] = config;
-                        increasecoin_DB[market][marketID].push(increaseData);
-                        slots.splice(i, 1);
-
-                        // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
-                        if (i == 0) // Slots이 모두 청산되었을 경우
-                        {
-                            portfolio_info[market][marketID]['last_bidask_info']['timetick'] = current;
-                            portfolio_info[market][marketID]['last_bidask_info']['tr_price'] = current_price;
-                        }
-                    }
-                    else
-                    {
-                        // 잔고 부족시 남은 잔고라도 익절을 할지.... 그냥 slot을 유지할지.....고민 필요함. 현재는 매수주문을 90%만큼만 하고 slot을 생성한다.
-                        if (balance['bid_account']['balance'] >= (order_money * 0.9))
-                        {
-                            order_coin_count = order_coin_count * 0.9;
-                            order_coin_count = order_coin_count.toFixed(6) * 1;
-                            orderinfo = await upbit.input_orders(market, 'bid', order_coin_count, current_price, 'limit');
-                            console.log("[", market, "][", marketID, "][slots", i, "] Insuffient Coin Balance on your account!!! Input Order amount = 90% ");
-                            console.log("[", market, "][", marketID, "][slots", i, "] Balance(KRW) = ", balance['bid_account']['balance'], " price = ", current_price, " input order amount = ", order_coin_count, " Order Money = ", order_money);
-
-                            //console.log("[", market, "][", marketID, "][slots", i, "] Balance(KRW) = ", balance['bid_account']['balance'], " price = ", current_price, " input order amount = ", order_coin_count);
-                            orderinfo['volume'] *= 1;
-                            orderinfo['executed_volume'] *= 1;
-                            orderinfo['remaining_volume'] *= 1;
-                            orderinfo['price'] *= 1;
-                            slots[i]['increasecoin_orderinfo'] = orderinfo;
-                            slots[i]['status'] = "increase_coin"; // ask is completed
-
-                            let increaseData = slots[i];
-                            increaseData['config'] = config;
-                            increasecoin_DB[market][marketID].push(increaseData);
-                            slots.splice(i, 1);
-
-                            // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
-                            if (i == 0) // Slots이 모두 청산되었을 경우
-                            {
-                                portfolio_info[market][marketID]['last_bidask_info']['timetick'] = current;
-                                portfolio_info[market][marketID]['last_bidask_info']['tr_price'] = current_price;
-                            }
-                        }
-                        else
-                        {
-                            console.log("[", market, "][", marketID, "][slots", i, "] Insuffient Coin Balance on your account!!! Please check your Coin Balance!!");
-                            console.log("[", market, "][", marketID, "][slots", i, "] Balance(KRW) = ", balance['bid_account']['balance'], " price = ", current_price, " input order amount = ", order_coin_count, " Order Money = ", order_money);
-                            console.log("[", market, "][", marketID, "] portfolio_info[market][marketID]['last_bidask_info']['tr_price'] = ", portfolio_info[market][marketID]['last_bidask_info']['tr_price']);
-                        }
-                    }
-                }
-                else
-                {
-                    console.log("[", market, "][", marketID, "][slots", i, "] **********Check Balance ERROR************"); orderinfo = { 'error': { 'message': "User define error" } }
-                }
-            }
-        }
-    }
-}
 
 
 /*******************************************************************************************************/
@@ -1550,9 +1074,8 @@ async function disiplay_statics(current, price_infoDB)
 
                 console.log("*************************************** Current Running Slots Information ***********************************************************");
                 console.log("=====================================================================================================================================");
-                if (mode === 'normal')
-                {
-                    console.log("[N][", market, "][", marketID, "][", config_filename[market][marketID], "], [Period] = ", config['check_period'], ", [Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
+                if (mode === 'normal') {
+                    console.log("[N][", market, "][", marketID, "][", (config_filename[market][marketID] + "_" + suffix), "], [Period] = ", config['check_period'], ", [Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
                     //console.log("[N][", market, "][", marketID, "][Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
                     console.log("[N][", market, "][", marketID, "][Max 투입제한 금액] = ", config['limit_invest_KRW'], ", [1st 투입금액] = ", config['slot_1st_Bid_KRW'], ", [2nd 이후 투입금액] = ", config['slot_2nd_Bid_KRW']);
                     console.log("[N][", market, "][", marketID, "][max_slot_cnt] = ", config['max_slot_cnt'], ", [max_addbid_cnt] = ", config['max_addbid_cnt'], ", [익절 Rate] = ", config['target_ask_rate'] + config['target_ask_rate_adj']);
@@ -1564,7 +1087,7 @@ async function disiplay_statics(current, price_infoDB)
                 }
                 else
                 {
-                    console.log("[R][", market, "][", marketID, "][", config_filename[market][marketID], "], [Period] = ", config['check_period'], ", [Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
+                    console.log("[R][", market, "][", marketID, "][", (config_filename[market][marketID] + "_" + suffix), "], [Period] = ", config['check_period'], ", [Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
                     //console.log("[R][", market, "][", marketID, "][Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
                     console.log("[R][", market, "][", marketID, "][Max 매도제한 Coin 개수] = ", config['limit_invest_coin'], ", [1st 매도 Coin 개수] = ", config['slot_1st_Ask_Coin'], " [2nd 이후 매도 Coin 개수] = ", config['slot_2nd_Ask_Coin']);
                     console.log("[R][", market, "][", marketID, "][max_slot_cnt] = ", config['max_slot_cnt'], ", [max_addask_cnt] = ", config['max_addask_cnt'], ", [Coin 재매수 Rate] = ", config['target_bid_rate'] + config['target_bid_rate_adj']);
@@ -1622,91 +1145,20 @@ async function disiplay_statics(current, price_infoDB)
                 }
             }
         }
-
-        for (market in price_infoDB)
-        {
-            let sum_org_KRW = 0;
-            let sum_net_KRW = 0;
-            for (marketID in price_infoDB[market])
-            {
-                if (portfolio_info[market][marketID]['config']['trade_mode'] !== "normal") { continue; }
-                let liquid_history = liquidation_DB[market][marketID];
-                console.log("***************************************** Liquidation   History(", liquid_history.length, ") **************************************************************** ")
-
-                for (let i = 0; i < liquid_history.length; i++)
-                {
-                    let statics = liquid_history[i]['statics'];
-                    let orderinfo = liquid_history[i]['liquidation_orderinfo'];
-                    sum_org_KRW += statics['sum_invest_KRW_withfee'];
-                    sum_net_KRW += statics['cur_eval_net_KRW'];
-                    if (i <
-                        5)
-                    {
-                        console.log("[N][", market, "][", marketID, "][ Slot", i, "] 현재 Coin 가격 =", statics['current_price'],
-                            " 매수 평단가 = ", statics['average_withfee'].toFixed(2), ", Coin 잔고 = ", statics['sum_amount_done'].toFixed(2), ", 이익율 = ",
-                            statics['cur_eval_net_ratio'].toFixed(2), "%, 이익금액(KRW) = ", statics['cur_eval_net_KRW'].toFixed(2));
-                    }
-                }
-                let cur_total_KRW = sum_org_KRW + sum_net_KRW;
-                let net_ratio = (sum_net_KRW / (sum_org_KRW+0.000001)) * 100;
-                net_ratio = net_ratio.toFixed(2);
-                cur_total_KRW = cur_total_KRW.toFixed(2) * 1;
-                console.log("=====================================================================================================================================");
-                console.log("[", market, "][", marketID, "] 총 투자금액(KRW) = ", sum_org_KRW.toFixed(2), ", 현 평가 금액(KRW) = ", cur_total_KRW,
-                    ", 이익금액(KRW) = ", sum_net_KRW.toFixed(2), ", 원화 이익율 = ", net_ratio, "%");
-                console.log("=====================================================================================================================================");
-                console.log("\n")
-            }
-        }
-
-        for (market in price_infoDB)
-        {
-            let sum_org_coin = 0;
-            let sum_net_coin = 0;
-            for (marketID in price_infoDB[market])
-            {
-                if (portfolio_info[market][marketID]['config']['trade_mode'] !== "reverse") { continue; }
-                let increasecoin_history = increasecoin_DB[market][marketID];
-                console.log("***************************************** Increase Coin History(", increasecoin_history.length, ") **************************************************************** ");
-
-                for (let i = 0; i < increasecoin_history.length; i++)
-                {
-                    let statics = increasecoin_history[i]['statics'];
-                    let orderinfo = increasecoin_history[i]['increasecoin_orderinfo'];
-                    sum_org_coin += statics['sum_amount_done'];
-                    sum_net_coin += statics['cur_eval_net_Coin'];
-
-                    if (i < 5)
-                    {
-                        console.log("[R][", market, "][", marketID, "][ Slot", i, "] Coin 매도평단가 = ", statics['average_withfee'].toFixed(2), ", 매도 Coin 수량 = ", 
-                            statics['sum_amount_done'], ", 회수금액(KRW) = ", statics['sum_ask_KRW_withfee'].toFixed(2), ", 재매수 가격 = ", statics['current_price'],
-                            ", 이익율 = ", statics['cur_eval_net_ratio'].toFixed(2), "%,  Coin 증가개수 = ", statics['cur_eval_net_Coin'].toFixed(2));
-                    }
-                }
-                let cur_total_coin = sum_org_coin + sum_net_coin;
-                let net_ratio = (sum_net_coin / (sum_org_coin+0.000001)) * 100;
-                net_ratio = net_ratio.toFixed(2);
-                cur_total_coin = cur_total_coin.toFixed(2) * 1;
-                console.log("=====================================================================================================================================");
-                console.log("[", market, "][", marketID, "] 매도 Coin 합계 = ", sum_org_coin.toFixed(2), ", 재매수 Coin 합계 = ", cur_total_coin,
-                    ", Coin 증가 = ", sum_net_coin.toFixed(2), ", 이익율 = ", net_ratio, "%");
-                console.log("=====================================================================================================================================");
-                console.log("\n")
-            }
-        }
     }
 }
-
 
 
 /*
   Save_JSON_file : 전달된 JSON객체를 filename(Path정보 포함)으로 저장한다.
 */
-function Save_JSON_file(jsonObject, filename) {
+function Save_JSON_file(jsonObject, filename)
+{
     var json = JSON.stringify(jsonObject);
     filename = filename + "_" + suffix + ".json";
-    fse.outputFileSync(filename, json, 'utf-8', function (e) {
-        if (e) { console.log(e); } else { console.log("Download is done!"); }
+    fse.outputFileSync(filename, json, 'utf-8', function (e)
+    {
+        if(e) { console.log(e); } else { console.log("Download is done!");}
     });
 }
 
@@ -1740,10 +1192,7 @@ function Load_JsonDB(filename)
                 let config = fs.readFileSync(filename, 'utf8');
                 resolve(JSON.parse(config));
             }
-            else
-            {
-                console.log("Can't find ", filename, " config file, use default settings"); resolve(portfolio_info[market][marketID]['config']);
-            }  // file read 실패시 기존값 return함.
+            else { console.log("Can't find config file, use default settings"); resolve(portfolio_info[market][marketID]['config']); }  // file read 실패시 기존값 return함.
         });
     });
 }

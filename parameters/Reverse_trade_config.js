@@ -4,7 +4,7 @@ var RSimulation_Mode = {
     control_mode: 'run',  // run / stop
     simulation: true,
     real_test_mode: false,
-    check_period: 1,           //* The price check duration of main loop, unit is second. (unit : Sec)
+    check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
     slot_1st_Ask_Coin: 50,   //* fisrt investment coint (unit : EA)
     slot_2nd_Ask_Coin: 100,  //* after 1st slot, investment coin (unit : EA)
     max_slot_cnt: 100,          //* The limitation number of creating slots (unit : EA) 
@@ -26,10 +26,10 @@ var RSimulation_Mode = {
 // Reverse Mode1 
 var RMode1 = {
     trade_mode: 'reverse',
-    control_mode: 'stop',  // run / stop
-    simulation: false,
+    control_mode: 'run',  // run / stop
+    simulation: true,
     real_test_mode: false,
-    check_period: 10,           //* The price check duration of main loop, unit is second. (unit : Sec)
+    check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
     slot_1st_Ask_Coin: 50,   //* fisrt investment coint (unit : EA)
     slot_2nd_Ask_Coin: 100,  //* after 1st slot, investment coin (unit : EA)
     max_slot_cnt: 100,          //* The limitation number of creating slots (unit : EA) 
@@ -52,9 +52,9 @@ var RMode1 = {
 var RMode2 = {
     trade_mode: 'reverse',
     control_mode: 'stop',  // run / stop
-    simulation: false,
+    simulation: true,
     real_test_mode: false,
-    check_period: 10,           //* The price check duration of main loop, unit is second. (unit : Sec)
+    check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
     slot_1st_Ask_Coin: 50,   //* fisrt investment coint (unit : EA)
     slot_2nd_Ask_Coin: 100,  //* after 1st slot, investment coin (unit : EA)
     max_slot_cnt: 100,          //* The limitation number of creating slots (unit : EA) 

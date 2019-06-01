@@ -5,7 +5,7 @@ var NSimulation_Mode = {
     control_mode: 'run',  // run / stop
     simulation: true,
     real_test_mode: false,
-    check_period: 1,           //* The price check duration of main loop, unit is second. (unit : Sec)
+    check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
     slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
     slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
     max_slot_cnt: 10,          //* The limitation number of creating slots (unit : EA) 
@@ -26,10 +26,10 @@ var NSimulation_Mode = {
 // normal mode 1
 var NMode1 = {
     trade_mode: 'normal',
-    control_mode: 'stop',  // run / stop
-    simulation: false,
+    control_mode: 'run',  // run / stop
+    simulation: true,
     real_test_mode: false,
-    check_period: 10,           //* The price check duration of main loop, unit is second. (unit : Sec)
+    check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
     slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
     slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
     max_slot_cnt: 10,          //* The limitation number of creating slots (unit : EA) 
@@ -54,7 +54,7 @@ var NMode2 = {
     control_mode: 'stop',  // run / stop
     simulation: false,
     real_test_mode: false,
-    check_period: 10,           //* The price check duration of main loop, unit is second. (unit : Sec)
+    check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
     slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
     slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
     max_slot_cnt: 10,          //* The limitation number of creating slots (unit : EA) 
