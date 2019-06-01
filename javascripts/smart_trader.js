@@ -112,7 +112,7 @@ var slot_ask_info = {
     last_bidask_info : { timetick : 0, tr_price : 0 },
 }
 
-var portfolio = { config : { }, last_bidask_info : { timetick : 0, tr_price : 0 }, slots : [] }; // slot config & info......
+var portfolio = { config : { }, last_bidask_info : { timetick : 0, tr_price : 0 }, slots : [], idle : false }; // slot config & info......
 var portfolio_info = { };
 
 
@@ -440,14 +440,21 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
         {
             if (config['restart_flag'] == 0)
             {
+                portfolio_info[market][marketID]['idle'] = true;
                 //console.log("[N][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is FALSE, go to Idle state!!");
                 return;
             }
-            else
+            else if (config['restart_flag'] == 1) // one shot mode
             {
                 console.log("[N][", market, "][", marketID, "]*** Restart Trader with current price, make new first slot!!! ***");
                 config['restart_flag'] = 0; // restart_flag를 0으로 초기화 안해주면 자동 auto start mode가 됨. 마지막 last bidask 값에서 정해놓은 % 하락시 재매수함.
+                portfolio_info[market][marketID]['idle'] = false;
                 Save_JSON_latest_file(config, "./output/" + config_filename[market][marketID]);
+            }
+            else 
+            {
+                // auto repeat mode.....
+                portfolio_info[market][marketID]['idle'] = false;
             } 
         }
         else
@@ -941,13 +948,24 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
     {
         if (slots.length == 0)
         {
-            if (config['restart_flag'] == 0) { console.log("[N][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is FALSE, go to Idle state!!"); return; }
-            else
+            if (config['restart_flag'] == 0)
+            {
+                portfolio_info[market][marketID]['idle'] = true;
+                //console.log("[N][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is FALSE, go to Idle state!!");
+                return;
+            }
+            else if (config['restart_flag'] == 1) // one shot mode
             {
                 console.log("[N][", market, "][", marketID, "]*** Restart Trader with current price, make new first slot!!! ***");
-                config['restart_flag'] = 0;
+                config['restart_flag'] = 0; // restart_flag를 0으로 초기화 안해주면 자동 auto start mode가 됨. 마지막 last bidask 값에서 정해놓은 % 하락시 재매수함.
+                portfolio_info[market][marketID]['idle'] = false;
                 Save_JSON_latest_file(config, "./output/" + config_filename[market][marketID]);
-            } // restart_flag를 0으로 초기화 안해주면 자동 auto start mode가 됨.
+            }
+            else
+            {
+                // auto repeat mode.....
+                portfolio_info[market][marketID]['idle'] = false;
+            } 
         }
         else
         {
@@ -1560,7 +1578,7 @@ async function disiplay_statics(current, price_infoDB)
                     console.log("[N][", market, "][", marketID, "][신규 Slot 생성 Rate] = ", config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj'], ", [Add Bid(물타기) Rate] = ", config['new_addbid_Create_Ratio'] + config['new_addbid_Create_Ratio_adj']);
                     //console.log("[N][", market, "][", marketID, "][Add Bid(물타기) Rate] = ", config['new_addbid_Create_Ratio'] + config['new_addbid_Create_Ratio_adj']);
                     console.log("=====================================================================================================================================");
-                    console.log("[N][", market, "][", marketID, "] 현재 Coin 가격 = ", cur_price, ", Last Trade Price = ", last_bidask_price, ", Gap Ratio = ", gap_ratio, "%");
+                    console.log("[N][", market, "][", marketID, "] Idle = ", portfolio_info[market][marketID]['idle'], ", 현재 Coin 가격 = ", cur_price, ", Last Trade Price = ", last_bidask_price, ", Gap Ratio = ", gap_ratio, "%");
                 }
                 else
                 {
@@ -1572,7 +1590,7 @@ async function disiplay_statics(current, price_infoDB)
                     console.log("[R][", market, "][", marketID, "][신규 Slot 생성 Rate - 이전 slot 대비 상승율] = ", config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj'], " [Add Ask(Coin 고점팔기) Rate] = ", config['new_addask_Create_Ratio'] + config['new_addask_Create_Ratio_adj']);
                     //console.log("[R][", market, "][", marketID, "][Add Ask(Coin 고점팔기) Rate] = ", config['new_addask_Create_Ratio'] + config['new_addask_Create_Ratio_adj']);
                     console.log("=====================================================================================================================================");
-                    console.log("[R][", market, "][", marketID, "] 현재 Coin 가격 = ", cur_price, ", Last Trade Price = ", last_bidask_price, ", Gap Ratio = ", gap_ratio, "%");
+                    console.log("[R][", market, "][", marketID, "] Idle = ", portfolio_info[market][marketID]['idle'], ", 현재 Coin 가격 = ", cur_price, ", Last Trade Price = ", last_bidask_price, ", Gap Ratio = ", gap_ratio, "%");
                 }
                 console.log("=====================================================================================================================================");
 
