@@ -53,17 +53,17 @@ var RMode1 = {
 // Reverse Mode 2 : 횡보 - gap을 작게.....
 var RMode2 = {
     trade_mode: 'reverse',
-    control_mode: 'run',  // run / stop
-    simulation: true,
+    control_mode: 'stop',  // run / stop
+    simulation: false,
     real_test_mode: false,
     check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    slot_Ask_Coin: [25, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+    slot_Ask_Coin: [20, 40, 40, 40, 40, 40, 40, 50, 50, 50],
 //    slot_1st_Ask_Coin: 50,   //* fisrt investment coint (unit : EA)
 //    slot_2nd_Ask_Coin: 100,  //* after 1st slot, investment coin (unit : EA)
     max_slot_cnt: 100,          //* The limitation number of creating slots (unit : EA) 
     max_addask_cnt: 10,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot당 물타기 최대 회수)
     target_bid_rate: 1,            //* The ratio of reverse liquidation margin in each slot. (unit : %)
-    target_bid_rate_adj: 0.05,        //* The adjustment ratio of target_rate
+    target_bid_rate_adj: 0.1,        //* The adjustment ratio of target_rate
     new_slot_Create_Ratio: 2,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
     new_slot_Create_Ratio_adj: 0, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
     new_addask_Create_Ratio: 8,       //* The gap of last transaction price to create new add_ask. (unit : %, always minus value)
