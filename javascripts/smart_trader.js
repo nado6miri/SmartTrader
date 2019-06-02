@@ -213,6 +213,7 @@ async function register_trade_markets()
         pfolio['config'] = configparam;
         pfolio['slots'] = [];
 
+        direction = portfolio_list[key][6];
         // 기존 만들어 놓은 Portfolio_info는 그대로 유지하고 신규로 추가된 Market / MarketID에 대해서 key/value를 구성한다.
         if (portfolio_info.hasOwnProperty(market) === false)
         {
@@ -440,11 +441,12 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
         {
             if (config['restart_flag'] == 0)
             {
-                portfolio_info[market][marketID]['idle'] = true;
                 //console.log("[N][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is FALSE, go to Idle state!!");
-                return;
+                // 첫 생성된 slot의 가격보다 현재 가격이 상승해서 청산될 경우... idle 모드로 대기 후 가격이 청산한 가격 이하로 내려가면 신규 slot을 생성하여 코인을 매수함.
+                if (current_price < last_bidask_price) { portfolio_info[market][marketID]['idle'] = false; }
+                else { portfolio_info[market][marketID]['idle'] = true; return; }
             }
-            else if (config['restart_flag'] == 1) // one shot mode
+            else if (config['restart_flag'] == 1) // one shot mode - 기준점(1st slot 생성가격 기준을 재설정함.)
             {
                 console.log("[N][", market, "][", marketID, "]*** Restart Trader with current price, make new first slot!!! ***");
                 config['restart_flag'] = 0; // restart_flag를 0으로 초기화 안해주면 자동 auto start mode가 됨. 마지막 last bidask 값에서 정해놓은 % 하락시 재매수함.
@@ -952,11 +954,12 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
         {
             if (config['restart_flag'] == 0)
             {
-                portfolio_info[market][marketID]['idle'] = true;
                 //console.log("[N][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is FALSE, go to Idle state!!");
-                return;
+                // 첫 생성된 slot의 가격보다 현재 가격이 하락해서 청산될 경우... 코인을 매도하지 않고 idle 모드로 가면서 가격이 청산한 가격 이상으로 올라오면 신규 slot을 생성.
+                if (current_price > last_bidask_price) { portfolio_info[market][marketID]['idle'] = false; }
+                else { portfolio_info[market][marketID]['idle'] = true; return; }
             }
-            else if (config['restart_flag'] == 1) // one shot mode
+            else if (config['restart_flag'] == 1) // one shot mode - 기준점(1st slot 생성가격 기준을 재설정함.)
             {
                 console.log("[N][", market, "][", marketID, "]*** Restart Trader with current price, make new first slot!!! ***");
                 config['restart_flag'] = 0; // restart_flag를 0으로 초기화 안해주면 자동 auto start mode가 됨. 마지막 last bidask 값에서 정해놓은 % 하락시 재매수함.
@@ -1577,9 +1580,9 @@ async function disiplay_statics(current, price_infoDB)
                     console.log("[N][", market, "][", marketID, "][", config_filename[market][marketID], "], [Period] = ", config['check_period'], ", [Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
                     //console.log("[N][", market, "][", marketID, "][Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
                     console.log("[N][", market, "][", marketID, "][Max 투입제한 금액] = ", config['limit_invest_KRW'], ", [Slot별 투입금액(천원)] = ", config['slot_Bid_KRW']);
-                    console.log("[N][", market, "][", marketID, "][max_slot_cnt] = ", config['max_slot_cnt'], ", [max_addbid_cnt] = ", config['max_addbid_cnt'], ", [익절 Rate] = ", config['target_ask_rate'] + config['target_ask_rate_adj']);
+                    console.log("[N][", market, "][", marketID, "][max_slot_cnt] = ", config['max_slot_cnt'], ", [max_addbid_cnt] = ", config['max_addbid_cnt'], ", [익절 Rate] = ", config['target_ask_rate'] + config['target_ask_rate_adj'], "%");
                     //console.log("[N][", market, "][", marketID, "][익절 Rate] = ", config['target_ask_rate'] + config['target_ask_rate_adj']);
-                    console.log("[N][", market, "][", marketID, "][신규 Slot 생성 Rate] = ", config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj'], ", [Add Bid(물타기) Rate] = ", config['new_addbid_Create_Ratio'] + config['new_addbid_Create_Ratio_adj']);
+                    console.log("[N][", market, "][", marketID, "][신규 Slot 생성 Rate] = ", config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj'], "%, [Add Bid(물타기) Rate] = ", config['new_addbid_Create_Ratio'] + config['new_addbid_Create_Ratio_adj'], "%");
                     //console.log("[N][", market, "][", marketID, "][Add Bid(물타기) Rate] = ", config['new_addbid_Create_Ratio'] + config['new_addbid_Create_Ratio_adj']);
                     console.log("=====================================================================================================================================");
                     console.log("[N][", market, "][", marketID, "] Idle = ", portfolio_info[market][marketID]['idle'], ", 현재 Coin 가격 = ", cur_price, ", Last Trade Price = ", last_bidask_price, ", Gap Ratio = ", gap_ratio, "%");
@@ -1589,9 +1592,9 @@ async function disiplay_statics(current, price_infoDB)
                     console.log("[R][", market, "][", marketID, "][", config_filename[market][marketID], "], [Period] = ", config['check_period'], ", [Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
                     //console.log("[R][", market, "][", marketID, "][Control Status] = ", config['control_mode'], ", [real_test_mode] = ", config['real_test_mode']);
                     console.log("[R][", market, "][", marketID, "][Max 매도제한 Coin 개수] = ", config['limit_invest_coin'], ", [Slot별 매도 Coin 개수] = ", config['slot_Ask_Coin']);
-                    console.log("[R][", market, "][", marketID, "][max_slot_cnt] = ", config['max_slot_cnt'], ", [max_addask_cnt] = ", config['max_addask_cnt'], ", [Coin 재매수 Rate] = ", config['target_bid_rate'] + config['target_bid_rate_adj']);
+                    console.log("[R][", market, "][", marketID, "][max_slot_cnt] = ", config['max_slot_cnt'], ", [max_addask_cnt] = ", config['max_addask_cnt'], ", [Coin 재매수 Rate] = ", config['target_bid_rate'] + config['target_bid_rate_adj'], "%");
                     //console.log("[R][", market, "][", marketID, "][Coin 재매수 Rate] = ", config['target_bid_rate'] + config['target_bid_rate_adj']);
-                    console.log("[R][", market, "][", marketID, "][신규 Slot 생성 Rate - 이전 slot 대비 상승율] = ", config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj'], " [Add Ask(Coin 고점팔기) Rate] = ", config['new_addask_Create_Ratio'] + config['new_addask_Create_Ratio_adj']);
+                    console.log("[R][", market, "][", marketID, "][신규 Slot 생성 Rate - 이전 slot 대비 상승율] = ", config['new_slot_Create_Ratio'] + config['new_slot_Create_Ratio_adj'], "%, [Add Ask(Coin 고점팔기) Rate] = ", config['new_addask_Create_Ratio'] + config['new_addask_Create_Ratio_adj'], "%");
                     //console.log("[R][", market, "][", marketID, "][Add Ask(Coin 고점팔기) Rate] = ", config['new_addask_Create_Ratio'] + config['new_addask_Create_Ratio_adj']);
                     console.log("=====================================================================================================================================");
                     console.log("[R][", market, "][", marketID, "] Idle = ", portfolio_info[market][marketID]['idle'], ", 현재 Coin 가격 = ", cur_price, ", Last Trade Price = ", last_bidask_price, ", Gap Ratio = ", gap_ratio, "%");
@@ -1605,7 +1608,7 @@ async function disiplay_statics(current, price_infoDB)
                     {
                         console.log("[N][", market, "][", marketID, "][ Slot", i, "][ Bid", slots[i]['add_bid'].length, "] 현재 Coin 가격 =", statics['current_price'],
                             ", 매수 평단가 = ", statics['average_withfee'].toFixed(2), ", 매수 Coin 수량 = ", statics['sum_amount_done'].toFixed(2), ", 이익율 = ",
-                            statics['cur_eval_net_ratio'].toFixed(2), "%" , ", 이익금액(KRW) = ", statics['cur_eval_net_KRW'].toFixed(2));
+                            statics['cur_eval_net_ratio'].toFixed(2)*100, "%" , ", 이익금액(KRW) = ", statics['cur_eval_net_KRW'].toFixed(2));
                         sum_org_KRW += statics['sum_invest_KRW_withfee'];
                         sum_net_KRW += statics['cur_eval_net_KRW'];
                         sum_org_coin += statics['sum_amount_done'];
@@ -1614,7 +1617,7 @@ async function disiplay_statics(current, price_infoDB)
                     {
                         console.log("[R][", market, "][", marketID, "][ Slot", i, "][ Ask", slots[i]['add_ask'].length, "] 현재 Coin 가격 =", statics['current_price'],
                             ", 매도 평단가 = ", statics['average_withfee'].toFixed(2), ", 매도 Coin 수량 = ", statics['sum_amount_done'], ", 회수된 원화(KRW) 금액 = ",
-                            statics['sum_ask_KRW_withfee'].toFixed(2), ", 이익율 = ", statics['cur_eval_net_ratio'].toFixed(2), "%", ", Coin 증가 = ", statics['cur_eval_net_Coin'].toFixed(2));
+                            statics['sum_ask_KRW_withfee'].toFixed(2), ", 이익율 = ", statics['cur_eval_net_ratio'].toFixed(2)*100, "%", ", Coin 증가 = ", statics['cur_eval_net_Coin'].toFixed(2));
                         sum_org_KRW += statics['sum_ask_KRW_withfee'];
                         sum_org_coin += statics['sum_amount_done'];
                         sum_net_coin += statics['cur_eval_net_Coin'];
@@ -1661,17 +1664,16 @@ async function disiplay_statics(current, price_infoDB)
                     let orderinfo = liquid_history[i]['liquidation_orderinfo'];
                     sum_org_KRW += statics['sum_invest_KRW_withfee'];
                     sum_net_KRW += statics['cur_eval_net_KRW'];
-                    if (i <
-                        5)
+                    if (i < 5)
                     {
-                        console.log("[N][", market, "][", marketID, "][ Slot", i, "] 현재 Coin 가격 =", statics['current_price'],
+                        console.log("[N][", market, "][", marketID, "][ Slot", i, "] 매도 Coin 가격 =", statics['current_price'],
                             " 매수 평단가 = ", statics['average_withfee'].toFixed(2), ", Coin 잔고 = ", statics['sum_amount_done'].toFixed(2), ", 이익율 = ",
-                            statics['cur_eval_net_ratio'].toFixed(2), "%, 이익금액(KRW) = ", statics['cur_eval_net_KRW'].toFixed(2));
+                            statics['cur_eval_net_ratio'].toFixed(2)*100, "%, 이익금액(KRW) = ", statics['cur_eval_net_KRW'].toFixed(2));
                     }
                 }
                 let cur_total_KRW = sum_org_KRW + sum_net_KRW;
                 let net_ratio = (sum_net_KRW / (sum_org_KRW+0.000001)) * 100;
-                net_ratio = net_ratio.toFixed(2);
+                net_ratio = net_ratio.toFixed(2) *1;
                 cur_total_KRW = cur_total_KRW.toFixed(2) * 1;
                 console.log("=====================================================================================================================================");
                 console.log("[", market, "][", marketID, "] 총 투자금액(KRW) = ", sum_org_KRW.toFixed(2), ", 현 평가 금액(KRW) = ", cur_total_KRW,
@@ -1702,12 +1704,12 @@ async function disiplay_statics(current, price_infoDB)
                     {
                         console.log("[R][", market, "][", marketID, "][ Slot", i, "] Coin 매도평단가 = ", statics['average_withfee'].toFixed(2), ", 매도 Coin 수량 = ", 
                             statics['sum_amount_done'], ", 회수금액(KRW) = ", statics['sum_ask_KRW_withfee'].toFixed(2), ", 재매수 가격 = ", statics['current_price'],
-                            ", 이익율 = ", statics['cur_eval_net_ratio'].toFixed(2), "%,  Coin 증가개수 = ", statics['cur_eval_net_Coin'].toFixed(2));
+                            ", 이익율 = ", statics['cur_eval_net_ratio'].toFixed(2)*100, "%,  Coin 증가개수 = ", statics['cur_eval_net_Coin'].toFixed(2));
                     }
                 }
                 let cur_total_coin = sum_org_coin + sum_net_coin;
                 let net_ratio = (sum_net_coin / (sum_org_coin+0.000001)) * 100;
-                net_ratio = net_ratio.toFixed(2);
+                net_ratio = net_ratio.toFixed(2)*1;
                 cur_total_coin = cur_total_coin.toFixed(2) * 1;
                 console.log("=====================================================================================================================================");
                 console.log("[", market, "][", marketID, "] 매도 Coin 합계 = ", sum_org_coin.toFixed(2), ", 재매수 Coin 합계 = ", cur_total_coin,
