@@ -208,7 +208,7 @@ async function register_trade_markets()
         console.log("===========Resume Mode==============");
         process.argv.splice(2, 1);  // 처음 한번만 실행하도록 함.
         // 1) read portfolio_info DB
-        portfolio_info = await Load_JsonDB("./output/" + "portfoilio");
+        portfolio_info = await Load_JsonDB("./output/" + "portfolio");
         //console.log("portfolio_info = ", JSON.stringify(portfolio_info));
 
         // 2) read liquidation_DB from Normal_Liquidation_History.json
