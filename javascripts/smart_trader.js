@@ -404,7 +404,7 @@ async function smart_coin_trader()
     await register_trade_markets();
     //return;
     // 2. make MACD Information.
-    await register_MACD_Timers(portfolio_list);
+    //await register_MACD_Timers(portfolio_list);
 
     // 3. create the first slot
     while(1)
