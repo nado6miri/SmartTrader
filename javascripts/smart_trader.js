@@ -193,65 +193,142 @@ var config_filename = {};
 
 async function register_trade_markets()
 {
-    // read portfolio json file.... : 투자목록 list를 portfolio_list 에서 가져온다.
+    /*
+    console.log(process.argv, process.argv.length, process.argv[2]);
+    process.argv.forEach(function (val, index, array) { console.log(index + ': ' + val); });
+    */
+
+    //1. read portfolio json file.... : 투자목록 list를 portfolio_list 에서 가져온다.
     portfolio_list = await Load_JsonDB("./parameters/" + "portfolio_list");
     //console.log("portfolio_list = ", JSON.stringify(portfolio_list));
 
-    // initialize portfolio info DB...
-    for (key in portfolio_list)
+    //2. resume mode 이면 기존 저정된 config 및 portfolio / liquidation / increase coin 정보를 읽어온다.
+    if (process.argv.length === 3 && process.argv[2] == 'resume')
     {
-        let market, marketID;
-        market = marketID = key;
-        marketID = marketID.split('_')[1];
-        market = market.split('_')[0];
+        console.log("===========Resume Mode==============");
+        process.argv.splice(2, 1);  // 처음 한번만 실행하도록 함.
+        // 1) read portfolio_info DB
+        portfolio_info = await Load_JsonDB("./output/" + "portfoilio");
+        //console.log("portfolio_info = ", JSON.stringify(portfolio_info));
 
-        let pfolio = JSON.parse(JSON.stringify(portfolio));
-        let configparam = {};
-        let direction = true;
-
-        if (portfolio_list[key][0] == 'N') { configparam = NConfig.params[portfolio_list[key][1]]; direction = false; } else { configparam = RConfig.params[portfolio_list[key][1]]; direction = true; }
-        pfolio['config'] = configparam;
-        pfolio['slots'] = [];
-
-        direction = portfolio_list[key][6];
-        // 기존 만들어 놓은 Portfolio_info는 그대로 유지하고 신규로 추가된 Market / MarketID에 대해서 key/value를 구성한다.
-        if (portfolio_info.hasOwnProperty(market) === false)
+        // 2) read liquidation_DB from Normal_Liquidation_History.json
+        liquidation_DB = await Load_JsonDB("./output/" + "Normal_Liquidation_History");
+        if (liquidation_DB === "error")
         {
-            portfolio_info[market] = {};
-            portfolio_info[market][marketID] = JSON.parse(JSON.stringify(pfolio));
-
-            // config file naming and create config file and latest file.
-            config_filename[market] = {};
-            config_filename[market][marketID] = "Config[" + market + "][" + marketID + "]";
-            Save_JSON_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
-            Save_JSON_latest_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
-            getPrice[market][marketID] = price_generator(portfolio_list[key][2], portfolio_list[key][3], portfolio_list[key][4], portfolio_list[key][5], direction);
-        }
-        else
-        {
-            if (portfolio_info[market].hasOwnProperty(marketID) === false)
+            liquidation_DB = {};
+            for (key in portfolio_list)
             {
-                portfolio_info[market][marketID] = JSON.parse(JSON.stringify(pfolio));
-                // config file naming and create config file and latest file.
-                config_filename[market][marketID] = "Config[" + market + "][" + marketID + "]";
-                Save_JSON_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
-                Save_JSON_latest_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
-                getPrice[market][marketID] = price_generator(portfolio_list[key][2], portfolio_list[key][3], portfolio_list[key][4], portfolio_list[key][5], direction);
+                let market, marketID;
+                market = marketID = key;
+                marketID = marketID.split('_')[1];
+                market = market.split('_')[0];
+
+                console.log("[", market, "][", marketID, "] create new liquidation_db");
+                if (liquidation_DB.hasOwnProperty(market) === false) { liquidation_DB[market] = {}; }
+                if (liquidation_DB[market].hasOwnProperty(marketID) === false) { liquidation_DB[market][marketID] = []; }
             }
         }
+        //console.log("portfolio_info = ", JSON.stringify(portfolio_info));
 
-        if (liquidation_DB.hasOwnProperty(market) === false) { liquidation_DB[market] = {}; }
-        if (liquidation_DB[market].hasOwnProperty(marketID) === false) { liquidation_DB[market][marketID] = []; }
 
-        if (increasecoin_DB.hasOwnProperty(market) === false) { increasecoin_DB[market] = {}; }
-        if (increasecoin_DB[market].hasOwnProperty(marketID) === false) { increasecoin_DB[market][marketID] = []; }
+        // 3) read increasecoin_DB from Reverse_IncreaseCoin_History.json
+        increasecoin_DB = await Load_JsonDB("./output/" + "Reverse_IncreaseCoin_History");
+        if (increasecoin_DB === "error")
+        {
+            increasecoin_DB = {};
+            for (key in portfolio_list)
+            {
+                let market, marketID;
+                market = marketID = key;
+                marketID = marketID.split('_')[1];
+                market = market.split('_')[0];
 
-        if (total_invest_KRW.hasOwnProperty(market) === false) { total_invest_KRW[market] = {}; }
-        if (total_invest_KRW[market].hasOwnProperty(marketID) === false) { total_invest_KRW[market][marketID] = 0; }
+                console.log("[", market, "][", marketID, "] create new increasecoin_DB");
+                if (increasecoin_DB.hasOwnProperty(market) === false) { increasecoin_DB[market] = {}; }
+                if (increasecoin_DB[market].hasOwnProperty(marketID) === false) { increasecoin_DB[market][marketID] = []; }
+            }
+        }
+        //console.log("portfolio_info = ", JSON.stringify(portfolio_info));
 
-        if (sellcoin_count.hasOwnProperty(market) === false) { sellcoin_count[market] = {}; sellcoin_count[market][marketID] = 0; }
-        if (sellcoin_count[market].hasOwnProperty(marketID) === false) { sellcoin_count[market][marketID] = 0; }
+        // 4) etc
+        for (key in portfolio_list)
+        {
+            let market, marketID;
+            market = marketID = key;
+            marketID = marketID.split('_')[1];
+            market = market.split('_')[0];
+
+            // make config file name - config file naming 
+            if (config_filename.hasOwnProperty(market) === false) { config_filename[market] = {}; }
+            if (config_filename[market].hasOwnProperty(market) === false) { config_filename[market][marketID] = "Config[" + market + "][" + marketID + "]"; }
+
+            if (total_invest_KRW.hasOwnProperty(market) === false) { total_invest_KRW[market] = {}; }
+            if (total_invest_KRW[market].hasOwnProperty(marketID) === false) { total_invest_KRW[market][marketID] = 0; }
+
+            if (sellcoin_count.hasOwnProperty(market) === false) { sellcoin_count[market] = {}; sellcoin_count[market][marketID] = 0; }
+            if (sellcoin_count[market].hasOwnProperty(marketID) === false) { sellcoin_count[market][marketID] = 0; }
+
+            getPrice[market][marketID] = price_generator(portfolio_list[key][2], portfolio_list[key][3], portfolio_list[key][4], portfolio_list[key][5], portfolio_list[key][6]);
+        }
     }
+    else // 3. resume mode가 아니면 처음 신규로 DB 초기화 하고 Trade를 시작한다.
+    {
+        //console.log("===========Initial Mode==============");
+        // initialize portfolio info DB...
+        for (key in portfolio_list)
+        {
+            let market, marketID;
+            market = marketID = key;
+            marketID = marketID.split('_')[1];
+            market = market.split('_')[0];
+
+            let pfolio = JSON.parse(JSON.stringify(portfolio));
+            let configparam = {};
+
+            if (portfolio_list[key][0] == 'N') { configparam = NConfig.params[portfolio_list[key][1]]; } else { configparam = RConfig.params[portfolio_list[key][1]]; }
+            pfolio['config'] = configparam;
+            pfolio['slots'] = [];
+
+            // 기존 만들어 놓은 Portfolio_info는 그대로 유지하고 신규로 추가된 Market / MarketID에 대해서 key/value를 구성한다.
+            if (portfolio_info.hasOwnProperty(market) === false)
+            {
+                portfolio_info[market] = {};
+                portfolio_info[market][marketID] = JSON.parse(JSON.stringify(pfolio));
+
+                // config file naming and create config file and latest file.
+                config_filename[market] = {};
+                config_filename[market][marketID] = "Config[" + market + "][" + marketID + "]";
+                Save_JSON_file(portfolio_info[market][marketID]['config'], "./output_backup/" + config_filename[market][marketID]);
+                Save_JSON_latest_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
+                getPrice[market][marketID] = price_generator(portfolio_list[key][2], portfolio_list[key][3], portfolio_list[key][4], portfolio_list[key][5], portfolio_list[key][6]);
+            }
+            else
+            {
+                if (portfolio_info[market].hasOwnProperty(marketID) === false)
+                {
+                    portfolio_info[market][marketID] = JSON.parse(JSON.stringify(pfolio));
+                    // config file naming and create config file and latest file.
+                    config_filename[market][marketID] = "Config[" + market + "][" + marketID + "]";
+                    Save_JSON_file(portfolio_info[market][marketID]['config'], "./output_backup/" + config_filename[market][marketID]);
+                    Save_JSON_latest_file(portfolio_info[market][marketID]['config'], "./output/" + config_filename[market][marketID]);
+                    getPrice[market][marketID] = price_generator(portfolio_list[key][2], portfolio_list[key][3], portfolio_list[key][4], portfolio_list[key][5], portfolio_list[key][6]);
+                }
+            }
+
+            if (liquidation_DB.hasOwnProperty(market) === false) { liquidation_DB[market] = {}; }
+            if (liquidation_DB[market].hasOwnProperty(marketID) === false) { liquidation_DB[market][marketID] = []; }
+
+            if (increasecoin_DB.hasOwnProperty(market) === false) { increasecoin_DB[market] = {}; }
+            if (increasecoin_DB[market].hasOwnProperty(marketID) === false) { increasecoin_DB[market][marketID] = []; }
+
+            if (total_invest_KRW.hasOwnProperty(market) === false) { total_invest_KRW[market] = {}; }
+            if (total_invest_KRW[market].hasOwnProperty(marketID) === false) { total_invest_KRW[market][marketID] = 0; }
+
+            if (sellcoin_count.hasOwnProperty(market) === false) { sellcoin_count[market] = {}; sellcoin_count[market][marketID] = 0; }
+            if (sellcoin_count[market].hasOwnProperty(marketID) === false) { sellcoin_count[market][marketID] = 0; }
+        }
+    }
+
     /*
     console.log("portfolio_info = ", JSON.stringify(portfolio_info));
     console.log("liquidation_DB = ", JSON.stringify(liquidation_DB));
@@ -282,10 +359,10 @@ async function register_MACD_Timers(plist)
             if (timerID_info[market][key] === 0)
             {
                 data = await get_MACD(market, timeval, timerID_Minval[key], 9, 26);
-                if (data.length > 0 && (data != "error"))
+                if (data != "error")
                 {
                     if (MACD_info.hasOwnProperty(market) === false) { MACD_info[market] = {}; }
-                    MACD_info[market][key] = data;
+                    if (data.length > 0) { MACD_info[market][key] = data; }
                 }
                 data = [];
                 //console.log("First Init ==> MACD_info[", market, "][", key, "] MACD_info = ", JSON.stringify(MACD_info[market][key]));
@@ -293,8 +370,18 @@ async function register_MACD_Timers(plist)
 
             // create timer
             timerID_info[market][key] = setInterval(async function () {
-                data = await get_MACD(market, timeval, timerID_Minval[key], 9, 26);
-                if (data.length > 0 && (data != "error")) { MACD_info[market][key] = data; }
+                try {
+                    data = await get_MACD(market, timeval, timerID_Minval[key], 9, 26);
+                    if (data != "error")
+                    {
+                        if (data.length > 0) { MACD_info[market][key] = data; }
+                    }
+                    else { console.log("MACD Error = ", data); }
+                }
+                catch (error)
+                {
+                    console.log("MACD Error Catch = ", error);
+                }
                 //Save_JSON_file(MACD_info, "./output/macd_infomation");
             }, timerID_Minval[key] * MACD_Period);
             //console.log("TimerID_info[", market, "][", key, "] = ", timerID_info[market][key]);
@@ -315,7 +402,7 @@ async function smart_coin_trader()
 
     // 1. Initialize Portfolio DB
     await register_trade_markets();
-
+    //return;
     // 2. make MACD Information.
     await register_MACD_Timers(portfolio_list);
 
@@ -588,6 +675,9 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
         new_slot['last_bidask_info']['timetick'] = current;
         new_slot['last_bidask_info']['tr_price'] = current_price; 
         slots.push(JSON.parse(JSON.stringify(new_slot)));
+        
+        Save_JSON_file(portfolio_info, "./output_backup/portfoilio");
+        Save_JSON_latest_file(portfolio_info, "./output/portfoilio");
 
         // Update last_bidask_info : this is basic routine... To find the lowest bid price, search all slots and bids price and compare it with for loop.
         if(portfolio_info[market][marketID]['last_bidask_info']['tr_price'] == 0 
@@ -713,13 +803,16 @@ async function add_bid_to_slot(market, marketID, current, priceinfo)
 
                     // bid information
                     new_bid['order_info'] = orderinfo;
-                    new_bid['deadline'] = new Date(Date.now() + expiredtime); // cur = new Date();
-                    //new_bid['deadline'] = moment(current).add(24, 'Hour');
+                    new_bid['deadline'] = new Date(Date.now() + expiredtime); 
                     new_bid['price_info'] = priceinfo; 
                     new_bid['amount'] = bid_sum;
                     new_bid['invest_KRW'] = bid_sum * current_price;
                     new_bid['status'] = orderinfo['state'];
                     slots[i]['add_bid'].push(new_bid);
+
+                    Save_JSON_file(portfolio_info, "./output_backup/portfoilio");
+                    Save_JSON_latest_file(portfolio_info, "./output/portfoilio");
+
                     //console.log("[", market, "][", marketID, "][", i, "][", j, "] Amount = ", bid_sum, " ################### Additional Bid is added ################################");
 
                     // Update last_bidask_info : this is basic routine... To find the lowest bid price, search all slots and bids price and compare it with for loop.
@@ -756,6 +849,7 @@ async function ask_sellCoin_buyKRW(market, marketID, current, priceinfo)
         let average = cur_slot_statics['average_withfeee'];
         let sum_invest_KRW = cur_slot_statics['sum_invest_KRW'];
         let cur_eval_net_KRW = cur_slot_statics['cur_eval_net_KRW'];
+        let save_DB = false;
 
         if((cur_eval_net_ratio*100) > target) 
         {
@@ -776,9 +870,9 @@ async function ask_sellCoin_buyKRW(market, marketID, current, priceinfo)
                 slots[i]['liquidation_orderinfo'] = orderinfo;
                 let liquidData = slots[i];
                 liquidData['config'] = config;
-                //liquidation_DB[market][marketID].push(slots[i]);
                 liquidation_DB[market][marketID].push(liquidData);
                 slots.splice(i, 1);
+                save_DB = true;
                 // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
                 // config['restart_flag'] == 0 일경우 slots이 모두 청산되었을때 slot을 생성하지 않는 stop 상태(idle)로 대기해야 함.
                 if (i == 0) // Slots이 모두 청산되었을 경우
@@ -809,9 +903,9 @@ async function ask_sellCoin_buyKRW(market, marketID, current, priceinfo)
                         slots[i]['liquidation_orderinfo'] = orderinfo;
                         let liquidData = slots[i];
                         liquidData['config'] = config;
-                        //liquidation_DB[market][marketID].push(slots[i]);
                         liquidation_DB[market][marketID].push(liquidData);
                         slots.splice(i, 1);
+                        save_DB = true;
                         // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
                         if (i == 0) // Slots이 모두 청산되었을 경우 
                         {
@@ -839,6 +933,7 @@ async function ask_sellCoin_buyKRW(market, marketID, current, priceinfo)
                             liquidData['config'] = config;
                             liquidation_DB[market][marketID].push(liquidData);
                             slots.splice(i, 1);
+                            save_DB = true;
                             // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
                             if (i == 0) // Slots이 모두 청산되었을 경우
                             {
@@ -855,6 +950,13 @@ async function ask_sellCoin_buyKRW(market, marketID, current, priceinfo)
                     }
                 }
                 else { console.log("[", market, "][", marketID, "][slots", i, "] **********Check Balance ERROR************"); orderinfo = { 'error' : { 'message' : "User define error" } } }
+            }
+            if (save_DB === true)
+            {
+                Save_JSON_file(liquidation_DB, "./output_backup/Normal_Liquidation_History");
+                Save_JSON_latest_file(liquidation_DB, "./output/Normal_Liquidation_History");
+                Save_JSON_file(portfolio_info, "./output_backup/portfoilio");
+                Save_JSON_latest_file(portfolio_info, "./output/portfoilio");
             }
         }
     }
@@ -920,7 +1022,7 @@ async function update_Normal_TrInfo_Statics(market, marketID, priceinfo)
     }
     //console.log("#####################[Static Information]######################################");
     //console.log("Statics[", market, "][", marketID, "] = ", JSON.stringify(portfolio_info));
-    if(filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output/portfoilio"); }
+    //if (filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output_backup/portfoilio"); Save_JSON_latest_file(portfolio_info, "./output/portfoilio");}
 }
 
 
@@ -1087,6 +1189,9 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
         new_slot['add_ask'].push(new_ask);
         //console.log("[", market, "][", marketID, "] ################### New Slot - 1st Ask is added ################################");
 
+        Save_JSON_file(portfolio_info, "./output_backup/portfoilio");
+        Save_JSON_latest_file(portfolio_info, "./output/portfoilio");
+
         // check bid status : wait / done / 
         new_slot['last_bidask_info']['timetick'] = current;
         new_slot['last_bidask_info']['tr_price'] = current_price; 
@@ -1217,6 +1322,9 @@ async function add_ask_to_slot(market, marketID, current, priceinfo)
                     slots[i]['add_ask'].push(new_ask);
                     //console.log("[", market, "][", marketID, "][", i, "][", j, "] Amount = ", new_ask['amount'], " ################### Additional Ask is added ################################");
 
+                    Save_JSON_file(portfolio_info, "./output_backup/portfoilio");
+                    Save_JSON_latest_file(portfolio_info, "./output/portfoilio");
+
                     // Update last_bidask_info : this is basic routine... To find the lowest bid price, search all slots and bids price and compare it with for loop.
                     slots[i]['last_bidask_info']['timetick'] = current;
                     slots[i]['last_bidask_info']['tr_price'] = current_price;
@@ -1294,7 +1402,7 @@ async function update_Reverse_TrInfo_Statics(market, marketID, priceinfo)
     }
     //console.log("#####################[Static Information]######################################");
     //console.log("Statics[", market, "][", marketID, "] = ", JSON.stringify(portfolio_info));
-    if (filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output/portfoilio"); }
+    //if (filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output_backup/portfoilio"); Save_JSON_latest_file(portfolio_info, "./output/portfoilio");}
 }
 
 
@@ -1310,6 +1418,7 @@ async function bid_sellKRW_buyCoin(market, marketID, current, priceinfo)
 
     for(i = 0; i < slots.length; i++)
     {
+        let save_DB = false;
         let cur_slot_statics = slots[i]['statics'];
         let average = cur_slot_statics['average_withfee'];
         let cur_eval_net_Coin = cur_slot_statics['cur_eval_net_Coin'];
@@ -1345,6 +1454,7 @@ async function bid_sellKRW_buyCoin(market, marketID, current, priceinfo)
                 increaseData['config'] = config;
                 increasecoin_DB[market][marketID].push(increaseData);
                 slots.splice(i, 1);
+                save_DB = true;
 
                 // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
                 if (i == 0) // Slots이 모두 청산되었을 경우
@@ -1380,6 +1490,7 @@ async function bid_sellKRW_buyCoin(market, marketID, current, priceinfo)
                         increaseData['config'] = config;
                         increasecoin_DB[market][marketID].push(increaseData);
                         slots.splice(i, 1);
+                        save_DB = true;
 
                         // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
                         if (i == 0) // Slots이 모두 청산되었을 경우
@@ -1411,6 +1522,7 @@ async function bid_sellKRW_buyCoin(market, marketID, current, priceinfo)
                             increaseData['config'] = config;
                             increasecoin_DB[market][marketID].push(increaseData);
                             slots.splice(i, 1);
+                            save_DB = true;
 
                             // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
                             if (i == 0) // Slots이 모두 청산되었을 경우
@@ -1431,6 +1543,13 @@ async function bid_sellKRW_buyCoin(market, marketID, current, priceinfo)
                 {
                     console.log("[", market, "][", marketID, "][slots", i, "] **********Check Balance ERROR************"); orderinfo = { 'error': { 'message': "User define error" } }
                 }
+            }
+            if (save_DB === true)
+            {
+                Save_JSON_file(increasecoin_DB, "./output_backup/Reverse_IncreaseCoin_History");
+                Save_JSON_latest_file(increasecoin_DB, "./output/Reverse_IncreaseCoin_History");
+                Save_JSON_file(portfolio_info, "./output_backup/portfoilio");
+                Save_JSON_latest_file(portfolio_info, "./output/portfoilio");
             }
         }
     }
@@ -1471,6 +1590,8 @@ async function cancel_oldorders(market, marketID, current)
                     upbit.cancel_orders(cancel_uuid);   // need to do exception handling
                 }
                 cancel_orderlist[market][marketID].push(cancel);
+                Save_JSON_file(cancel_orderlist, "./output_backup/cancel_orderlist");
+                Save_JSON_latest_file(cancel_orderlist, "./output/cancel_orderlist");
                 console.log("[", market, "][", marketID, "] Cancel time = ", current, " Cancel uuid = ", cancel_uuid)
             }
         }
@@ -1766,7 +1887,7 @@ function Load_JsonDB(filename)
             }
             else
             {
-                console.log("Can't find ", filename, " config file, use default settings"); resolve(portfolio_info[market][marketID]['config']);
+                console.log("Can't find ", filename, " file, retunr 'error'"); resolve("error");
             }  // file read 실패시 기존값 return함.
         });
     });
