@@ -676,8 +676,8 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
         new_slot['last_bidask_info']['tr_price'] = current_price; 
         slots.push(JSON.parse(JSON.stringify(new_slot)));
         
-        Save_JSON_file(portfolio_info, "./output_backup/portfoilio");
-        Save_JSON_latest_file(portfolio_info, "./output/portfoilio");
+        Save_JSON_file(portfolio_info, "./output_backup/portfolio");
+        Save_JSON_latest_file(portfolio_info, "./output/portfolio");
 
         // Update last_bidask_info : this is basic routine... To find the lowest bid price, search all slots and bids price and compare it with for loop.
         if(portfolio_info[market][marketID]['last_bidask_info']['tr_price'] == 0 
@@ -810,8 +810,8 @@ async function add_bid_to_slot(market, marketID, current, priceinfo)
                     new_bid['status'] = orderinfo['state'];
                     slots[i]['add_bid'].push(new_bid);
 
-                    Save_JSON_file(portfolio_info, "./output_backup/portfoilio");
-                    Save_JSON_latest_file(portfolio_info, "./output/portfoilio");
+                    Save_JSON_file(portfolio_info, "./output_backup/portfolio");
+                    Save_JSON_latest_file(portfolio_info, "./output/portfolio");
 
                     //console.log("[", market, "][", marketID, "][", i, "][", j, "] Amount = ", bid_sum, " ################### Additional Bid is added ################################");
 
@@ -955,8 +955,8 @@ async function ask_sellCoin_buyKRW(market, marketID, current, priceinfo)
             {
                 Save_JSON_file(liquidation_DB, "./output_backup/Normal_Liquidation_History");
                 Save_JSON_latest_file(liquidation_DB, "./output/Normal_Liquidation_History");
-                Save_JSON_file(portfolio_info, "./output_backup/portfoilio");
-                Save_JSON_latest_file(portfolio_info, "./output/portfoilio");
+                Save_JSON_file(portfolio_info, "./output_backup/portfolio");
+                Save_JSON_latest_file(portfolio_info, "./output/portfolio");
             }
         }
     }
@@ -1022,7 +1022,7 @@ async function update_Normal_TrInfo_Statics(market, marketID, priceinfo)
     }
     //console.log("#####################[Static Information]######################################");
     //console.log("Statics[", market, "][", marketID, "] = ", JSON.stringify(portfolio_info));
-    //if (filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output_backup/portfoilio"); Save_JSON_latest_file(portfolio_info, "./output/portfoilio");}
+    //if (filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output_backup/portfolio"); Save_JSON_latest_file(portfolio_info, "./output/portfolio");}
 }
 
 
@@ -1189,8 +1189,8 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
         new_slot['add_ask'].push(new_ask);
         //console.log("[", market, "][", marketID, "] ################### New Slot - 1st Ask is added ################################");
 
-        Save_JSON_file(portfolio_info, "./output_backup/portfoilio");
-        Save_JSON_latest_file(portfolio_info, "./output/portfoilio");
+        Save_JSON_file(portfolio_info, "./output_backup/portfolio");
+        Save_JSON_latest_file(portfolio_info, "./output/portfolio");
 
         // check bid status : wait / done / 
         new_slot['last_bidask_info']['timetick'] = current;
@@ -1322,8 +1322,8 @@ async function add_ask_to_slot(market, marketID, current, priceinfo)
                     slots[i]['add_ask'].push(new_ask);
                     //console.log("[", market, "][", marketID, "][", i, "][", j, "] Amount = ", new_ask['amount'], " ################### Additional Ask is added ################################");
 
-                    Save_JSON_file(portfolio_info, "./output_backup/portfoilio");
-                    Save_JSON_latest_file(portfolio_info, "./output/portfoilio");
+                    Save_JSON_file(portfolio_info, "./output_backup/portfolio");
+                    Save_JSON_latest_file(portfolio_info, "./output/portfolio");
 
                     // Update last_bidask_info : this is basic routine... To find the lowest bid price, search all slots and bids price and compare it with for loop.
                     slots[i]['last_bidask_info']['timetick'] = current;
@@ -1402,7 +1402,7 @@ async function update_Reverse_TrInfo_Statics(market, marketID, priceinfo)
     }
     //console.log("#####################[Static Information]######################################");
     //console.log("Statics[", market, "][", marketID, "] = ", JSON.stringify(portfolio_info));
-    //if (filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output_backup/portfoilio"); Save_JSON_latest_file(portfolio_info, "./output/portfoilio");}
+    //if (filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output_backup/portfolio"); Save_JSON_latest_file(portfolio_info, "./output/portfolio");}
 }
 
 
@@ -1548,8 +1548,8 @@ async function bid_sellKRW_buyCoin(market, marketID, current, priceinfo)
             {
                 Save_JSON_file(increasecoin_DB, "./output_backup/Reverse_IncreaseCoin_History");
                 Save_JSON_latest_file(increasecoin_DB, "./output/Reverse_IncreaseCoin_History");
-                Save_JSON_file(portfolio_info, "./output_backup/portfoilio");
-                Save_JSON_latest_file(portfolio_info, "./output/portfoilio");
+                Save_JSON_file(portfolio_info, "./output_backup/portfolio");
+                Save_JSON_latest_file(portfolio_info, "./output/portfolio");
             }
         }
     }
