@@ -31,7 +31,7 @@ var EOS_Small_Gap = {
     simulation: false,
     real_test_mode: false,
     check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    slot_Ask_Coin: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+    slot_Ask_Coin: [50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
     //    slot_1st_Ask_Coin: 50,   //* fisrt investment coint (unit : EA)
     //    slot_2nd_Ask_Coin: 100,  //* after 1st slot, investment coin (unit : EA)
     max_slot_cnt: 100,          //* The limitation number of creating slots (unit : EA) 

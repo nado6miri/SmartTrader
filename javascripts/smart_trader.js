@@ -1769,12 +1769,16 @@ async function disiplay_statics(current, price_infoDB)
             }
         }
 
+        let sum_org_KRW = {};
+        let sum_net_KRW = {};
         for (market in price_infoDB)
         {
-            let sum_org_KRW = 0;
-            let sum_net_KRW = 0;
+            if (sum_org_KRW.hasOwnProperty(market) === false) { sum_org_KRW[market] = {}; }
+            if (sum_net_KRW.hasOwnProperty(market) === false) { sum_net_KRW[market] = {}; }
             for (marketID in price_infoDB[market])
             {
+                if (sum_org_KRW[market].hasOwnProperty(marketID) === false) { sum_org_KRW[market][marketID] = 0; }
+                if (sum_net_KRW[market].hasOwnProperty(marketID) === false) { sum_net_KRW[market][marketID] = 0; }
                 if (portfolio_info[market][marketID]['config']['trade_mode'] !== "normal") { continue; }
                 let liquid_history = liquidation_DB[market][marketID];
                 console.log("***************************************** Liquidation   History(", liquid_history.length, ") **************************************************************** ")
@@ -1783,8 +1787,8 @@ async function disiplay_statics(current, price_infoDB)
                 {
                     let statics = liquid_history[i]['statics'];
                     let orderinfo = liquid_history[i]['liquidation_orderinfo'];
-                    sum_org_KRW += statics['sum_invest_KRW_withfee'];
-                    sum_net_KRW += statics['cur_eval_net_KRW'];
+                    sum_org_KRW[market][marketID] += statics['sum_invest_KRW_withfee'];
+                    sum_net_KRW[market][marketID] += statics['cur_eval_net_KRW'];
                     if (i < 5)
                     {
                         console.log("[N][", market, "][", marketID, "][ Slot", i, "] 매도 Coin 가격 =", statics['current_price'],
@@ -1792,24 +1796,28 @@ async function disiplay_statics(current, price_infoDB)
                             statics['cur_eval_net_ratio'].toFixed(2)*100, "%, 이익금액(KRW) = ", statics['cur_eval_net_KRW'].toFixed(2));
                     }
                 }
-                let cur_total_KRW = sum_org_KRW + sum_net_KRW;
-                let net_ratio = (sum_net_KRW / (sum_org_KRW+0.000001)) * 100;
+                let cur_total_KRW = sum_org_KRW[market][marketID] + sum_net_KRW[market][marketID];
+                let net_ratio = (sum_net_KRW[market][marketID] / (sum_org_KRW[market][marketID]+0.000001)) * 100;
                 net_ratio = net_ratio.toFixed(2) *1;
                 cur_total_KRW = cur_total_KRW.toFixed(2) * 1;
                 console.log("=====================================================================================================================================");
-                console.log("[", market, "][", marketID, "] 총 투자금액(KRW) = ", sum_org_KRW.toFixed(2), ", 현 평가 금액(KRW) = ", cur_total_KRW,
-                    ", 이익금액(KRW) = ", sum_net_KRW.toFixed(2), ", 원화 이익율 = ", net_ratio, "%");
+                console.log("[", market, "][", marketID, "] 총 투자금액(KRW) = ", sum_org_KRW[market][marketID].toFixed(2), ", 현 평가 금액(KRW) = ", cur_total_KRW,
+                    ", 이익금액(KRW) = ", sum_net_KRW[market][marketID].toFixed(2), ", 원화 이익율 = ", net_ratio, "%");
                 console.log("=====================================================================================================================================");
                 console.log("\n")
             }
         }
 
+        let sum_org_coin = {};
+        let sum_net_coin = {};
         for (market in price_infoDB)
         {
-            let sum_org_coin = 0;
-            let sum_net_coin = 0;
+            if (sum_org_coin.hasOwnProperty(market) === false) { sum_org_coin[market] = {}; }
+            if (sum_net_coin.hasOwnProperty(market) === false) { sum_net_coin[market] = {}; }
             for (marketID in price_infoDB[market])
             {
+                if (sum_org_coin[market].hasOwnProperty(marketID) === false) { sum_org_coin[market][marketID] = 0; }
+                if (sum_net_coin[market].hasOwnProperty(marketID) === false) { sum_net_coin[market][marketID] = 0; }
                 if (portfolio_info[market][marketID]['config']['trade_mode'] !== "reverse") { continue; }
                 let increasecoin_history = increasecoin_DB[market][marketID];
                 console.log("***************************************** Increase Coin History(", increasecoin_history.length, ") **************************************************************** ");
@@ -1818,8 +1826,8 @@ async function disiplay_statics(current, price_infoDB)
                 {
                     let statics = increasecoin_history[i]['statics'];
                     let orderinfo = increasecoin_history[i]['increasecoin_orderinfo'];
-                    sum_org_coin += statics['sum_amount_done'];
-                    sum_net_coin += statics['cur_eval_net_Coin'];
+                    sum_org_coin[market][marketID] += statics['sum_amount_done'];
+                    sum_net_coin[market][marketID] += statics['cur_eval_net_Coin'];
 
                     if (i < 5)
                     {
@@ -1828,13 +1836,13 @@ async function disiplay_statics(current, price_infoDB)
                             ", 이익율 = ", statics['cur_eval_net_ratio'].toFixed(2)*100, "%,  Coin 증가개수 = ", statics['cur_eval_net_Coin'].toFixed(2));
                     }
                 }
-                let cur_total_coin = sum_org_coin + sum_net_coin;
-                let net_ratio = (sum_net_coin / (sum_org_coin+0.000001)) * 100;
+                let cur_total_coin = sum_org_coin[market][marketID] + sum_net_coin[market][marketID];
+                let net_ratio = (sum_net_coin[market][marketID] / (sum_org_coin[market][marketID]+0.000001)) * 100;
                 net_ratio = net_ratio.toFixed(2)*1;
                 cur_total_coin = cur_total_coin.toFixed(2) * 1;
                 console.log("=====================================================================================================================================");
-                console.log("[", market, "][", marketID, "] 매도 Coin 합계 = ", sum_org_coin.toFixed(2), ", 재매수 Coin 합계 = ", cur_total_coin,
-                    ", Coin 증가 = ", sum_net_coin.toFixed(2), ", 이익율 = ", net_ratio, "%");
+                console.log("[", market, "][", marketID, "] 매도 Coin 합계 = ", sum_org_coin[market][marketID].toFixed(2), ", 재매수 Coin 합계 = ", cur_total_coin,
+                    ", Coin 증가 = ", sum_net_coin[market][marketID].toFixed(2), ", 이익율 = ", net_ratio, "%");
                 console.log("=====================================================================================================================================");
                 console.log("\n")
             }
