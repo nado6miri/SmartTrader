@@ -249,7 +249,7 @@ async function register_trade_markets()
             }
         }
         //console.log("portfolio_info = ", JSON.stringify(portfolio_info));
-
+        /*
         // 4) etc
         for (key in portfolio_list)
         {
@@ -270,6 +270,7 @@ async function register_trade_markets()
 
             getPrice[market][marketID] = price_generator(portfolio_list[key][2], portfolio_list[key][3], portfolio_list[key][4], portfolio_list[key][5], portfolio_list[key][6]);
         }
+        */
     }
     else // 3. resume mode가 아니면 처음 신규로 DB 초기화 하고 Trade를 시작한다.
     {
