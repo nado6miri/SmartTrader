@@ -15,7 +15,6 @@ var sellcoin_count = {}; // reverse mode에서 현재까지 매도된 coin 수�
 var total_invest_KRW = {}; // normal mode에서 현재까지 매수/투자된 KRW 합
 const trade_fee = {}; // { MARKET : { ASK : 0.05, BID : 0.05 } }
 
-var filesave_count = 0;
 const filesave_period = 12; // check_period * count = 5sec * 12 = 60sec
 var expired_chk_count = 0;
 const expired_chk_period = 12; // check_period * count = 5sec * 12 = 60sec
@@ -497,7 +496,6 @@ async function smart_coin_trader()
 
                     // expired 된 거래에 대해 취소여부를 결정하고 취소/유지 처리를 한다. 
                     if (expired_chk_count >= expired_chk_period) { fexpired_chk_count = 0; await cancel_oldorders(market, marketID, current); }
-                    filesave_count++;
                     expired_chk_count++;
                 }
             }
@@ -537,8 +535,8 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
             {
                 console.log("[N][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is 1, config['restart_base_price'] = ", config['restart_base_price']);
                 // 첫 생성된 slot의 가격보다 현재 가격이 상승해서 청산될 경우... idle 모드로 대기 후 가격이 설정한 매입가 기준 아래로 내려가면 신규 slot을 생성하여 코인을 매수함.
-                if (current_price < config['restart_base_price']) { portfolio_info[market][marketID]['idle'] = false; }
-                else { portfolio_info[market][marketID]['idle'] = true; return; }
+                if (current_price >= config['restart_base_price']) { portfolio_info[market][marketID]['idle'] = true; return; }
+                else { portfolio_info[market][marketID]['idle'] = false; }
             }
             else if (config['restart_flag'] == 2)
             {
@@ -546,12 +544,15 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
                 console.log("[N][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is 2, last_bidask_price = ", last_bidask_price);
                 portfolio_info[market][marketID]['idle'] = false;
             }
+            else if (config['restart_flag'] == 3)
+            {
+                // auto repeat mode..... : 가격이 올라갈때 slot을 하나 생성해서 익절을 하고 slot이 다시 0되면 다시 매수하고 이를 반복하다 고점에서 가격이 내리면 slot을 생성하면서 매입하기 때문에 손해가 큼... (테스트 결과)
+                console.log("[N][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is 3, config['restart_base_price'] = ", config['restart_base_price']);
+                portfolio_info[market][marketID]['idle'] = false;
+            }
             else
             {
-                console.log("[N][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is 1, config['restart_base_price'] = ", config['restart_base_price']);
-                // 첫 생성된 slot의 가격보다 현재 가격이 상승해서 청산될 경우... idle 모드로 대기 후 가격이 설정한 매입가 기준 아래로 내려가면 신규 slot을 생성하여 코인을 매수함.
-                if (current_price < config['restart_base_price']) { portfolio_info[market][marketID]['idle'] = false; }
-                else { portfolio_info[market][marketID]['idle'] = true; return; }
+                console.log("[N][", market, "][", marketID, "]Error == Please set restart_flag vaule!!!");
             }
         }
         else
@@ -570,9 +571,13 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
     if (slots.length === 0)
     {
         new_slot['type'] = "first";
+
         new_bid['amount'] = portfolio_info[market][marketID]['config']['slot_Bid_KRW'][0]*1000 / current_price; //priceinfo['trade_price'];
         new_bid['amount'] = 1 * new_bid['amount'].toFixed(6);
-        new_bid['invest_KRW'] = portfolio_info[market][marketID]['config']['slot_Bid_KRW'][0]*1000;
+        new_bid['invest_KRW'] = portfolio_info[market][marketID]['config']['slot_Bid_KRW'][0] * 1000;
+
+        //if (config['restart_flag'] == 3 && current >= config['restart_base_price']) { new_bid['amount'] = new_bid['amount'] * 2; new_bid['invest_KRW'] = new_bid['invest_KRW'] * 2; }
+
         //console.log("[", market, "][", marketID, "] Create New 1st Slots. Price = ", current_price);
         if (new_bid['invest_KRW'] >= config['limit_invest_KRW']) { return; }
     }
@@ -588,6 +593,12 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
         if((total_invest_KRW[market][marketID] + new_bid['invest_KRW']) >= config['limit_invest_KRW'])
         {
             //console.log("[Create New Slots] == (total_invest_KRW[market][marketID] + orderinfo['invest_KRW']) >= limit_invest_KRW");
+            return;
+        }
+
+        if (config['restart_flag'] == 3 && current_price >= config['restart_base_price'])
+        {
+            //console.log("[N][", market, "][", marketID, "] config['restart_flag'] == 3 && current_price >= config['restart_base_price'](", config['restart_base_price'], ") - Limit slot count = 1");
             return;
         }
     }
@@ -707,9 +718,16 @@ async function add_bid_to_slot(market, marketID, current, priceinfo)
     let slots = portfolio_info[market][marketID]['slots'];
     let config = portfolio_info[market][marketID]['config'];
     let current_price = priceinfo['trade_price'];
-
     let i = 0, j = 0;
-    for(i = 0; i < slots.length; i++)
+
+    if (config['restart_flag'] == 3 && current_price >= config['restart_base_price'])
+    {
+        //console.log("[N][", market, "][", marketID, "] config['restart_flag'] == 3 && current_price >= config['restart_base_price'](", config['restart_base_price'], ") - Limit bidask count = 1");
+        return;
+    }
+
+
+    for (i = 0; i < slots.length; i++)
     {
         let bid_sum = 0;
         let last_bidask_price = slots[i]['last_bidask_info']['tr_price'];
@@ -1002,9 +1020,6 @@ async function update_Normal_TrInfo_Statics(market, marketID, priceinfo)
         statics['cur_eval_net_KRW'] = statics['cur_eval_net_ratio'] * statics['sum_invest_KRW_withfee'];
         slots[i]['statics'] = statics;
     }
-    //console.log("#####################[Static Information]######################################");
-    //console.log("Statics[", market, "][", marketID, "] = ", JSON.stringify(portfolio_info));
-    //if (filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output_backup/portfolio"); Save_JSON_latest_file(portfolio_info, "./output/portfolio");}
 }
 
 
@@ -1047,8 +1062,8 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
             {
                 console.log("[R][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is 1, go to Idle state!!, restart_base_price = ", config['restart_base_price']);
                 // 첫 생성된 slot의 가격보다 현재 가격이 하락해서 청산될 경우... 코인을 매도하지 않고 idle 모드로 가면서 가격이 청산한 가격(last_bidask_price) 이상으로 올라오면 신규 slot을 생성.
-                if (current_price > config['restart_base_price']) { portfolio_info[market][marketID]['idle'] = false; }
-                else { portfolio_info[market][marketID]['idle'] = true; return; }
+                if (current_price < config['restart_base_price']) { portfolio_info[market][marketID]['idle'] = true; return; }
+                else { portfolio_info[market][marketID]['idle'] = false; }
             }
             else if (config['restart_flag'] == 2)
             {
@@ -1056,12 +1071,15 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
                 console.log("[R][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is 2, last_bidask_price = ", last_bidask_price);
                 portfolio_info[market][marketID]['idle'] = false;
             }
-            else // restart_flag 0과 비슷한 동작이나 코인을 구매한 평단가 밑에서는 코인을 팔지 않고 평단가 위에서만 코인을 매도 하는 방식 (코인 평단가 지정해 줘야 함.)
+            else if (config['restart_flag'] == 3) // 1과 2를 혼합한 최종 가고자 하는 방향 : 기본 동작은 2와 같이 하지만 base price 이하에서는 slot  / bidask 갯수를 1로 제한함.
             {
-                console.log("[R][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is greater than 2, go to Idle state!!, restart_base_price = ", config['restart_base_price']);
-                // 첫 생성된 slot의 가격보다 현재 가격이 하락해서 청산될 경우... 코인을 매도하지 않고 idle 모드로 가면서 가격이 청산한 가격(last_bidask_price) 이상으로 올라오면 신규 slot을 생성.
-                if (current_price > config['restart_base_price']) { portfolio_info[market][marketID]['idle'] = false; }
-                else { portfolio_info[market][marketID]['idle'] = true; return; }
+                // auto repeat mode..... : 내려갈때 slot을 하나씩 생성해서 팔고 다시 0되면 다시 팔고를 반복하다 저점에서 오르면 slot을 생성하면서 팔기 때문에 손해가 큼... (테스트 결과)
+                console.log("[R][", market, "][", marketID, "] Slot is Empty!! Auto Restart Flag is 3, restart_base_price = ", config['restart_base_price']);
+                portfolio_info[market][marketID]['idle'] = false;
+            }
+            else 
+            {
+                console.log("[R][", market, "][", marketID, "]Error == Please set restart_flag vaule!!!");
             }
         }
         else
@@ -1083,6 +1101,9 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
         new_ask['amount'] = portfolio_info[market][marketID]['config']['slot_Ask_Coin'][0]; 
         new_ask['amount'] = new_ask['amount'] * 1;  
         new_ask['amount'] = 1 * new_ask['amount'].toFixed(6);
+
+        //if (config['restart_flag'] == 3 && current_price < config['restart_base_price']) { new_ask['amount'] = new_ask['amount'] * 2; new_ask['invest_KRW'] = new_ask['invest_KRW'] * 2;  }
+
         //console.log("[", market, "][", marketID, "] Create New 1st Slots. Price = ", current_price);
         if (new_ask['amount'] >= config['limit_invest_coin']) { return; }
     }
@@ -1098,6 +1119,12 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
         if ((sellcoin_count[market][marketID] + new_ask['amount']) >= config['limit_invest_coin'])
         {
             //console.log("(sellcoin_count[market][marketID] + orderinfo['volume']) >= limit_invest_coin");
+            return;
+        }
+
+        if (config['restart_flag'] == 3 && current_price < config['restart_base_price'])
+        {
+            //console.log("[R][", market, "][", marketID, "] config['restart_flag'] == 3 && current_price < config['restart_base_price'](", config['restart_base_price'], ") - Limit slot count = 1");
             return;
         }
     }
@@ -1207,9 +1234,15 @@ async function add_ask_to_slot(market, marketID, current, priceinfo)
     let slots = portfolio_info[market][marketID]['slots'];
     let config = portfolio_info[market][marketID]['config'];
     let current_price = priceinfo['trade_price'];
-
     let i = 0, j = 0;
-    for(i = 0; i < slots.length; i++)
+
+    if (config['restart_flag'] == 3 && current_price < config['restart_base_price'])
+    {
+        //console.log("[R][", market, "][", marketID, "] config['restart_flag'] == 3 && current_price < config['restart_base_price'](", config['restart_base_price'], ") - Limit bidask count = 1");
+        return;
+    }
+
+    for (i = 0; i < slots.length; i++)
     {
         let ask_sum = 0;
         let last_bidask_price = slots[i]['last_bidask_info']['tr_price'];
@@ -1226,6 +1259,7 @@ async function add_ask_to_slot(market, marketID, current, priceinfo)
         if(ask.length >= config['max_addask_cnt']) 
         { 
             //console.log("[", market, "][", marketID, "][", i, "] ask.length(count) = ", ask.length, " j = ", j, " exceed max_addask_cnt[", config['max_addask_cnt'], "]" );
+            return;
         }
         else
         {
@@ -1390,9 +1424,6 @@ async function update_Reverse_TrInfo_Statics(market, marketID, priceinfo)
         statics['cur_eval_net_Coin'] = (statics['cur_eval_net_ratio'] * statics['sum_reclaim_KRW_withfee']) / current_price;    // 이익 코인 수 (증가량)
         slots[i]['statics'] = statics;
     }
-    //console.log("#####################[Static Information]######################################");
-    //console.log("Statics[", market, "][", marketID, "] = ", JSON.stringify(portfolio_info));
-    //if (filesave_count >= filesave_period) { filesave_count = 0; Save_JSON_file(portfolio_info, "./output_backup/portfolio"); Save_JSON_latest_file(portfolio_info, "./output/portfolio");}
 }
 
 
@@ -1839,13 +1870,14 @@ async function disiplay_statics(current, price_infoDB)
                 let liquid_history = liquidation_DB[market][marketID];
                 console.log("***************************************** Liquidation   History(", liquid_history.length, ") **************************************************************** ")
 
-                for (let i = 0; i < liquid_history.length; i++)
+                for (let i = liquid_history.length; i > 0; i--)
                 {
-                    let statics = liquid_history[i]['statics'];
-                    let orderinfo = liquid_history[i]['liquidation_orderinfo'];
+                    let statics = liquid_history[i-1]['statics'];
+                    let orderinfo = liquid_history[i-1]['liquidation_orderinfo'];
                     sum_org_KRW[market][marketID] += statics['sum_invest_KRW_withfee'];
                     sum_net_KRW[market][marketID] += statics['cur_eval_net_KRW'];
-                    if (i < 5)
+
+                    if (i > (liquid_history.length - 2))
                     {
                         console.log("[N][", market, "][", marketID, "][ Slot", i, "] 매도 Coin 가격 =", statics['current_price'],
                             " 매수 평단가 = ", statics['average_withfee'].toFixed(2), ", Coin 잔고 = ", statics['sum_amount_done'].toFixed(2), ", 이익율 = ",
@@ -1878,14 +1910,14 @@ async function disiplay_statics(current, price_infoDB)
                 let increasecoin_history = increasecoin_DB[market][marketID];
                 console.log("***************************************** Increase Coin History(", increasecoin_history.length, ") **************************************************************** ");
 
-                for (let i = 0; i < increasecoin_history.length; i++)
+                for (let i = increasecoin_history.length; i > 0; i--)
                 {
-                    let statics = increasecoin_history[i]['statics'];
-                    let orderinfo = increasecoin_history[i]['increasecoin_orderinfo'];
+                    let statics = increasecoin_history[i-1]['statics'];
+                    let orderinfo = increasecoin_history[i-1]['increasecoin_orderinfo'];
                     sum_org_coin[market][marketID] += statics['sum_amount_done'];
                     sum_net_coin[market][marketID] += statics['cur_eval_net_Coin'];
 
-                    if (i < 5)
+                    if (i > (increasecoin_history.length - 2))
                     {
                         console.log("[R][", market, "][", marketID, "][ Slot", i, "] Coin 매도평단가 = ", statics['average_withfee'].toFixed(2), ", 매도 Coin 수량 = ", 
                             statics['sum_amount_done'], ", 회수금액(KRW) = ", statics['sum_ask_KRW_withfee'].toFixed(2), ", 재매수 가격 = ", statics['current_price'],

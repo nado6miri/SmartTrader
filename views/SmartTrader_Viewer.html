@@ -1,0 +1,611 @@
+﻿/* html / jquery example */
+
+<style>
+    .tb_default {
+        width: 1100px;
+        border: 1px solid;
+    }
+    .linkarea {
+
+    }
+</style>
+
+<!-- tab style -->
+<style>
+    .tabWrap { width: 1000px; height: 700px; }
+    .tab_Menu { margin: 0px; padding: 0px; list-style: none; }
+    .tabMenu { width: 150px; margin: 0px; text-align: center;
+                padding-top: 10px; padding-bottom: 10px; float: left; }
+    .tabMenu a { color: #000000; font-weight: bold; text-decoration: none; }
+    .current { background-color: #FFFFFF;
+                border: 1px solid blue; border-bottom:hidden; }
+    .tabPage { width: 900px; height: 600px; float: left;
+                border: 1px solid blue; }
+</style>
+
+<!-- table style -->
+<style>
+    .custom_table {
+        width : 100%;
+        border-collapse : collapse;
+        border-spacing : 0px 0px;
+        border : 1px solid #7f7f7f;
+        text-align : center;
+    }
+
+    .custom_table th {
+        padding : 0px;
+        spacing : 0px;
+        border : 1px solid #7f7f7f;
+        text-align : center;
+    }
+    .custom_table td {
+        padding : 0px;
+        spacing : 0px;
+        border : 1px solid #7f7f7f;
+        text-align : center;
+    }
+    .custom_table tr {
+        padding : 0px;
+        spacing : 0px;
+        border : 1px solid #7f7f7f;
+        text-align : center;
+    }
+
+</style>
+
+<html>
+    <head>
+    <title></title>
+    <meta charset="utf-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <!-- for google chart -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    </head>
+    <body>
+        <table id="ConfigurationTable" classe=custom_table>
+            <thead id="ConfigurationTable_head">
+                <tr>
+                    <th colspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category1</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category2</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category3</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category4</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category5</th>
+                </tr>
+                <tr>
+                    <th colspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> market</th>
+                    <th id="market_category1"></th>
+                    <th id="market_category2"></th>
+                    <th id="market_category3"></th>
+                    <th id="market_category4"></th>
+                    <th id="market_category5"></th>
+                </tr>
+            </thead>
+            <tbody id="ConfigurationTable_body">
+                <tr id="max_slot_cnt">
+                    <td rowspan="11"> Config</td>
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="slot_1st_Bid_KRW">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="slot_2nd_Bid_KRW">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="check_period">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="retry_cnt">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="retry_delaysec">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="target_rate">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="target_rate_adj">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="new_slot_create_ratio">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="new_slot_create_ratio_adj">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="max_add_bid_cnt">
+                    <td> max_slot_cnt</td>
+                </tr>
+                <tr id="status">
+                    <td colspan="2"> status</td>
+                </tr>
+                <tr id="controlBtn">
+                    <td colspan="2">control Btn</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table id="ConfigTable" classe=custom_table>
+            <thead id="ConfigTable_head">
+                <tr>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 종목</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> ID</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 동작모드</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Algorithm</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 기준가격</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Status</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 동작주기</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> New Slot(%)</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Add BidAsk(%)</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 수익실현(%)</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Max Slot</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Max BidAsk</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> KRW 제한</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 제한</th>
+                    <th colspan="10" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 투입비중(KRW(천원) or Coin</th>
+                    <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 설정값적용</th>
+                </tr>
+                <tr>
+                    <th id="BidAsk0" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">0</th>
+                    <th id="BidAsk1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">1</th>
+                    <th id="BidAsk2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">2</th>
+                    <th id="BidAsk3" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">3</th>
+                    <th id="BidAsk4" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">4</th>
+                    <th id="BidAsk5" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">5</th>
+                    <th id="BidAsk6" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">6</th>
+                    <th id="BidAsk7" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">7</th>
+                    <th id="BidAsk8" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">8</th>
+                    <th id="BidAsk9" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">9</th>
+                </tr>
+            </thead>
+            <tbody id="ConfigTable_body">
+                <tr id="market_1">
+                    <!--
+                    <td>EOS</td><td>1</td><td>Reverse</td><td>run</td><td>15</td><td>2</td><td>10</td><td>1</td><td>30</td><td>5</td><td>10,000,000</td><td>1000</td><td>1</td><td>8,000</td>
+                    <td>20</td><td>20</td><td>20</td><td>20</td><td>20</td><td>20</td><td>20</td><td>20</td><td>20</td><td>20</td> -->
+                </tr>
+                <tr id="market_2">
+                </tr>
+                <tr id="market_3">
+                </tr>
+                <tr id="market_4">
+                </tr>
+            </tbody>
+        </table>
+    </body>
+</html>
+
+
+<!--
+    JQUERY : https://www.w3schools.com/jquery/default.asp
+    Jquery Selector
+    1. Element Selector : $("tag") - $("body"), $("p")
+    2. #id Selector : $("#idname") - $("#button1")
+    3. .class Selector : $(".classname") - $(".clsname")
+    $("*")	Selects all elements	
+    $(this)	Selects the current HTML element	
+    $("p.intro")	Selects all <p> elements with class="intro"	
+    $("p:first")	Selects the first <p> element	
+    $("ul li:first")	Selects the first <li> element of the first <ul>	
+    $("ul li:first-child")	Selects the first <li> element of every <ul>	
+    $("[href]")	Selects all elements with an href attribute	
+    $("a[target='_blank']")	Selects all <a> elements with a target attribute value equal to "_blank"	
+    $("a[target!='_blank']")	Selects all <a> elements with a target attribute value NOT equal to "_blank"	
+    $(":button")	Selects all <button> elements and <input> elements of type="button"	
+    $("tr:even")	Selects all even <tr> elements	
+    $("tr:odd")	    Selects all odd <tr> elements
+
+    object define
+    var obj = $('<tagname>')
+    obj.css().attr().attr()
+-->
+
+<script type="text/javascript">
+    //$(document).ready(function() {  // long syntax
+    $(function() {        // short syntax
+        CreateTable("ConfigurationTable_body", plistx, plisty);
+        CreateConfigTable("ConfigTable_body", xlabel, ylabel);
+    });
+
+    function buttton1_handler()
+    {
+        alert("Hello world!!!!");
+    }
+
+    function setDivLinks()
+    {
+        $('div.linkarea').each(function(){
+            let link = $(this).attr("clicklink");
+            if(link != undefined && link != "")
+            {
+                $(this).css("cursor", "pointer").click(function(){
+                    window.open($(this).attr("clicklink"));
+                })
+            }
+        });
+    }
+
+
+    var plistx = [ "P1", "P2", "P3", "P4", "P5" ];
+    var plisty = [ "max_slot_cnt", "slot_1st_Bid_KRW", "slot_2nd_Bid_KRW", "check_period", "retry_cnt", "retry_delaysec", "target_rate", "target_rate_adj", "new_slot_create_ratio", "new_slot_create_ratio_adj", "max_add_bid_cnt", "status", "controlBtn" ];
+    let portflist = ["menu0", "menu1", "menu2", "menu3", "menu4" ];
+    let slotcnt = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10" ];
+
+    function CreateTable(table_bodyID, xlabel, ylabel)
+    {
+        var index = 0;
+        var selecterID = "#" + table_bodyID + " > tr";
+        //alert(selecterID);
+        $(selecterID).each(function () {
+        //$("#ConfigurationTable_body > tr").each(function () {
+            createTds(index++, $(this), xlabel, ylabel);
+        });
+
+        makeListBox("#market_category1", "portf1", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
+        makeListBox("#market_category2", "portf2", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
+        makeListBox("#market_category3", "portf3", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
+        makeListBox("#market_category4", "portf4", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
+        makeListBox("#market_category5", "portf5", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
+
+        makeListBox("#Cell_max_slot_cnt_P1", "slotcnt1", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
+        makeListBox("#Cell_max_slot_cnt_P2", "slotcnt2", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
+        makeListBox("#Cell_max_slot_cnt_P3", "slotcnt3", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
+        makeListBox("#Cell_max_slot_cnt_P4", "slotcnt4", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
+        makeListBox("#Cell_max_slot_cnt_P5", "slotcnt5", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
+
+        //function makeInputBox(ParentID, ID, type, defaultval, classID, style, callback)
+        makeInputBox("#Cell_slot_1st_Bid_KRW_P1", "firstbidKRW1", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_slot_1st_Bid_KRW_P2", "firstbidKRW2", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_slot_1st_Bid_KRW_P3", "firstbidKRW3", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_slot_1st_Bid_KRW_P4", "firstbidKRW4", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_slot_1st_Bid_KRW_P5", "firstbidKRW5", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+
+        makeInputBox("#Cell_slot_2nd_Bid_KRW_P1", "secondbidKRW1", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 100, InputBoxHandler);
+        makeInputBox("#Cell_slot_2nd_Bid_KRW_P2", "secondbidKRW2", "number", 5000, "css_style1", "width: 100px", 5000, 100000, 100, InputBoxHandler);
+        makeInputBox("#Cell_slot_2nd_Bid_KRW_P3", "secondbidKRW3", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 100, InputBoxHandler);
+        makeInputBox("#Cell_slot_2nd_Bid_KRW_P4", "secondbidKRW4", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 100, InputBoxHandler);
+        makeInputBox("#Cell_slot_2nd_Bid_KRW_P5", "secondbidKRW5", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 100, InputBoxHandler);
+
+
+        makeInputBox("#Cell_check_period_P1", "checkperiod1", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
+        makeInputBox("#Cell_check_period_P2", "checkperiod2", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
+        makeInputBox("#Cell_check_period_P3", "checkperiod3", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
+        makeInputBox("#Cell_check_period_P4", "checkperiod4", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
+        makeInputBox("#Cell_check_period_P5", "checkperiod5", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
+
+
+        makeInputBox("#Cell_retry_cnt_P1", "retrycnt1", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_cnt_P2", "retrycnt2", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_cnt_P3", "retrycnt3", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_cnt_P4", "retrycnt4", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_cnt_P5", "retrycnt5", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+
+        makeInputBox("#Cell_retry_delaysec_P1", "retry_delaysec1", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_delaysec_P2", "retry_delaysec2", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_delaysec_P3", "retry_delaysec3", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_delaysec_P4", "retry_delaysec4", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
+        makeInputBox("#Cell_retry_delaysec_P5", "retry_delaysec5", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
+
+        makeInputBox("#Cell_target_rate_P1", "target_rate1", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_P2", "target_rate2", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_P3", "target_rate3", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_P4", "target_rate4", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_P5", "target_rate5", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+
+        makeInputBox("#Cell_target_rate_adj_P1", "target_rate_ajd1", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_adj_P2", "target_rate_ajd2", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_adj_P3", "target_rate_ajd3", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_adj_P4", "target_rate_ajd4", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_target_rate_adj_P5", "target_rate_ajd5", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+
+        makeInputBox("#Cell_new_slot_create_ratio_P1", "new_slot_create_ratio1", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_P2", "new_slot_create_ratio2", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_P3", "new_slot_create_ratio3", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_P4", "new_slot_create_ratio4", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_P5", "new_slot_create_ratio5", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+
+        makeInputBox("#Cell_new_slot_create_ratio_adj_P1", "new_slot_create_ratio_adj1", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_adj_P2", "new_slot_create_ratio_adj2", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_adj_P3", "new_slot_create_ratio_adj3", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_adj_P4", "new_slot_create_ratio_adj4", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_new_slot_create_ratio_adj_P5", "new_slot_create_ratio_adj5", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
+
+        makeInputBox("#Cell_max_add_bid_cnt_P1", "max_add_bid_cnt1", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_max_add_bid_cnt_P2", "max_add_bid_cnt2", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_max_add_bid_cnt_P3", "max_add_bid_cnt3", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_max_add_bid_cnt_P4", "max_add_bid_cnt4", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+        makeInputBox("#Cell_max_add_bid_cnt_P5", "max_add_bid_cnt5", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
+
+        makeInputBox("#Cell_status_P1", "status1", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_status_P2", "status2", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_status_P3", "status3", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_status_P4", "status4", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_status_P5", "status5", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
+
+        makeButton("#Cell_controlBtn_P1", "submitBtn1", "Start", ButtonClickhandler, "css_style1", "width: 100px");
+        makeButton("#Cell_controlBtn_P2", "submitBtn2", "Start", ButtonClickhandler, "css_style1", "width: 100px");
+        makeButton("#Cell_controlBtn_P3", "submitBtn3", "Start", ButtonClickhandler, "css_style1", "width: 100px");
+        makeButton("#Cell_controlBtn_P4", "submitBtn4", "Start", ButtonClickhandler, "css_style1", "width: 100px");
+        makeButton("#Cell_controlBtn_P5", "submitBtn5", "Start", ButtonClickhandler, "css_style1", "width: 100px");
+    }
+
+    let portfolio_list = ["KRW-EOS", "KRW-XRP", "KRW-BTC", "KRW-ETH", "KRW_BCH"];
+    var xlabel = ["market", "ID", "mode", "algorithm", "base_price", "status", "period", "newslot_ratio", "bidask_ratio", "liquid_ratio", "max_slot_cnt", "max_bidask_cnt", "limit_KRW", "limit_Coin"
+        , "amount0", "amount1", "amount2", "amount3", "amount4", "amount5", "amount6", "amount7", "amount8", "amount9", "applay_cfg"];
+    var ylabel = ["Row0", "Row1", "Row2", "Row3"];
+    var trade_mode = ["stop", "run"];
+    var algorithm = [ "0", "1", "2", "etc-1"];
+
+    function CreateConfigTable(table_bodyID, xlabel, ylabel)
+    {
+        var index = 0;
+        var selecterID = "#" + table_bodyID + " > tr";
+        //alert(selecterID);
+        $(selecterID).each(function () {
+            //$("#ConfigurationTable_body > tr").each(function () {
+            createTds(index++, $(this), xlabel, ylabel);
+        });
+
+        makeListBox("#Cell_Row0_market", "market0", portfolio_list, ListBox_handleChange, "css_style1", "width: 90px", 0, "single", 1);
+        makeListBox("#Cell_Row0_mode", "mode0", trade_mode, ListBox_handleChange, "css_style1", "width: 70px", 0, "single", 1);
+        makeListBox("#Cell_Row0_algorithm", "algorithm0", algorithm, ListBox_handleChange, "css_style1", "width: 80px", 0, "single", 1);
+        makeInputBox("#Cell_Row0_base_price", "base_price0", "number", 8000, "css_style1", "width: 70px", 1000, 50000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_Row0_status", "status0", "text", "idle", "css_style1", "width: 70px", 5000, 1000000, 10, InputBoxHandler);
+        makeInputBox("#Cell_Row0_period", "period0", "number", 15, "css_style1", "width: 70px", 1, 120, 1, InputBoxHandler);
+        makeInputBox("#Cell_Row0_newslot_ratio", "newslot_ratio0", "number", 3, "css_style1", "width: 100px", 0.1, 15, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_Row0_bidask_ratio", "bidask_ratio0", "number", 10, "css_style1", "width: 100px", 0.1, 30, 0.01, InputBoxHandler);
+        makeInputBox("#Cell_Row0_liquid_ratio", "liquid_ratio0", "number", 1, "css_style1", "width: 100px", 0.1, 15, 0.01, InputBoxHandler);
+
+        makeInputBox("#Cell_Row0_max_slot_cnt", "max_slot_cnt0", "number", 30, "css_style1", "width: 70px", 1, 1000, 1, InputBoxHandler);
+        makeInputBox("#Cell_Row0_max_bidask_cnt", "max_bidask_cnt0", "number", 5, "css_style1", "width: 100px", 1, 20, 1, InputBoxHandler);
+        makeInputBox("#Cell_Row0_limit_KRW", "limit_KRW0", "number", 10000000, "css_style1", "width: 80px", 1000, 10000000, 10000, InputBoxHandler);
+        makeInputBox("#Cell_Row0_limit_Coin", "limit_KRW0", "number", 10000, "css_style1", "width: 80px", 500, 1000000, 100, InputBoxHandler);
+
+        makeInputBox("#Cell_Row0_amount0", "amount00", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+        makeInputBox("#Cell_Row0_amount1", "amount10", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+        makeInputBox("#Cell_Row0_amount2", "amount20", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+        makeInputBox("#Cell_Row0_amount3", "amount30", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+        makeInputBox("#Cell_Row0_amount4", "amount40", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+        makeInputBox("#Cell_Row0_amount5", "amount50", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+        makeInputBox("#Cell_Row0_amount6", "amount60", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+        makeInputBox("#Cell_Row0_amount7", "amount70", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+        makeInputBox("#Cell_Row0_amount8", "amount80", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+        makeInputBox("#Cell_Row0_amount9", "amount90", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+
+        makeButton("#Cell_Row0_applay_cfg", "apply_cfg_Btn", "Apply CFG", ButtonClickhandler, "css_style1", "width: 100px");
+    }
+
+
+    function createTds(index, obj, xlabel, ylabel) {
+        var cellname = "";
+        for(var i = 0; i < xlabel.length; i++)
+        {
+            cellname = "Cell_" + ylabel[index] +"_"+ xlabel[i];
+            //obj.append($("<td>").css("text-align","center").html('<a href = "https://www.naver.com" target = "_blank">0</a>').attr("statusname", cellname));
+            //obj.append($("<td>").css("text-align","center").text('-').attr("cellname", cellname));
+            obj.append($("<td>").css("text-align","center").text('').attr("id", cellname));
+        }
+    }
+
+    function attachWidgetToTable(tdID, WidgetCategory) {
+        let accessID = "#" + tdID;
+
+        switch(WidgetCategory)
+        {
+            case "ListBox" : 
+                let ht = '<div><select id = selectbox1 name="single_selection"><option value="volvo">A</option><option value="saab">B</option><option value="opel" selected="selected">C</option><option value="audi">D</option></select></div>'
+                $(accessID).text('').append(ht);
+                break;
+            
+        }
+    }
+
+
+    function makeListBox(ParentID, ID, datalist, callback, classID, style, defaultIndex, option, size)
+    {
+        /*
+        let result = $('<div><select>');
+        //result = result.find('select').attr("id", "selecterID").attr("size", 5).attr("multiple", "multiple").attr("style", "width: 200px").append("<option value = a>aa").attr("selected", "selected").append("<option value = b>BB");
+        result.find('select').attr("id", "selecterID").append("<option value = a>aa").attr("selected", "selected").append("<option value = b>BB");
+        $('#Cell_max_slot_cnt_P3').append(result);
+        */
+        var Obj = null;
+        Obj = $('<div><select>')
+        if(option == "multiple") { Obj.find('select').attr("size", size).attr("id", ID).attr("class", classID).attr("style", style).attr("multiple", "multiple"); }
+        else { Obj.find('select').attr("size", size).attr("id", ID).attr("class", classID).attr("style", style); }
+ 
+        let finalhtml = "";
+        for(i = 0; i < datalist.length; i++)
+        {
+            if(i == defaultIndex) { html = "<option value=" + datalist[i] + " selected=selected>" + datalist[i]; } else { html = "<option value="+datalist[i] + ">" + datalist[i]; }
+            finalhtml += html;
+        }
+        Obj.find('select').append(finalhtml);
+        // on binding
+        Obj.find('select').bind("change", function() { return callback(this, datalist); });
+        $(ParentID).append(Obj);
+    }
+
+    /*
+    List Box onchange Callback.... Event 종류 참조 : https://heavening.tistory.com/23
+    */
+
+    function ListBox_handleChange (self, itemList) 
+    {
+        //console.log("ListBox_handleChange = ", self);
+        for(i = 0; i < itemList.length; i++)
+        {
+            if(self[i].selected) { console.log("Selected Item[", i, "] = ", self[i].value); }
+        }
+    }
+
+    /*
+    get selected item value from listbox....
+    */
+    function getListBox_values(id) 
+    {
+        id = "#" + id;
+        console.log(id);
+        let Obj = $(id).find('option');
+        console.log(Obj);
+        let selval = [];
+        let j = 0;
+        for(i = 0; i < Obj.length; i++)
+        {
+            if(Obj[i].selected) 
+            { 
+                //console.log("[getListBox_values] Selected Item[", i, "] = ", Obj[i].value); 
+                selval.push(Obj[i].value); 
+            }
+        }
+        console.log("Selected Items in ListBox is ", selval);
+        if(selval.length == 1) { return selval[0]; }
+        return selval;
+    }
+
+
+
+    /*
+    Button 생성
+    <div">
+        <button id = button1, type="button" onclick=buttton1_handler()>Button1</button>
+    </div>
+    */
+    function makeButton(ParentID, ID, Name, callback, classID, style)
+    {
+        var Obj = $('<div><button>');
+        Obj.find('button').attr("id", ID).attr("class", classID).attr("style", style).attr("typpe", "button").text(Name);
+        Obj.find('button').bind("click", function() { return callback(this, ID); }); 
+        $(ParentID).append(Obj);
+    }
+
+    /*
+    Button Click Handler.......
+    */
+    function ButtonClickhandler(self, ID)
+    {
+        console.log(" ButtonClickhandler = ", self);
+        console.log("Button ID = ", ID);
+        //alert("Button clicked.........");
+        
+        //send_ConfigParam(ID);
+    }
+
+    /*
+    text input box
+    <div id = "text field example">
+        Text field Input : <input type="text" id="msginput", name="member_name" value="text를 입력하세요...">
+        Text field Input : <input type="number" id="msginput", name="member_name" value="text를 입력하세요...">
+    </div>
+    */
+    function makeInputBox(ParentID, ID, type, defaultstr, classID, style, min, max, step, callback)
+    {
+        var Obj = $('<div><input>');
+        Obj.find('input').attr("type", type).attr("id", ID).attr("class", classID).attr("style", style).val(defaultstr);
+        if(type === "number") 
+        { 
+            Obj.find('input').attr('min', min).attr('max', max).attr('step', step);
+            //Obj.find('input').bind("keyup", function() { return callback(this, min, max); });
+            Obj.find('input').bind("focusout", function() { return callback(this, min, max); });
+        }
+        $(ParentID).append(Obj);
+    }
+
+    function InputBoxHandler(self, min, max)
+    {
+        //console.log("InputBoxHandler = ", self);
+        if(self.value < min ) { self.value = min; console.log("force fix min value"); }
+        if(self.value > max ) { self.value = max; console.log("force fix max value"); }
+    }
+
+
+    /*
+    get value from inputbox....
+    */
+    function getInputBox_values(id) 
+    {
+        id = "#" + id;
+        let Obj = $(id)
+        console.log(Obj);
+        console.log("Input Box value is ", Obj[0].value);
+        return Obj[0].value;
+    }
+
+
+
+    function send_ConfigParam(ID)
+    {
+        let ConfigParams = 
+        { 
+            max_slot_cnt : 0,
+            slot_1st_Bid_KRW : 0, 
+            slot_2nd_Bid_KRW : 0, 
+            check_period : 0,
+            retry_cnt : 0,
+            retry_delaysec : 0,
+            target_rate : 0,
+            target_rate_adj : 0,
+            new_slot_create_ratio : 0,
+            new_slot_create_ratio_adj : 0,
+            max_add_bid_cnt : 0,
+            status : 0,
+        };
+        
+        let index = ID.replace("submitBtn", '');
+        let keyID = getListBox_values("portf"+index);
+        console.log("keyID = ", keyID);
+        ConfigParams['max_slot_cnt'] = getListBox_values("slotcnt"+index);
+        ConfigParams['slot_1st_Bid_KRW'] = getInputBox_values("firstbidKRW"+index);
+        ConfigParams['slot_2nd_Bid_KRW'] = getInputBox_values("secondbidKRW"+index);
+        ConfigParams['check_period'] = getInputBox_values("checkperiod"+index);
+        ConfigParams['retry_cnt'] = getInputBox_values("retrycnt"+index);
+        ConfigParams['retry_delaysec'] = getInputBox_values("retry_delaysec"+index);
+        ConfigParams['target_rate'] = getInputBox_values("target_rate"+index);
+        ConfigParams['target_rate_adj'] = getInputBox_values("target_rate_ajd"+index);
+        ConfigParams['new_slot_create_ratio'] = getInputBox_values("new_slot_create_ratio"+index);
+        ConfigParams['new_slot_create_ratio_adj'] = getInputBox_values("new_slot_create_ratio_adj"+index);
+        ConfigParams['max_add_bid_cnt'] = getInputBox_values("max_add_bid_cnt"+index);
+        //ConfigParams['status'] = getListBox_values("status"+index);
+
+        let jsonObj = { };
+        let indexID = "ID" + index;
+        jsonObj[keyID] = { };
+        jsonObj[keyID][indexID] = { 'marketID' : keyID + "_" + indexID, inserted_at : 0, config : ConfigParams };
+        console.log("jsonObj = ", JSON.stringify(jsonObj));
+
+        let CRUD_url = "";
+        let CRUD_method = "";
+        if(index == 7) // PUT : update
+        {
+            CRUD_url = "http://10.186.115.57:7000/config/post";
+            CRUD_method = "PUT"
+        }
+        else
+        {
+            CRUD_url = "http://10.186.115.57:7000/config/update";
+            CRUD_method = "PUT"
+        }
+
+        let settings = {
+            async : true,
+            crossDomain : true,
+            url : CRUD_url,
+            method : CRUD_method,
+            headers : {
+                "Content-Type": "application/json",
+            },
+            //data : JSON.stringify(ConfigParams), 
+            data : JSON.stringify(jsonObj), 
+            success : function (result) { console.log("CRUD_Index] = ", index, " upload suceess!!! = ", result); },
+            error : function (error) { console.log("CRUD_Index] = ", index, " upload fail!!! = ", error); }
+        }
+
+        $.ajax(settings).done(function (response) {
+            console.log("Respones... : ", response);
+        });
+    }
+
+</script>
+
