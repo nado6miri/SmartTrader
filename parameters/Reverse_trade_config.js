@@ -111,6 +111,7 @@ var EOS_Middle_Gap2 = {
     control_mode: 'stop',  // run / stop
     simulation: false,
     real_test_mode: false,
+    check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
     slot_Ask_Coin: [60, 60, 60, 60, 60, 60, 60, 60, 60, 60],
     //    slot_1st_Ask_Coin: 50,   //* fisrt investment coint (unit : EA)
     //    slot_2nd_Ask_Coin: 100,  //* after 1st slot, investment coin (unit : EA)
