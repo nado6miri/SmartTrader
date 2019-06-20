@@ -699,8 +699,8 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
         Save_JSON_latest_file(portfolio_info, "./output/portfolio");
 
         // Update last_bidask_info : this is basic routine... To find the lowest bid price, search all slots and bids price and compare it with for loop.
-        if(portfolio_info[market][marketID]['last_bidask_info']['tr_price'] == 0 
-            || portfolio_info[market][marketID]['last_bidask_info']['tr_price'] > new_slot['last_bidask_info']['tr_price'])
+        //if(portfolio_info[market][marketID]['last_bidask_info']['tr_price'] == 0 
+        //    || portfolio_info[market][marketID]['last_bidask_info']['tr_price'] > new_slot['last_bidask_info']['tr_price'])
         {
             //console.log("Update Last Bid Price infomation....Old = ", portfolio_info[market][marketID]['last_bidask_info']['tr_price'], "Latest = ", new_slot['last_bidask_info']['tr_price'])
             portfolio_info[market][marketID]['last_bidask_info']['timetick'] = new_slot['last_bidask_info']['timetick'];
@@ -845,7 +845,7 @@ async function add_bid_to_slot(market, marketID, current, priceinfo)
                     slots[i]['last_bidask_info']['timetick'] = current;
                     slots[i]['last_bidask_info']['tr_price'] = current_price;
                 
-                    if(portfolio_info[market][marketID]['last_bidask_info']['tr_price'] > slots[i]['last_bidask_info']['tr_price'])
+                    //if(portfolio_info[market][marketID]['last_bidask_info']['tr_price'] > slots[i]['last_bidask_info']['tr_price'])
                     {
                         //console.log("Update Last Bid Price infomation....Old = ", portfolio_info[market][marketID]['last_bidask_info']['tr_price'], "Latest = ", slots[i]['last_bidask_info']['tr_price'])
                         portfolio_info[market][marketID]['last_bidask_info']['timetick'] = slots[i]['last_bidask_info']['timetick'];
@@ -946,7 +946,7 @@ async function ask_sellCoin_buyKRW(market, marketID, current, priceinfo)
 
                 // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
                 // config['restart_flag'] == 0 일경우 slots이 모두 청산되었을때 slot을 생성하지 않는 stop 상태(idle)로 대기해야 할ㅈ. 무한 자동실행할지 고민 필요.
-                if (i == 0) // Slots이 모두 청산되었을 경우
+                //if (i == 0) // Slots이 모두 청산되었을 경우
                 {
                     portfolio_info[market][marketID]['last_bidask_info']['timetick'] = current;
                     portfolio_info[market][marketID]['last_bidask_info']['tr_price'] = current_price;
@@ -1215,8 +1215,8 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
         slots.push(JSON.parse(JSON.stringify(new_slot)));
 
         // Update last_bidask_info : this is basic routine... To find the lowest bid price, search all slots and bids price and compare it with for loop.
-        if(portfolio_info[market][marketID]['last_bidask_info']['tr_price'] == 0 
-            || portfolio_info[market][marketID]['last_bidask_info']['tr_price'] < new_slot['last_bidask_info']['tr_price'])
+        //if(portfolio_info[market][marketID]['last_bidask_info']['tr_price'] == 0 
+        //    || portfolio_info[market][marketID]['last_bidask_info']['tr_price'] < new_slot['last_bidask_info']['tr_price'])
         {
             //console.log("Update Last Bid Price infomation....Old = ", portfolio_info[market][marketID]['last_bidask_info']['tr_price'], "Latest = ", new_slot['last_bidask_info']['tr_price'])
             portfolio_info[market][marketID]['last_bidask_info']['timetick'] = new_slot['last_bidask_info']['timetick'];
@@ -1353,7 +1353,7 @@ async function add_ask_to_slot(market, marketID, current, priceinfo)
                     slots[i]['last_bidask_info']['timetick'] = current;
                     slots[i]['last_bidask_info']['tr_price'] = current_price;
                 
-                    if(portfolio_info[market][marketID]['last_bidask_info']['tr_price'] > slots[i]['last_bidask_info']['tr_price'])
+                    //if(portfolio_info[market][marketID]['last_bidask_info']['tr_price'] < slots[i]['last_bidask_info']['tr_price'])
                     {
                         //console.log("Update Last Ask Price infomation....Old = ", portfolio_info[market][marketID]['last_bidask_info']['tr_price'], "Latest = ", slots[i]['last_bidask_info']['tr_price'])
                         portfolio_info[market][marketID]['last_bidask_info']['timetick'] = slots[i]['last_bidask_info']['timetick'];
@@ -1527,7 +1527,7 @@ async function bid_sellKRW_buyCoin(market, marketID, current, priceinfo)
                 slots.splice(i, 1);
                 
                 // 마지막 slot이 익절되었을 경우 slot이 0인데 다시 1st slot을 생성하기 위한 기준 가격을 설정함. 설정이 잘되면 무한 자동 실행 됨. MACD 역배열 시점의 가격을 지정하는 것도 좋은 방법임.
-                if (i == 0) // Slots이 모두 청산되었을 경우
+                //if (i == 0) // Slots이 모두 청산되었을 경우
                 {
                     portfolio_info[market][marketID]['last_bidask_info']['timetick'] = current;
                     portfolio_info[market][marketID]['last_bidask_info']['tr_price'] = current_price;
@@ -1886,7 +1886,7 @@ async function disiplay_statics(current, price_infoDB)
                 if (sum_net_KRW[market].hasOwnProperty(marketID) === false) { sum_net_KRW[market][marketID] = 0; }
                 if (portfolio_info[market][marketID]['config']['trade_mode'] !== "normal") { continue; }
                 let liquid_history = liquidation_DB[market][marketID];
-                if (index === 0) { console.log("******************************************************************************************** Liquidation   History(", liquid_history.length, ") ***************************************************************************************************************** "); }
+                console.log("******************************************************************************************** Liquidation   History(", liquid_history.length, ") ***************************************************************************************************************** "); 
 
                 for (let i = liquid_history.length; i > 0; i--)
                 {
@@ -1928,7 +1928,7 @@ async function disiplay_statics(current, price_infoDB)
                 if (sum_net_coin[market].hasOwnProperty(marketID) === false) { sum_net_coin[market][marketID] = 0; }
                 if (portfolio_info[market][marketID]['config']['trade_mode'] !== "reverse") { continue; }
                 let increasecoin_history = increasecoin_DB[market][marketID];
-                if (index === 0) { console.log("******************************************************************************************** Increase Coin History(", increasecoin_history.length, ") ***************************************************************************************************************** "); }
+                console.log("******************************************************************************************** Increase Coin History(", increasecoin_history.length, ") ***************************************************************************************************************** "); 
 
                 for (let i = increasecoin_history.length; i > 0; i--)
                 {
