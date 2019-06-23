@@ -6,45 +6,45 @@ var NSimulation_Mode = {
     simulation: true,
     real_test_mode: false,
     check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    slot_Bid_KRW: [200, 200, 200, 200, 200, 200, 200, 200, 200, 200],
+    slot_BidAsk_KrwCoin: [200, 200, 200, 200, 200, 200, 200, 200, 200, 200],
     //    slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
     //    slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
     max_slot_cnt: 30,          //* The limitation number of creating slots (unit : EA) 
-    max_addbid_cnt: 4,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot´ç ¹°Å¸±â ÃÖ´ë È¸¼ö)
-    target_ask_rate: 1.5,            //* The ratio of liquidation margin in each slot. (unit : %)
-    target_ask_rate_adj: 0.1,        //* The adjustment ratio of target_rate
+    max_addBidAsk_cnt: 4,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slotï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½Ö´ï¿½ È¸ï¿½ï¿½)
+    target_BidAsk_Ratio: 1.5,            //* The ratio of liquidation margin in each slot. (unit : %)
+    target_BidAsk_Ratio_adj: 0.1,        //* The adjustment ratio of target_rate
     new_slot_Create_Ratio: -1.0,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
     new_slot_Create_Ratio_adj: 0, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
-    new_addbid_Create_Ratio: -18,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
-    new_addbid_Create_Ratio_adj: 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
+    new_addBidAsk_Create_Ratio: -18,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
+    new_addBidAsk_Create_Ratio_adj: 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
     restart_flag: 3,            // if flag != 0, set last_bidask_price = current price to restart trader when slot is empty.
-    restart_base_price: 8300,            // ÄÚÀÎ Æò´Ü°¡ ±âÀÔ (¸ðµå 3 ÀÌ»óÀÏ¶§ µ¿ÀÛ)
+    restart_base_price: 8300,            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ü°ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ 3 ï¿½Ì»ï¿½ï¿½Ï¶ï¿½ ï¿½ï¿½ï¿½ï¿½)
     limit_invest_coin: 0000,    // The limitation of invest coin in current market. (unit : EA)
     limit_invest_KRW: 10000000,    // The limitation of invest money in current market. (unit : KRW)
     minimum_order_KRW: 500,
     minimum_order_coin: 0.1,    // KRW 500 / Current price = minimum_order_coin
 }
 
-// EOS_Small_Gap mode : È¸ÀüÀ² ³ôÀÌ±â À§ÇØ ÃÖ¼Ò margin ¼¼ÆÃ
+// EOS_Small_Gap mode : È¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¼ï¿½ margin ï¿½ï¿½ï¿½ï¿½
 var EOS_Small_Gap1 = {
     trade_mode: 'normal',
-    control_mode: 'stop',  // run / stop
-    simulation: false,
+    control_mode: 'run',  // run / stop
+    simulation: true,
     real_test_mode: false,
     check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    slot_Bid_KRW: [200, 200, 200, 200, 200, 200, 200, 200, 200, 200],
+    slot_BidAsk_KrwCoin: [200, 200, 200, 200, 200, 200, 200, 200, 200, 200],
 //    slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
 //    slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
     max_slot_cnt: 30,          //* The limitation number of creating slots (unit : EA) 
-    max_addbid_cnt: 4,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot´ç ¹°Å¸±â ÃÖ´ë È¸¼ö)
-    target_ask_rate: 1.5,            //* The ratio of liquidation margin in each slot. (unit : %)
-    target_ask_rate_adj: 0.1,        //* The adjustment ratio of target_rate
+    max_addBidAsk_cnt: 4,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slotï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½Ö´ï¿½ È¸ï¿½ï¿½)
+    target_BidAsk_Ratio: 1.5,            //* The ratio of liquidation margin in each slot. (unit : %)
+    target_BidAsk_Ratio_adj: 0.1,        //* The adjustment ratio of target_rate
     new_slot_Create_Ratio: -1.0,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
     new_slot_Create_Ratio_adj: 0, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
-    new_addbid_Create_Ratio: -18,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
-    new_addbid_Create_Ratio_adj: 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
+    new_addBidAsk_Create_Ratio: -18,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
+    new_addBidAsk_Create_Ratio_adj: 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
     restart_flag: 2,            // if flag != 0, set last_bidask_price = current price to restart trader when slot is empty.
-    restart_base_price: 8300,            // ÄÚÀÎ Æò´Ü°¡ ±âÀÔ (¸ðµå 3 ÀÌ»óÀÏ¶§ µ¿ÀÛ)
+    restart_base_price: 8300,            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ü°ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ 3 ï¿½Ì»ï¿½ï¿½Ï¶ï¿½ ï¿½ï¿½ï¿½ï¿½)
     limit_invest_coin: 0000,    // The limitation of invest coin in current market. (unit : EA)
     limit_invest_KRW: 10000000,    // The limitation of invest money in current market. (unit : KRW)
     minimum_order_KRW: 500,
@@ -53,23 +53,23 @@ var EOS_Small_Gap1 = {
 
 var EOS_Small_Gap2 = {
     trade_mode: 'normal',
-    control_mode: 'stop',  // run / stop
-    simulation: false,
+    control_mode: 'run',  // run / stop
+    simulation: true,
     real_test_mode: false,
     check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    slot_Bid_KRW: [200, 200, 200, 200, 200, 200, 200, 200, 200, 200],
+    slot_BidAsk_KrwCoin: [200, 200, 200, 200, 200, 200, 200, 200, 200, 200],
     //    slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
     //    slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
     max_slot_cnt: 30,          //* The limitation number of creating slots (unit : EA) 
-    max_addbid_cnt: 4,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot´ç ¹°Å¸±â ÃÖ´ë È¸¼ö)
-    target_ask_rate: 1.5,            //* The ratio of liquidation margin in each slot. (unit : %)
-    target_ask_rate_adj: 0.1,        //* The adjustment ratio of target_rate
+    max_addBidAsk_cnt: 4,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slotï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½Ö´ï¿½ È¸ï¿½ï¿½)
+    target_BidAsk_Ratio: 1.5,            //* The ratio of liquidation margin in each slot. (unit : %)
+    target_BidAsk_Ratio_adj: 0.1,        //* The adjustment ratio of target_rate
     new_slot_Create_Ratio: -1.0,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
     new_slot_Create_Ratio_adj: 0, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
-    new_addbid_Create_Ratio: -18,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
-    new_addbid_Create_Ratio_adj: 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
+    new_addBidAsk_Create_Ratio: -18,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
+    new_addBidAsk_Create_Ratio_adj: 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
     restart_flag: 3,            // if flag != 0, set last_bidask_price = current price to restart trader when slot is empty.
-    restart_base_price: 8300,            // ÄÚÀÎ Æò´Ü°¡ ±âÀÔ (¸ðµå 3 ÀÌ»óÀÏ¶§ µ¿ÀÛ)
+    restart_base_price: 8300,            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ü°ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ 3 ï¿½Ì»ï¿½ï¿½Ï¶ï¿½ ï¿½ï¿½ï¿½ï¿½)
     limit_invest_coin: 0000,    // The limitation of invest coin in current market. (unit : EA)
     limit_invest_KRW: 10000000,    // The limitation of invest money in current market. (unit : KRW)
     minimum_order_KRW: 500,
@@ -77,26 +77,26 @@ var EOS_Small_Gap2 = {
 }
 
 
-// EOS_Middle_Gap : È¸ÀüÀ²À» ³ôÀÌ±â¿¡ ÀûÇÕÇÑ ¼¼ÆÃ. È¾º¸ÀåÀÌ³ª º¯µ¿ÆøÀÌ Á¼°Ô ÀÚÁÖ ¿òÁ÷ÀÌ´Â Case
+// EOS_Middle_Gap : È¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì±â¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½. È¾ï¿½ï¿½ï¿½ï¿½ï¿½Ì³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì´ï¿½ Case
 var EOS_Middle_Gap1 = {
     trade_mode: 'normal',
-    control_mode: 'stop',  // run / stop
-    simulation: false,
+    control_mode: 'run',  // run / stop
+    simulation: true,
     real_test_mode: false,
     check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    slot_Bid_KRW: [400, 400, 400, 400, 400, 400, 400, 400, 400, 400],
+    slot_BidAsk_KrwCoin: [400, 400, 400, 400, 400, 400, 400, 400, 400, 400],
     //    slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
     //    slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
     max_slot_cnt: 30,          //* The limitation number of creating slots (unit : EA) 
-    max_addbid_cnt: 4,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot´ç ¹°Å¸±â ÃÖ´ë È¸¼ö)
-    target_ask_rate: 2.0,            //* The ratio of liquidation margin in each slot. (unit : %)
-    target_ask_rate_adj: 0.1,        //* The adjustment ratio of target_rate
+    max_addBidAsk_cnt: 4,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slotï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½Ö´ï¿½ È¸ï¿½ï¿½)
+    target_BidAsk_Ratio: 2.0,            //* The ratio of liquidation margin in each slot. (unit : %)
+    target_BidAsk_Ratio_adj: 0.1,        //* The adjustment ratio of target_rate
     new_slot_Create_Ratio: -4.0,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
     new_slot_Create_Ratio_adj: 0, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
-    new_addbid_Create_Ratio: -20,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
-    new_addbid_Create_Ratio_adj: 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
+    new_addBidAsk_Create_Ratio: -20,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
+    new_addBidAsk_Create_Ratio_adj: 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
     restart_flag: 2,            // if flag != 0, set last_bidask_price = current price to restart trader when slot is empty.
-    restart_base_price: 8300,            // ÄÚÀÎ Æò´Ü°¡ ±âÀÔ (¸ðµå 3 ÀÌ»óÀÏ¶§ µ¿ÀÛ)
+    restart_base_price: 8300,            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ü°ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ 3 ï¿½Ì»ï¿½ï¿½Ï¶ï¿½ ï¿½ï¿½ï¿½ï¿½)
     limit_invest_coin: 0000,    // The limitation of invest coin in current market. (unit : EA)
     limit_invest_KRW: 10000000,    // The limitation of invest money in current market. (unit : KRW)
     minimum_order_KRW: 500,
@@ -104,26 +104,26 @@ var EOS_Middle_Gap1 = {
 }
 
 
-// EOS_Middle_Gap : È¸ÀüÀ²À» ³ôÀÌ±â¿¡ ÀûÇÕÇÑ ¼¼ÆÃ. È¾º¸ÀåÀÌ³ª º¯µ¿ÆøÀÌ Á¼°Ô ÀÚÁÖ ¿òÁ÷ÀÌ´Â Case
+// EOS_Middle_Gap : È¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì±â¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½. È¾ï¿½ï¿½ï¿½ï¿½ï¿½Ì³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì´ï¿½ Case
 var EOS_Middle_Gap2 = {
     trade_mode: 'normal',
-    control_mode: 'stop',  // run / stop
-    simulation: false,
+    control_mode: 'run',  // run / stop
+    simulation: true,
     real_test_mode: false,
     check_period: 15,           //* The price check duration of main loop, unit is second. (unit : Sec)
-    slot_Bid_KRW: [400, 400, 400, 400, 400, 400, 400, 400, 400, 400],
+    slot_BidAsk_KrwCoin: [400, 400, 400, 400, 400, 400, 400, 400, 400, 400],
     //    slot_1st_Bid_KRW: 50000,   //* fisrt investment moeny (unit : KRW)
     //    slot_2nd_Bid_KRW: 100000,  //* after 1st slot, investment moeny (unit : KRW)
     max_slot_cnt: 30,          //* The limitation number of creating slots (unit : EA) 
-    max_addbid_cnt: 4,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slot´ç ¹°Å¸±â ÃÖ´ë È¸¼ö)
-    target_ask_rate: 2.0,            //* The ratio of liquidation margin in each slot. (unit : %)
-    target_ask_rate_adj: 0.1,        //* The adjustment ratio of target_rate
+    max_addBidAsk_cnt: 4,        //* The max count of additional purchase crypto currency to lower average price on each slot. (slotï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½Ö´ï¿½ È¸ï¿½ï¿½)
+    target_BidAsk_Ratio: 2.0,            //* The ratio of liquidation margin in each slot. (unit : %)
+    target_BidAsk_Ratio_adj: 0.1,        //* The adjustment ratio of target_rate
     new_slot_Create_Ratio: -4.0,       //* The gap of last transaction price to create new slot. (unit : %, always minus value)
     new_slot_Create_Ratio_adj: 0, //* The adjustment ratio of new_slot_crcond. (unit : %, always minus value)
-    new_addbid_Create_Ratio: -20,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
-    new_addbid_Create_Ratio_adj: 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
+    new_addBidAsk_Create_Ratio: -20,       //* The gap of last transaction price to create new add_bid. (unit : %, always minus value)
+    new_addBidAsk_Create_Ratio_adj: 0, //* The adjustment ratio of new_addbid_crcond. (unit : %, always minus value)
     restart_flag: 3,            // if flag != 0, set last_bidask_price = current price to restart trader when slot is empty.
-    restart_base_price: 8300,            // ÄÚÀÎ Æò´Ü°¡ ±âÀÔ (¸ðµå 3 ÀÌ»óÀÏ¶§ µ¿ÀÛ)
+    restart_base_price: 8300,            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ü°ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ 3 ï¿½Ì»ï¿½ï¿½Ï¶ï¿½ ï¿½ï¿½ï¿½ï¿½)
     limit_invest_coin: 0000,    // The limitation of invest coin in current market. (unit : EA)
     limit_invest_KRW: 10000000,    // The limitation of invest money in current market. (unit : KRW)
     minimum_order_KRW: 500,

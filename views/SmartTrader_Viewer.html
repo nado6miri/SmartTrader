@@ -64,69 +64,28 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     </head>
     <body>
-        <table id="ConfigurationTable" classe=custom_table>
-            <thead id="ConfigurationTable_head">
+        <!-- Portfolio Table -->
+        <table id="PortfolioTable" classe=custom_table>
+            <thead id="PortfolioTable_head">
                 <tr>
-                    <th colspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category1</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category2</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category3</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category4</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Category5</th>
-                </tr>
-                <tr>
-                    <th colspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> market</th>
-                    <th id="market_category1"></th>
-                    <th id="market_category2"></th>
-                    <th id="market_category3"></th>
-                    <th id="market_category4"></th>
-                    <th id="market_category5"></th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> No</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Market</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> ID</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Trade Mode</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Config Index</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> P_Min</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> P_Max</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> P_Start</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> P_Step</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> P_Start_Direction</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Trade 적용</th>
                 </tr>
             </thead>
-            <tbody id="ConfigurationTable_body">
-                <tr id="max_slot_cnt">
-                    <td rowspan="11"> Config</td>
-                    <td> max_slot_cnt</td>
-                </tr>
-                <tr id="slot_1st_Bid_KRW">
-                    <td> max_slot_cnt</td>
-                </tr>
-                <tr id="slot_2nd_Bid_KRW">
-                    <td> max_slot_cnt</td>
-                </tr>
-                <tr id="check_period">
-                    <td> max_slot_cnt</td>
-                </tr>
-                <tr id="retry_cnt">
-                    <td> max_slot_cnt</td>
-                </tr>
-                <tr id="retry_delaysec">
-                    <td> max_slot_cnt</td>
-                </tr>
-                <tr id="target_rate">
-                    <td> max_slot_cnt</td>
-                </tr>
-                <tr id="target_rate_adj">
-                    <td> max_slot_cnt</td>
-                </tr>
-                <tr id="new_slot_create_ratio">
-                    <td> max_slot_cnt</td>
-                </tr>
-                <tr id="new_slot_create_ratio_adj">
-                    <td> max_slot_cnt</td>
-                </tr>
-                <tr id="max_add_bid_cnt">
-                    <td> max_slot_cnt</td>
-                </tr>
-                <tr id="status">
-                    <td colspan="2"> status</td>
-                </tr>
-                <tr id="controlBtn">
-                    <td colspan="2">control Btn</td>
-                </tr>
+            <tbody id="PortfolioTable_body">
             </tbody>
         </table>
 
+        <!-- Configuration Table -->
         <table id="ConfigTable" classe=custom_table>
             <thead id="ConfigTable_head">
                 <tr>
@@ -203,10 +162,16 @@
 -->
 
 <script type="text/javascript">
+    var pf = {}; 
+    var config_filename = {};
+
+
+
     //$(document).ready(function() {  // long syntax
     $(function() {        // short syntax
-        CreateTable("ConfigurationTable_body", plistx, plisty);
-        CreateConfigTable("ConfigTable_body", xlabel, ylabel);
+        //CreateTable("ConfigurationTable_body", plistx, plisty);
+        Create_PortfolioTable("PortfolioTable");
+        Create_ConfigTable("ConfigTable_body", xlabel, ylabel);
     });
 
     function buttton1_handler()
@@ -227,118 +192,60 @@
         });
     }
 
-
-    var plistx = [ "P1", "P2", "P3", "P4", "P5" ];
-    var plisty = [ "max_slot_cnt", "slot_1st_Bid_KRW", "slot_2nd_Bid_KRW", "check_period", "retry_cnt", "retry_delaysec", "target_rate", "target_rate_adj", "new_slot_create_ratio", "new_slot_create_ratio_adj", "max_add_bid_cnt", "status", "controlBtn" ];
-    let portflist = ["menu0", "menu1", "menu2", "menu3", "menu4" ];
-    let slotcnt = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10" ];
-
-    function CreateTable(table_bodyID, xlabel, ylabel)
+    
+    async function Create_PortfolioTable(table_ID)
     {
-        var index = 0;
-        var selecterID = "#" + table_bodyID + " > tr";
-        //alert(selecterID);
-        $(selecterID).each(function () {
-        //$("#ConfigurationTable_body > tr").each(function () {
-            createTds(index++, $(this), xlabel, ylabel);
-        });
+        //var pf = { "KRW-EOS_ID1": [ "R", 2, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID2": [ "R", 4, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID3": [ "N", 2, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID4": [ "N", 4, 6500, 10000, 10, 8000, false ] }
+        pf = await get_PortfolioLists("portfolio_list.json");
+        console.log("PF = ", JSON.stringify(pf));
+        let index = 0;
+        for (key in pf)
+        {
+            index++;
+            var obj = "#" + table_ID + " > tbody";
+            let market = key.split('_')[0];
+            let marketID = key.split('_')[1];
+            let trademode = pf[key][0];
+            let configindex = pf[key][1];
+            let p_min = pf[key][2];
+            let p_max = pf[key][3];
+            let p_step = pf[key][4];
+            let p_start = pf[key][5];
+            let p_direction = pf[key][6];
 
-        makeListBox("#market_category1", "portf1", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
-        makeListBox("#market_category2", "portf2", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
-        makeListBox("#market_category3", "portf3", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
-        makeListBox("#market_category4", "portf4", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
-        makeListBox("#market_category5", "portf5", portflist, ListBox_handleChange, "css_style1", "width: 100px", 0, "single", 1);
+            if(config_filename.hasOwnProperty(market) == false) { config_filename[market] = {}; }
+            if(config_filename[market].hasOwnProperty(marketID) == false) { config_filename[market][marketID] = {}; }
+            config_filename[market][marketID] = "Config[" + market + "][" + marketID + "].json";
 
-        makeListBox("#Cell_max_slot_cnt_P1", "slotcnt1", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
-        makeListBox("#Cell_max_slot_cnt_P2", "slotcnt2", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
-        makeListBox("#Cell_max_slot_cnt_P3", "slotcnt3", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
-        makeListBox("#Cell_max_slot_cnt_P4", "slotcnt4", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
-        makeListBox("#Cell_max_slot_cnt_P5", "slotcnt5", slotcnt, ListBox_handleChange, "css_style1", "width: 100px", 9, "single", 1);
+            console.log("key = ", key, "market = ", market, "marketID = ", marketID, "configindex = ", configindex, "p_min = ", p_min, "p_max = ", p_max,
+                        "p_start = ", p_start, "p_step = ", p_step, "p_direction = ", p_direction);
 
-        //function makeInputBox(ParentID, ID, type, defaultval, classID, style, callback)
-        makeInputBox("#Cell_slot_1st_Bid_KRW_P1", "firstbidKRW1", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
-        makeInputBox("#Cell_slot_1st_Bid_KRW_P2", "firstbidKRW2", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
-        makeInputBox("#Cell_slot_1st_Bid_KRW_P3", "firstbidKRW3", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
-        makeInputBox("#Cell_slot_1st_Bid_KRW_P4", "firstbidKRW4", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
-        makeInputBox("#Cell_slot_1st_Bid_KRW_P5", "firstbidKRW5", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
-
-        makeInputBox("#Cell_slot_2nd_Bid_KRW_P1", "secondbidKRW1", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 100, InputBoxHandler);
-        makeInputBox("#Cell_slot_2nd_Bid_KRW_P2", "secondbidKRW2", "number", 5000, "css_style1", "width: 100px", 5000, 100000, 100, InputBoxHandler);
-        makeInputBox("#Cell_slot_2nd_Bid_KRW_P3", "secondbidKRW3", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 100, InputBoxHandler);
-        makeInputBox("#Cell_slot_2nd_Bid_KRW_P4", "secondbidKRW4", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 100, InputBoxHandler);
-        makeInputBox("#Cell_slot_2nd_Bid_KRW_P5", "secondbidKRW5", "number", 5000, "css_style1", "width: 100px", 5000, 1000000, 100, InputBoxHandler);
-
-
-        makeInputBox("#Cell_check_period_P1", "checkperiod1", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
-        makeInputBox("#Cell_check_period_P2", "checkperiod2", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
-        makeInputBox("#Cell_check_period_P3", "checkperiod3", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
-        makeInputBox("#Cell_check_period_P4", "checkperiod4", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
-        makeInputBox("#Cell_check_period_P5", "checkperiod5", "number", 5, "css_style1", "width: 100px", 1, 120, 1, InputBoxHandler);
-
-
-        makeInputBox("#Cell_retry_cnt_P1", "retrycnt1", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
-        makeInputBox("#Cell_retry_cnt_P2", "retrycnt2", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
-        makeInputBox("#Cell_retry_cnt_P3", "retrycnt3", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
-        makeInputBox("#Cell_retry_cnt_P4", "retrycnt4", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
-        makeInputBox("#Cell_retry_cnt_P5", "retrycnt5", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
-
-        makeInputBox("#Cell_retry_delaysec_P1", "retry_delaysec1", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
-        makeInputBox("#Cell_retry_delaysec_P2", "retry_delaysec2", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
-        makeInputBox("#Cell_retry_delaysec_P3", "retry_delaysec3", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
-        makeInputBox("#Cell_retry_delaysec_P4", "retry_delaysec4", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
-        makeInputBox("#Cell_retry_delaysec_P5", "retry_delaysec5", "number", 2, "css_style1", "width: 100px", 1, 5, 1, InputBoxHandler);
-
-        makeInputBox("#Cell_target_rate_P1", "target_rate1", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_target_rate_P2", "target_rate2", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_target_rate_P3", "target_rate3", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_target_rate_P4", "target_rate4", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_target_rate_P5", "target_rate5", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-
-        makeInputBox("#Cell_target_rate_adj_P1", "target_rate_ajd1", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_target_rate_adj_P2", "target_rate_ajd2", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_target_rate_adj_P3", "target_rate_ajd3", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_target_rate_adj_P4", "target_rate_ajd4", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_target_rate_adj_P5", "target_rate_ajd5", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-
-        makeInputBox("#Cell_new_slot_create_ratio_P1", "new_slot_create_ratio1", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_new_slot_create_ratio_P2", "new_slot_create_ratio2", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_new_slot_create_ratio_P3", "new_slot_create_ratio3", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_new_slot_create_ratio_P4", "new_slot_create_ratio4", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_new_slot_create_ratio_P5", "new_slot_create_ratio5", "number", 4, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-
-        makeInputBox("#Cell_new_slot_create_ratio_adj_P1", "new_slot_create_ratio_adj1", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_new_slot_create_ratio_adj_P2", "new_slot_create_ratio_adj2", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_new_slot_create_ratio_adj_P3", "new_slot_create_ratio_adj3", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_new_slot_create_ratio_adj_P4", "new_slot_create_ratio_adj4", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_new_slot_create_ratio_adj_P5", "new_slot_create_ratio_adj5", "number", 1, "css_style1", "width: 100px", 0.01, 1000, 0.01, InputBoxHandler);
-
-        makeInputBox("#Cell_max_add_bid_cnt_P1", "max_add_bid_cnt1", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
-        makeInputBox("#Cell_max_add_bid_cnt_P2", "max_add_bid_cnt2", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
-        makeInputBox("#Cell_max_add_bid_cnt_P3", "max_add_bid_cnt3", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
-        makeInputBox("#Cell_max_add_bid_cnt_P4", "max_add_bid_cnt4", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
-        makeInputBox("#Cell_max_add_bid_cnt_P5", "max_add_bid_cnt5", "number", 5, "css_style1", "width: 100px", 1, 10, 1, InputBoxHandler);
-
-        makeInputBox("#Cell_status_P1", "status1", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
-        makeInputBox("#Cell_status_P2", "status2", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
-        makeInputBox("#Cell_status_P3", "status3", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
-        makeInputBox("#Cell_status_P4", "status4", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
-        makeInputBox("#Cell_status_P5", "status5", "text", "none", "css_style1", "width: 100px", 5000, 1000000, 10, InputBoxHandler);
-
-        makeButton("#Cell_controlBtn_P1", "submitBtn1", "Start", ButtonClickhandler, "css_style1", "width: 100px");
-        makeButton("#Cell_controlBtn_P2", "submitBtn2", "Start", ButtonClickhandler, "css_style1", "width: 100px");
-        makeButton("#Cell_controlBtn_P3", "submitBtn3", "Start", ButtonClickhandler, "css_style1", "width: 100px");
-        makeButton("#Cell_controlBtn_P4", "submitBtn4", "Start", ButtonClickhandler, "css_style1", "width: 100px");
-        makeButton("#Cell_controlBtn_P5", "submitBtn5", "Start", ButtonClickhandler, "css_style1", "width: 100px");
+            let id_name = "trade_instance" + index.toString()
+            let newtr = $(obj).append($("<tr>").css("text-align","center").text('').attr("id", id_name));
+            newtr.append($("<td>").css("text-align","center").text(index));    
+            newtr.append($("<td>").css("text-align","center").text(market));    
+            newtr.append($("<td>").css("text-align","center").text(marketID));    
+            newtr.append($("<td>").css("text-align","center").text(trademode));    
+            newtr.append($("<td>").css("text-align","center").text(configindex));    
+            newtr.append($("<td>").css("text-align","center").text(p_min));    
+            newtr.append($("<td>").css("text-align","center").text(p_max));    
+            newtr.append($("<td>").css("text-align","center").text(p_start));    
+            newtr.append($("<td>").css("text-align","center").text(p_step));    
+            newtr.append($("<td>").css("text-align","center").text(p_direction));    
+        }
     }
 
-    let portfolio_list = ["KRW-EOS", "KRW-XRP", "KRW-BTC", "KRW-ETH", "KRW_BCH"];
-    var xlabel = ["market", "ID", "mode", "algorithm", "base_price", "status", "period", "newslot_ratio", "bidask_ratio", "liquid_ratio", "max_slot_cnt", "max_bidask_cnt", "limit_KRW", "limit_Coin"
-        , "amount0", "amount1", "amount2", "amount3", "amount4", "amount5", "amount6", "amount7", "amount8", "amount9", "applay_cfg"];
-    var ylabel = ["Row0", "Row1", "Row2", "Row3"];
-    var trade_mode = ["stop", "run"];
-    var algorithm = [ "0", "1", "2", "etc-1"];
 
-    function CreateConfigTable(table_bodyID, xlabel, ylabel)
+    let portfolio_list = ["KRW-EOS", "KRW-XRP", "KRW-BTC", "KRW-ETH", "KRW-BCH"];
+    var xlabel = ["market", "ID", "mode", "algorithm", "base_price", "status", "period", "newslot_ratio", "bidask_ratio", "target_ratio", "max_slot_cnt", "max_bidask_cnt", "limit_KRW", "limit_Coin"
+        , "amount0", "amount1", "amount2", "amount3", "amount4", "amount5", "amount6", "amount7", "amount8", "amount9", "applay_cfg"];
+    var ylabel = ["instance1", "instance2", "instance3", "instance4"];
+    var trade_mode = ["normal", "reverse"];
+    var control_mode = ["stop", "run"];
+    var algorithm = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ];
+    var config_param = {};
+
+    async function Create_ConfigTable(table_bodyID, xlabel, ylabel)
     {
         var index = 0;
         var selecterID = "#" + table_bodyID + " > tr";
@@ -348,48 +255,87 @@
             createTds(index++, $(this), xlabel, ylabel);
         });
 
-        makeListBox("#Cell_Row0_market", "market0", portfolio_list, ListBox_handleChange, "css_style1", "width: 90px", 0, "single", 1);
-        makeListBox("#Cell_Row0_mode", "mode0", trade_mode, ListBox_handleChange, "css_style1", "width: 70px", 0, "single", 1);
-        makeListBox("#Cell_Row0_algorithm", "algorithm0", algorithm, ListBox_handleChange, "css_style1", "width: 80px", 0, "single", 1);
-        makeInputBox("#Cell_Row0_base_price", "base_price0", "number", 8000, "css_style1", "width: 70px", 1000, 50000000, 10, InputBoxHandler);
-        makeInputBox("#Cell_Row0_status", "status0", "text", "idle", "css_style1", "width: 70px", 5000, 1000000, 10, InputBoxHandler);
-        makeInputBox("#Cell_Row0_period", "period0", "number", 15, "css_style1", "width: 70px", 1, 120, 1, InputBoxHandler);
-        makeInputBox("#Cell_Row0_newslot_ratio", "newslot_ratio0", "number", 3, "css_style1", "width: 100px", 0.1, 15, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_Row0_bidask_ratio", "bidask_ratio0", "number", 10, "css_style1", "width: 100px", 0.1, 30, 0.01, InputBoxHandler);
-        makeInputBox("#Cell_Row0_liquid_ratio", "liquid_ratio0", "number", 1, "css_style1", "width: 100px", 0.1, 15, 0.01, InputBoxHandler);
+        //var pf = { "KRW-EOS_ID1": [ "R", 2, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID2": [ "R", 4, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID3": [ "N", 2, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID4": [ "N", 4, 6500, 10000, 10, 8000, false ] }
+        var pf = {};
+        pf = await get_PortfolioLists("portfolio_list.json");
 
-        makeInputBox("#Cell_Row0_max_slot_cnt", "max_slot_cnt0", "number", 30, "css_style1", "width: 70px", 1, 1000, 1, InputBoxHandler);
-        makeInputBox("#Cell_Row0_max_bidask_cnt", "max_bidask_cnt0", "number", 5, "css_style1", "width: 100px", 1, 20, 1, InputBoxHandler);
-        makeInputBox("#Cell_Row0_limit_KRW", "limit_KRW0", "number", 10000000, "css_style1", "width: 80px", 1000, 10000000, 10000, InputBoxHandler);
-        makeInputBox("#Cell_Row0_limit_Coin", "limit_KRW0", "number", 10000, "css_style1", "width: 80px", 500, 1000000, 100, InputBoxHandler);
+        index = 0;
+        for (key in pf)
+        {
+            index++;
+            let market = key.split('_')[0];
+            let marketID = key.split('_')[1];
+            let config = {}
+            //get_ConfigParam(config_filename[market][marketID]).then((data) => { console.log("OK = ", data)}).catch((error) => { console.log("catch error = ", error)});
+            config = await get_ConfigParam(config_filename[market][marketID]); 
 
-        makeInputBox("#Cell_Row0_amount0", "amount00", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
-        makeInputBox("#Cell_Row0_amount1", "amount10", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
-        makeInputBox("#Cell_Row0_amount2", "amount20", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
-        makeInputBox("#Cell_Row0_amount3", "amount30", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
-        makeInputBox("#Cell_Row0_amount4", "amount40", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
-        makeInputBox("#Cell_Row0_amount5", "amount50", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
-        makeInputBox("#Cell_Row0_amount6", "amount60", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
-        makeInputBox("#Cell_Row0_amount7", "amount70", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
-        makeInputBox("#Cell_Row0_amount8", "amount80", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
-        makeInputBox("#Cell_Row0_amount9", "amount90", "number", 1000, "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+            if(config['errno'] == undefined)
+            {
+                if(config_param.hasOwnProperty(market) == false) { config_param[market] = {}; }
+                if(config_param[market].hasOwnProperty(marketID) == false) { config_param[market][marketID] = {}; }
+                config_param[market][marketID] = config;
 
-        makeButton("#Cell_Row0_applay_cfg", "apply_cfg_Btn", "Apply CFG", ButtonClickhandler, "css_style1", "width: 100px");
+                let market_list_index = portfolio_list.indexOf(market);
+                makeListBox("#Cell_instance" + index.toString() + "_market", "market" + index.toString(), portfolio_list, ListBox_handleChange, "css_style1", "width: 90px", market_list_index, "single", 1);
+                makeInputBox("#Cell_instance" + index.toString() + "_ID", "ID" + index.toString(), "text", marketID, "css_style1", "width: 70px", 5000, 1000000, 10, InputBoxHandler);
+
+                let trade_mode_index = trade_mode.indexOf(config['trade_mode']);
+                makeListBox("#Cell_instance" + index.toString() + "_mode", "mode" + index.toString(), trade_mode, ListBox_handleChange, "css_style1", "width: 70px", trade_mode_index, "single", 1);
+
+                let algorithm_index = algorithm.indexOf(config['restart_flag']);
+                makeListBox("#Cell_instance" + index.toString() + "_algorithm", "algorithm" + index.toString(), algorithm, ListBox_handleChange, "css_style1", "width: 80px", algorithm_index, "single", 1);
+                makeInputBox("#Cell_instance" + index.toString() + "_base_price", "base_price" + index.toString(), "number", config['restart_base_price'], "css_style1", "width: 70px", 1000, 50000000, 10, InputBoxHandler);
+
+                let control_mode_index = control_mode.indexOf(config['control_mode']);
+                makeListBox("#Cell_instance" + index.toString() + "_status", "status" + index.toString(), control_mode, ListBox_handleChange, "css_style1", "width: 70px", control_mode_index, "single", 1);
+
+
+                makeInputBox("#Cell_instance" + index.toString() + "_period", "period" + index.toString(), "number", config['check_period'], "css_style1", "width: 70px", 1, 120, 1, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_newslot_ratio", "newslot_ratio" + index.toString(), "number", config['new_slot_Create_Ratio'], "css_style1", "width: 100px", -15, 15, 0.01, InputBoxHandler);
+                
+                makeInputBox("#Cell_instance" + index.toString() + "_bidask_ratio", "bidask_ratio" + index.toString(), "number", config['new_addBidAsk_Create_Ratio'], "css_style1", "width: 100px", -30, 30, 0.01, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_target_ratio", "target_ratio" + index.toString(), "number", config['target_BidAsk_Ratio'], "css_style1", "width: 100px", -20, 20, 0.01, InputBoxHandler);
+
+                makeInputBox("#Cell_instance" + index.toString() + "_max_slot_cnt", "max_slot_cnt" + index.toString(), "number", config['max_slot_cnt'], "css_style1", "width: 70px", 1, 1000, 1, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_max_bidask_cnt", "max_bidask_cnt" + index.toString(), "number", config['max_addBidAsk_cnt'], "css_style1", "width: 100px", 1, 20, 1, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_limit_KRW", "limit_KRW" + index.toString(), "number", config['limit_invest_KRW'], "css_style1", "width: 80px", 1000, 100000000, 10000, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_limit_Coin", "limit_Coin" + index.toString(), "number", config['limit_invest_coin'], "css_style1", "width: 80px", 500, 50000, 100, InputBoxHandler);
+                
+                makeInputBox("#Cell_instance" + index.toString() + "_amount0", "amount0_" + index.toString(), "number", config['slot_BidAsk_KrwCoin'][0], "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_amount1", "amount1_" + index.toString(), "number", config['slot_BidAsk_KrwCoin'][1], "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_amount2", "amount2_" + index.toString(), "number", config['slot_BidAsk_KrwCoin'][2], "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_amount3", "amount3_" + index.toString(), "number", config['slot_BidAsk_KrwCoin'][3], "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_amount4", "amount4_" + index.toString(), "number", config['slot_BidAsk_KrwCoin'][4], "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_amount5", "amount5_" + index.toString(), "number", config['slot_BidAsk_KrwCoin'][5], "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_amount6", "amount6_" + index.toString(), "number", config['slot_BidAsk_KrwCoin'][6], "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_amount7", "amount7_" + index.toString(), "number", config['slot_BidAsk_KrwCoin'][7], "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_amount8", "amount8_" + index.toString(), "number", config['slot_BidAsk_KrwCoin'][8], "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+                makeInputBox("#Cell_instance" + index.toString() + "_amount9", "amount9_" + index.toString(), "number", config['slot_BidAsk_KrwCoin'][9], "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
+                
+                makeButton("#Cell_instance" + index.toString() + "_applay_cfg", "apply_cfg_Btn" + index.toString(), "Apply CFG", ButtonClickhandler, "css_style1", "width: 100px");
+            }
+            else
+            {
+                console.log("can't read file.....................")
+            }
+        }
     }
 
 
-    function createTds(index, obj, xlabel, ylabel) {
+    function createTds(index, obj, xlabel, ylabel) 
+    {
         var cellname = "";
         for(var i = 0; i < xlabel.length; i++)
         {
             cellname = "Cell_" + ylabel[index] +"_"+ xlabel[i];
             //obj.append($("<td>").css("text-align","center").html('<a href = "https://www.naver.com" target = "_blank">0</a>').attr("statusname", cellname));
             //obj.append($("<td>").css("text-align","center").text('-').attr("cellname", cellname));
-            obj.append($("<td>").css("text-align","center").text('').attr("id", cellname));
+            obj.append($("<td>").css("text-align","center").text("").attr("id", cellname));
         }
     }
 
-    function attachWidgetToTable(tdID, WidgetCategory) {
+    function attachWidgetToTable(tdID, WidgetCategory) 
+    {
         let accessID = "#" + tdID;
 
         switch(WidgetCategory)
@@ -488,9 +434,71 @@
     {
         console.log(" ButtonClickhandler = ", self);
         console.log("Button ID = ", ID);
-        //alert("Button clicked.........");
-        
-        //send_ConfigParam(ID);
+        let instance = ID.replace("apply_cfg_Btn", "");
+        instance = instance*1;
+        let marketlist = Object.keys(pf);
+        console.log("marketlist = ", marketlist, " instance = ", instance);
+        let instance_name = marketlist[instance-1];
+        console.log("instance_name =", instance_name);
+        let market = instance_name.split('_')[0];
+        let marketID = instance_name.split('_')[1];
+        let cur_config = JSON.parse(JSON.stringify(config_param[market][marketID]));
+        let user_config = JSON.parse(JSON.stringify(config_param[market][marketID]));
+        let NeedtoUpdate = false;
+        console.log("cur_config = ", cur_config);
+
+        //{"trade_mode":"reverse","control_mode":"run","simulation":true,"real_test_mode":false,"check_period":15,"slot_BidAsk_KrwCoin":[30,30,30,30,30,30,30,30,30,30],
+        //"max_slot_cnt":30,"max_addBidAsk_cnt":4,"target_BidAsk_Ratio":1.5,"target_BidAsk_Ratio_adj":0.1,"new_slot_Create_Ratio":1,"new_slot_Create_Ratio_adj":0,"new_addBidAsk_Create_Ratio":18,
+        //"new_addBidAsk_Create_Ratio_adj":0.1,"restart_flag":3,"restart_base_price":8300,"limit_invest_coin":1000,"limit_invest_KRW":10000000,"minimum_order_KRW":500,"minimum_order_coin":0.1}
+        user_config['trade_mode'] = getListBox_values("mode"+instance);
+        user_config['restart_flag'] = getListBox_values("algorithm"+instance) * 1;
+        user_config['restart_base_price'] = getInputBox_values("base_price"+instance);
+        user_config['control_mode'] = getListBox_values("status"+instance);
+        user_config['check_period'] = getInputBox_values("period"+instance);
+
+        user_config['new_slot_Create_Ratio'] = getInputBox_values("newslot_ratio"+instance);
+        user_config['new_addBidAsk_Create_Ratio'] = getInputBox_values("bidask_ratio"+instance);
+        user_config['target_BidAsk_Ratio'] = getInputBox_values("target_ratio"+instance);
+        user_config['max_slot_cnt'] = getInputBox_values("max_slot_cnt"+instance);
+        user_config['max_addBidAsk_cnt'] = getInputBox_values("max_bidask_cnt"+instance);
+        user_config['limit_invest_KRW'] = getInputBox_values("limit_KRW"+instance);
+        user_config['limit_invest_coin'] = getInputBox_values("limit_Coin"+instance);
+
+        user_config['slot_BidAsk_KrwCoin'][0] = getInputBox_values("amount0_"+instance);
+        user_config['slot_BidAsk_KrwCoin'][1] = getInputBox_values("amount1_"+instance);
+        user_config['slot_BidAsk_KrwCoin'][2] = getInputBox_values("amount2_"+instance);
+        user_config['slot_BidAsk_KrwCoin'][3] = getInputBox_values("amount3_"+instance);
+        user_config['slot_BidAsk_KrwCoin'][4] = getInputBox_values("amount4_"+instance);
+        user_config['slot_BidAsk_KrwCoin'][5] = getInputBox_values("amount5_"+instance);
+        user_config['slot_BidAsk_KrwCoin'][6] = getInputBox_values("amount6_"+instance);
+        user_config['slot_BidAsk_KrwCoin'][7] = getInputBox_values("amount7_"+instance);
+        user_config['slot_BidAsk_KrwCoin'][8] = getInputBox_values("amount8_"+instance);
+        user_config['slot_BidAsk_KrwCoin'][9] = getInputBox_values("amount9_"+instance);
+
+        console.log("usr_config", instance, "  = ", user_config);
+
+        for(key in cur_config)
+        {
+            if(key == 'slot_BidAsk_KrwCoin')
+            {
+                for(i = 0; i < cur_config[key].length; i++)
+                {
+                    console.log("key = ", key, "index = ", i, " Org = ", cur_config[key][i], " User = ", user_config[key][i]);
+                    if(cur_config[key][i] != user_config[key][i]) { NeedtoUpdate = true; console.log("Data is changed................... = ", key)}
+                }
+            }
+            else
+            {
+                console.log("key = ", key, " Org = ", cur_config[key], " User = ", user_config[key]);
+                if(cur_config[key] != user_config[key]) { NeedtoUpdate = true; console.log("Data is changed................... = ", key)}
+            }
+        }
+
+        if(NeedtoUpdate) 
+        {
+            console.log("Data is changed...................") 
+            Update_ConfigParam(config_filename[market][marketID], user_config); 
+        }
     }
 
     /*
@@ -513,6 +521,7 @@
         $(ParentID).append(Obj);
     }
 
+
     function InputBoxHandler(self, min, max)
     {
         //console.log("InputBoxHandler = ", self);
@@ -526,16 +535,41 @@
     */
     function getInputBox_values(id) 
     {
+        console.log("id = ", id);
         id = "#" + id;
         let Obj = $(id)
         console.log(Obj);
         console.log("Input Box value is ", Obj[0].value);
-        return Obj[0].value;
+        return Obj[0].value * 1;
     }
 
 
 
-    function send_ConfigParam(ID)
+    function Update_ConfigParam(filename, config)
+    {
+        console.log("filename = ", filename, "config = " , config);
+        let senddata = { name : filename, cfg : config };
+
+        let settings = {
+            async : true,
+            crossDomain : true,
+            url : "http://localhost:7000/config/updatecfg",
+            method : "POST",
+            headers : {
+                "Content-Type": "application/json",
+            },
+            data : JSON.stringify(senddata), 
+            success : function (result) { console.log(" upload suceess!!! = ", result); },
+            error : function (error) { console.log(" upload fail!!! = ", error); }
+        }
+
+        $.ajax(settings).done(function (response) {
+            console.log("Respones... : ", response);
+        });
+    }
+
+    
+    function Update_ConfigParamDB(modifed_config)
     {
         let ConfigParams = 
         { 
@@ -604,6 +638,75 @@
 
         $.ajax(settings).done(function (response) {
             console.log("Respones... : ", response);
+        });
+    }
+
+    
+    function get_ConfigParam(filename)
+    {
+        var settings = {
+            "async": true,
+            "crossDomain": true,
+            "url": "http://localhost:7000/config/configparam",
+            "method": "GET",
+            "headers": {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "cache-control": "no-cache",
+            },
+            data : { 'configfile' : filename },
+            /*
+            success : function (data) { console.log("ajax success : config filename = ", filename, " data = ", data); },
+            error : function (error) { console.log("ajax error = ", error); },
+            complete  : function (data) { console.log("ajax complete = ", data);  },
+            */
+        }
+
+        return new Promise(function (resolve, reject)
+        {
+            $.ajax(settings).done(function (response) {
+                console.log("ajax done : config filename = ", filename, " param = ", response);
+                resolve(JSON.parse(response));
+            }).fail(function(error) {
+                console.log("ajax fail = ", error);
+                reject(JSON.parse(error));
+            }).always(function (data) { 
+                 //console.log("ajax always = ", data); 
+            })
+        });
+    }
+
+
+
+    function get_PortfolioLists(filename)
+    {
+        var settings = {
+            "async": true,
+            "crossDomain": true,
+            "url": "http://localhost:7000/config/portfoliolists",
+            "method": "GET",
+            "headers": {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "cache-control": "no-cache",
+            },
+            data : { 'filename' : filename },
+            /*
+            success : function (data) { console.log("ajax success : portfolio filename = ", filename, " data = ", data); },
+            error : function (error) { console.log("ajax error = ", error); },
+            complete  : function (data) { console.log("ajax complete = ", data);  },
+            */
+        }
+
+        return new Promise(function (resolve, reject)
+        {
+            $.ajax(settings).done(function (response) {
+                console.log("ajax done : portfolio filename = ", filename, " param = ", response);
+                resolve(JSON.parse(response));
+            }).fail(function(error) {
+                console.log("ajax portfoliolists fail = ", error);
+                reject(JSON.parse(error));
+            }).always(function (data) { 
+                 console.log("ajax portfoliolists always = ", data); 
+            })
         });
     }
 

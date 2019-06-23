@@ -85,6 +85,43 @@ router.get('/', function(req, res, next) {
     */
 });
 
+
+/* GET default page */
+router.get('/configparam', function(req, res, next) {
+    console.log("[get] body = ", JSON.stringify(req.body));
+    console.log("[get] params(path) = ", JSON.stringify(req.params));
+    console.log("[get] query = ", JSON.stringify(req.query));
+
+    res.writeHead(200, { 'Content-Type': 'text/html' }); // header 설정
+    let filename = req.query['configfile'];
+    fs.readFile(__dirname + '/../output/' + filename, (err, data) => { // 파일 읽는 메소드
+        if (err) {
+            res.end(JSON.stringify(err), 'utf-8');
+            return console.error(err); // 에러 발생시 에러 기록하고 종료
+        }
+        res.end(data, 'utf-8'); // 브라우저로 전송   
+    });
+});
+
+
+/* GET default page */
+router.get('/portfoliolists', function(req, res, next) {
+    console.log("[get] body = ", JSON.stringify(req.body));
+    console.log("[get] params(path) = ", JSON.stringify(req.params));
+    console.log("[get] query = ", JSON.stringify(req.query));
+
+    res.writeHead(200, { 'Content-Type': 'text/html' }); // header 설정
+    let filename = req.query['filename'];
+    fs.readFile(__dirname + '/../parameters/' + filename, (err, data) => { // 파일 읽는 메소드
+        if (err) {
+            res.end(JSON.stringify(err), 'utf-8');
+            return console.error(err); // 에러 발생시 에러 기록하고 종료
+        }
+        res.end(data, 'utf-8'); // 브라우저로 전송   
+    });
+});
+
+
 /*
   DB 검색
 */
@@ -96,6 +133,50 @@ router.get('/list', function(req, res, next) {
     ConfigParam_DB.findAll().then((result) => { console.log("result = ", result); }).catch((error)=> { console.log("error = ", error); });
     res.end("DB List가 검색 완료되었습니다.", 'utf-8'); // 브라우저로 전송   
 });
+
+
+ 
+/* POST param parsing test */
+// http://10.186.115.57:3000/login?param1=param1test&param2=param2test 
+// req.params : /login:id
+// req.query : url상의 ?a=b&c=d { a = b, b = c }
+// req.body : form상의 key / value 쌍. { userid : "sungbin", password : "aaaaaaaa" }
+router.post('/updatecfg', function(req, res, next) {
+    console.log("[POST] body = ", JSON.stringify(req.body));
+    console.log("[POST] params(path) = ", JSON.stringify(req.params));
+    console.log("[POST] query = ", JSON.stringify(req.query));
+
+    let filename = req.body['name'];
+    let config = JSON.stringify(req.body['cfg']);
+    console.log("filename = ", filename, "config = ", config); 
+
+    fs.writeFile(__dirname + "/../output/" + filename, config, function (err) {
+        if (err) throw err;
+        console.log('Saved!');
+      });
+    /*
+    let today = new Date();
+    let newdata = { };
+    let recievedData = req.body;
+    for(market in recievedData)
+    {
+        if(newdata.hasOwnProperty(market) === false) { newdata[market] = {}; }
+        
+        for(marketID in recievedData[market])
+        {
+            if(newdata[market].hasOwnProperty(marketID) === false) { newdata[market][marketID] = { }; }
+            newdata[market][marketID]['marketID'] = market + "_" + marketID;
+            newdata[market][marketID]['inserted'] = today;
+            newdata[market][marketID]['config'] = recievedData[market][marketID]['config'];
+        }
+    }
+    
+    console.log("newdata = ", newdata, JSON.stringify(newdata));
+    */
+    res.end("Update 완료되었습니다.", 'utf-8'); // 브라우저로 전송   
+});
+
+
 
 
   
@@ -183,6 +264,9 @@ router.put('/update', function(req, res, next) {
 
 
 module.exports = router;
+
+
+
 
 /*
 const SchemaDefine = { 
