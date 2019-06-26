@@ -135,6 +135,24 @@ router.get('/list', function(req, res, next) {
 });
 
 
+router.get('/netincomlist', function(req, res, next) {
+    console.log("[get] body = ", JSON.stringify(req.body));
+    console.log("[get] params(path) = ", JSON.stringify(req.params));
+    console.log("[get] query = ", JSON.stringify(req.query));
+    
+    let data = { 'list' : [
+         { "market" : "KRW-EOS", "ID" : 'ID1', "mode" : "reverse", "CrDate" : "2019/11/11T11:00", "SlotNo" : 1, "BidAskNo" : 2, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, "eval_Ratio" : -1.5, "Last_Tr_Price" : 9000, "Gap_Ratio" : 10 },
+         { "market" : "KRW-EOS", "ID" : 'ID2', "mode" : "reverse", "CrDate" : "2019/10/11T12:00", "SlotNo" : 1, "BidAskNo" : 3, "Coin_BidAsk_Average" : 8100, "BidAsk_KRW" : 5000000, "Coin_KRW_eval" : 10, "eval_Ratio" : 1.5, "Last_Tr_Price" : 9100, "Gap_Ratio" : 11 },
+         { "market" : "KRW-EOS", "ID" : 'ID3', "mode" : "reverse", "CrDate" : "2019/09/11T13:00", "SlotNo" : 1, "BidAskNo" : 4, "Coin_BidAsk_Average" : 8200, "BidAsk_KRW" : 6000000, "Coin_KRW_eval" : -11, "eval_Ratio" : -2.5, "Last_Tr_Price" : 9200, "Gap_Ratio" : 12 },
+         { "market" : "KRW-EOS", "ID" : 'ID4', "mode" : "reverse", "CrDate" : "2019/08/11T14:00", "SlotNo" : 1, "BidAskNo" : 5, "Coin_BidAsk_Average" : 8300, "BidAsk_KRW" : 7000000, "Coin_KRW_eval" : 11, "eval_Ratio" : 2.5, "Last_Tr_Price" : 9300, "Gap_Ratio" : 13 },
+         { "market" : "KRW-EOS", "ID" : 'ID1', "mode" : "normal", "CrDate" : "2019/07/11T15:00", "SlotNo" : 1, "BidAskNo" : 6, "Coin_BidAsk_Average" : 8400, "BidAsk_KRW" : 8000000, "Coin_KRW_eval" : -12, "eval_Ratio" : -3.5, "Last_Tr_Price" : 9400, "Gap_Ratio" : 14 },
+         { "market" : "KRW-EOS", "ID" : 'ID2', "mode" : "normal", "CrDate" : "2019/06/11T16:00", "SlotNo" : 1, "BidAskNo" : 7, "Coin_BidAsk_Average" : 8400, "BidAsk_KRW" : 9000000, "Coin_KRW_eval" : 12, "eval_Ratio" : 3.5, "Last_Tr_Price" : 9500, "Gap_Ratio" : -15 },
+    ] };
+
+    res.end(JSON.stringify(data), 'utf-8'); // 브라우저로 전송   
+});
+
+
  
 /* POST param parsing test */
 // http://10.186.115.57:3000/login?param1=param1test&param2=param2test 
