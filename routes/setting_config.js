@@ -213,15 +213,17 @@ router.get('/netincomesummary', function(req, res, next) {
     console.log("[get] body = ", JSON.stringify(req.body));
     console.log("[get] params(path) = ", JSON.stringify(req.params));
     console.log("[get] query = ", JSON.stringify(req.query));
-    
-    let data = { 'summary' : [
-         { "market" : "KRW-EOS", "ID" : 'ID1', "mode" : "reverse", "CrDate" : "2019/11/11T11:00", "total_invest_KRW" : 0, "eval_KRW" : 0, "net_KRW" : 0, "net_KRW_Ratio" : 0, "total_Ask_Coin" : 500, "reBid_Coin" : 600, "net_Coin" : 100, "net_Coin_Ratio" : 20 },
-         { "market" : "KRW-EOS", "ID" : 'ID2', "mode" : "reverse", "CrDate" : "2019/11/11T11:00", "total_invest_KRW" : 0, "eval_KRW" : 0, "net_KRW" : 0, "net_KRW_Ratio" : 0, "total_Ask_Coin" : 500, "reBid_Coin" : 600, "net_Coin" : 100, "net_Coin_Ratio" : 20 },
-         { "market" : "KRW-EOS", "ID" : 'ID3', "mode" : "normal", "CrDate" : "2019/11/11T11:00", "total_invest_KRW" : 15000000, "eval_KRW" : 14000000, "net_KRW" : -1000000, "net_KRW_Ratio" : -5, "total_Ask_Coin" : 0, "reBid_Coin" : 0, "net_Coin" : 0, "net_Coin_Ratio" : 0 },
-         { "market" : "KRW-EOS", "ID" : 'ID4', "mode" : "normal", "CrDate" : "2019/11/11T11:00", "total_invest_KRW" : 15000000, "eval_KRW" : 14000000, "net_KRW" : -1000000, "net_KRW_Ratio" : -5, "total_Ask_Coin" : 0, "reBid_Coin" : 0, "net_Coin" : 0, "net_Coin_Ratio" : 0 },
-    ] };
 
-    res.end(JSON.stringify(data), 'utf-8'); // 브라우저로 전송   
+    
+    let filename = "netincome_summary.json";
+    fs.readFile(__dirname + '/../output/' + filename, (err, data) => { // 파일 읽는 메소드
+        if (err) {
+            res.end(JSON.stringify(err), 'utf-8');
+            return console.error(err); // 에러 발생시 에러 기록하고 종료
+        }
+
+        res.end(data, 'utf-8'); // 브라우저로 전송   
+    });
 });
 
 
@@ -230,7 +232,23 @@ router.get('/netincomedetaillist', function(req, res, next) {
     console.log("[get] body = ", JSON.stringify(req.body));
     console.log("[get] params(path) = ", JSON.stringify(req.params));
     console.log("[get] query = ", JSON.stringify(req.query));
-    
+
+    let filename = "netincome_details.json";
+    fs.readFile(__dirname + '/../output/' + filename, (err, data) => { // 파일 읽는 메소드
+        if (err) {
+            res.end(JSON.stringify(err), 'utf-8');
+            return console.error(err); // 에러 발생시 에러 기록하고 종료
+        }
+        //console.log("Data = ", JSON.parse(data));
+        let market = req.query['market'];
+        let marketID = req.query['marketID'];
+        let jsondata = JSON.parse(data);
+        jsondata = jsondata[market][marketID];
+        //console.log("market = ", market, "marketID = ", marketID, "jsondata = ", JSON.stringify(jsondata));
+        res.end(JSON.stringify(jsondata), 'utf-8'); // 브라우저로 전송   
+    });
+    /*
+
     let data = { 'list' : [
         { "market" : "KRW-EOS", "ID" : 'ID1', "mode" : "reverse", "CrDate" : "2019/11/11T11:00", "SlotNo" : 0, "BidAsk_Cnt" : 2, 
         "normal" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
@@ -247,6 +265,7 @@ router.get('/netincomedetaillist', function(req, res, next) {
     ] };
 
     res.end(JSON.stringify(data), 'utf-8'); // 브라우저로 전송   
+    */
 });
 
 

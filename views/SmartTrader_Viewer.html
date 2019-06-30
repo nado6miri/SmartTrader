@@ -145,9 +145,10 @@
         <table id="TradingSummaryTable" classe=custom_table>
             <thead id="TradingSummary_head">
                 <tr>
-                    <th colspan="19" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">트레이딩 요약</th>
+                    <th colspan="20" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">트레이딩 요약</th>
                 </tr>
                 <tr>
+                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> No</th>
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 종목</th>
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> ID</th>
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 동작모드</th>
@@ -174,8 +175,20 @@
                 </tr>
     
             </thead>
-            <tbody id="TradingSummary_body">
-            </tbody>
+            <tbody id="TradingSummary_body"></tbody>
+            <tfoot id="TradingSummary_foot"><tr>
+                <td colspan = "5">Sum</td>
+                <td id = "TS1">-</td>
+                <td id = "TS2">-</td>
+                <td id = "TS3">-</td>
+                <td id = "TS4">-</td>
+                <td id = "TS5">-</td>
+                <td id = "TS6">-</td>
+                <td id = "TS7">-</td>
+                <td id = "TS8">-</td>
+                <td id = "TS9">-</td>
+                <td id = "TS10">-</td>
+            </tr></tfoot>
         </table>
 
 
@@ -191,32 +204,30 @@
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> ID</th>
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 동작모드</th>
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 거래일시</th>
-                    <th colspan = "4" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Normal Mode</th>
-                    <th colspan = "4" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Reverse Mode</th>
+                    <th colspan = "3" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Normal Mode</th>
+                    <th colspan = "3" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Reverse Mode</th>
+                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 이익율(%)</th>
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Detail Info</th>
                 </tr>
                 <tr>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 총 투자금액(KRW)</th>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 현 평가금액(KRW)</th>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 이익 금액(KRW)</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 원화(KRW) 이익율</th>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 매도 Coin 합계</th>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 재매수 Coin 합계</th>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 증가 합계</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 이익율(%)</th>
                 </tr>
             </thead>
             <tbody id="IncomeSummary_body"></tbody>
             <tfoot id="IncomeSummary_foot"><tr>
-                <td colspan = "4">Sum</td>
+                <td colspan = "5">Sum</td>
                 <td id = "N1">-</td>
                 <td id = "N2">-</td>
                 <td id = "N3">-</td>
-                <td id = "N4">-</td>
                 <td id = "R1">-</td>
                 <td id = "R2">-</td>
                 <td id = "R3">-</td>
-                <td id = "R4">-</td>
+                <td id = "NR">-</td>
             </tr></tfoot>
         </table>
 
@@ -225,9 +236,10 @@
         <table id="TradingDetailTable" classe=custom_table>
             <thead id="TradingDetail_head">
                 <tr>
-                    <th colspan="18" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">트레이딩 상세 정보</th>
+                    <th colspan="19" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">트레이딩 상세 정보</th>
                 </tr>
                 <tr>
+                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> No</th>
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 종목</th>
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> ID</th>
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 동작모드</th>
@@ -272,7 +284,7 @@
         <table id="IncomeDetailTable" classe=custom_table>
             <thead id="IncomeDetail_head">
                 <tr>
-                    <th colspan="16" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">익절 상세 정보</th>
+                    <th colspan="18" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">익절 상세 정보</th>
                 </tr>
                 <tr>
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> No</th>
@@ -282,18 +294,20 @@
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 거래일시</th>
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Slot No</th>
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> BidAsk Cnt</th>
-                    <th colspan = "4" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Normal Mode</th>
-                    <th colspan = "4" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Reverse Mode</th>
+                    <th colspan = "5" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Normal Mode</th>
+                    <th colspan = "5" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Reverse Mode</th>
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 이익율(%)</th>
                 </tr>
                 <tr>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매입개수 </th>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매입평단가</th>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매입금액</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매도금액</th>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> KRW 이익</th>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매도개수 </th>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매도평단가</th>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> KRW 회수금액</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 재매수 수량</th>
                     <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 이익</th>
                 </tr>
             </thead>
@@ -304,10 +318,12 @@
                     <td id = "N2">-</td>
                     <td id = "N3">-</td>
                     <td id = "N4">-</td>
+                    <td id = "N5">-</td>
                     <td id = "R1">-</td>
                     <td id = "R2">-</td>
                     <td id = "R3">-</td>
                     <td id = "R4">-</td>
+                    <td id = "R5">-</td>
             </tr></tfoot>
         </table>
         <div id = "IncomeDetailTableDiv"></div>
@@ -410,10 +426,14 @@
             newtr.append($("<td>").css("text-align","center").text(p_max));    
             newtr.append($("<td>").css("text-align","center").text(p_start));    
             newtr.append($("<td>").css("text-align","center").text(p_step));    
-            newtr.append($("<td>").css("text-align","center").text(p_direction));    
-            let btnid = "pfbtn" + index.toString();
-            newtr.append($('<td>').attr('id', btnid));
-            makeButton("#pfbtn" + index.toString(), "pfapplyBtn" + index.toString(), "Trading 반영", ButtonClickhandler, "css_style1", "width: 120px");
+            newtr.append($("<td>").css("text-align","center").text(p_direction));  
+            
+            if(index == 1)
+            {
+                let btnid = "pfbtn" + index.toString();
+                newtr.append($('<td>').attr('id', btnid));
+                makeButton("#pfbtn" + index.toString(), "pfapplyBtn" + index.toString(), "Trading 반영", Pfapply_ButtonClickhandler, "css_style1", "wdith: 120px");
+            }
         }
     }
 
@@ -505,7 +525,7 @@
         Create_TradingSummaryTable("TradingSummary_body");
         Create_TradingDetailTable("TradingDetail_body", null, null);
         Create_IncomeSummaryTable("IncomeSummary_body");
-        Create_IncomeDetailTable("IncomeDetail_body");
+        Create_IncomeDetailTable("IncomeDetail_body", null, null);
     }
 
 
@@ -546,6 +566,7 @@
 
                     var tr = $('<tr>');
                     table.append(tr);
+                    $(tr).append($('<td>').html(index));
                     $(tr).append($('<td>').html(market));
                     $(tr).append($('<td>').html(marketID));
                     $(tr).append($('<td>').html(mode));
@@ -569,58 +590,6 @@
                     makeButton("#trbtn" + index.toString(), "TradingDetailBtn" + index.toString(), "Veiw Detail", TrDetailView_ButtonClickhandler, "css_style1", "width: 150px");
                 }
             }
-            /*
-            console.log("jsondata['list'].length = ", jsondata['list'].length);
-            for (i = 0; i < jsondata['list'].length; i++) 
-            {
-                var no = i + 1;
-                var market = jsondata["list"][i]["market"];
-                var marketID = jsondata["list"][i]["ID"];
-                var mode = jsondata["list"][i]["mode"];
-                var CrDate = jsondata["list"][i]["CrDate"];
-                var SlotNo = jsondata["list"][i]["SlotNo"];
-                var SeedSlotCnt = jsondata["list"][i]["SeedSlotCnt"];
-                var cur_price = jsondata["list"][i]["cur_price"];
-                var Last_Tr_Price = jsondata["list"][i]["Last_Tr_Price"];
-                var Net_Ratio = jsondata["list"][i]["Net_Ratio"];
-                var Gap_Ratio = jsondata["list"][i]["Gap_Ratio"];
-
-                var N_Coin_BidAsk_amount = jsondata["list"][i]['normal']["Coin_BidAsk_amount"];
-                var N_Coin_BidAsk_Average = jsondata["list"][i]['normal']["Coin_BidAsk_Average"];
-                var N_BidAsk_KRW = jsondata["list"][i]['normal']["BidAsk_KRW"];
-                var N_Coin_KRW_eval = jsondata["list"][i]['normal']["Coin_KRW_eval"];
-
-                var R_Coin_BidAsk_amount = jsondata["list"][i]['reverse']["Coin_BidAsk_amount"];
-                var R_Coin_BidAsk_Average = jsondata["list"][i]['reverse']["Coin_BidAsk_Average"];
-                var R_BidAsk_KRW = jsondata["list"][i]['reverse']["BidAsk_KRW"];
-                var R_Coin_KRW_eval = jsondata["list"][i]['reverse']["Coin_KRW_eval"];
-
-                var tr = $('<tr>');
-                table.append(tr);
-                $(tr).append($('<td>').html(market));
-                $(tr).append($('<td>').html(marketID));
-                $(tr).append($('<td>').html(mode));
-                $(tr).append($('<td>').html(CrDate));
-                $(tr).append($('<td>').html(SlotNo));
-                $(tr).append($('<td>').html(SeedSlotCnt));
-                $(tr).append($('<td>').html(N_Coin_BidAsk_amount));
-                $(tr).append($('<td>').html(N_Coin_BidAsk_Average));
-                $(tr).append($('<td>').html(N_BidAsk_KRW));
-                $(tr).append($('<td>').html(N_Coin_KRW_eval));
-                $(tr).append($('<td>').html(R_Coin_BidAsk_amount));
-                $(tr).append($('<td>').html(R_Coin_BidAsk_Average));
-                $(tr).append($('<td>').html(R_BidAsk_KRW));
-                $(tr).append($('<td>').html(R_Coin_KRW_eval));
-                $(tr).append($('<td>').html(Net_Ratio));
-                $(tr).append($('<td>').html(Last_Tr_Price));
-                $(tr).append($('<td>').html(cur_price));
-                $(tr).append($('<td>').html(Gap_Ratio));
-                let btnid = "trbtn" + no.toString();
-                $(tr).append($('<td>').attr('id', btnid));
-                makeButton("#trbtn" + no.toString(), "TradingDetailBtn" + no.toString(), "Veiw Detail", ButtonClickhandler, "css_style1", "width: 150px");
-            }
-            */
-
         }).catch((error) => {
 
         });        
@@ -640,6 +609,7 @@
             console.log("get_TradingDetailInfo - jsondata.length = ", jsondata['list'].length);
             for (i = 0; i < jsondata['list'].length; i++) 
             {
+                index++;
                 var mode = jsondata['list'][i]["mode"];
                 var CrDate = jsondata['list'][i]["CrDate"];
                 var SlotNo = jsondata['list'][i]["SlotNo"];
@@ -661,6 +631,7 @@
 
                 var tr = $('<tr>');
                 table.append(tr);
+                $(tr).append($('<td>').html(index));
                 $(tr).append($('<td>').html(market));
                 $(tr).append($('<td>').html(marketID));
                 $(tr).append($('<td>').html(mode));
@@ -689,50 +660,54 @@
 
     function Create_IncomeSummaryTable(table_bodyID)
     {
-        let market = "KRW-EOS";
-        let marketID = "ID1";
         let index = 0;
         let selecterID = "#" + table_bodyID;
         let table = $(selecterID);
-        index = 0;
+        let market = "KRW-EOS";
+        let marketID = "ID1";
 
         get_NetIncomeSummary(market, marketID, "all").then((jsondata) => {
-            for (i = 0; i < jsondata['summary'].length; i++) 
+            for (market in jsondata)
             {
-                var no = i + 1;
-                var market = jsondata["summary"][i]["market"];
-                var marketID = jsondata["summary"][i]["ID"];
-                var mode = jsondata["summary"][i]["mode"];
-                var CrDate = jsondata["summary"][i]["CrDate"];
-                var total_invest_KRW = jsondata["summary"][i]["total_invest_KRW"];
-                var eval_KRW = jsondata["summary"][i]["eval_KRW"];
-                var net_KRW = jsondata["summary"][i]["net_KRW"];
-                var net_KRW_Ratio = jsondata["summary"][i]["net_KRW_Ratio"];
-                var total_Ask_Coin = jsondata["summary"][i]["total_Ask_Coin"];
-                var reBid_Coin = jsondata["summary"][i]["reBid_Coin"];
-                var net_Coin = jsondata["summary"][i]["net_Coin"];
-                var net_Coin_Ratio = jsondata["summary"][i]["net_Coin_Ratio"];
+                for (marketID in jsondata[market])
+                {
+                    index++;
+                    var mode = jsondata[market][marketID]["mode"];
+                    var CrDate = jsondata[market][marketID]["CrDate"];
 
-                var tr = $('<tr>');
-                table.append(tr);
-                $(tr).append($('<td>').html(no));
-                $(tr).append($('<td>').html(market));
-                $(tr).append($('<td>').html(marketID));
-                $(tr).append($('<td>').html(mode));
-                $(tr).append($('<td>').html(CrDate));
-                $(tr).append($('<td>').html(total_invest_KRW));
-                $(tr).append($('<td>').html(eval_KRW));
-                $(tr).append($('<td>').html(net_KRW));
-                $(tr).append($('<td>').html(net_KRW_Ratio));
-                $(tr).append($('<td>').html(total_Ask_Coin));
-                $(tr).append($('<td>').html(reBid_Coin));
-                $(tr).append($('<td>').html(net_Coin));
-                $(tr).append($('<td>').html(net_Coin_Ratio));
-                let btnid = "incomebtn" + no.toString();
-                $(tr).append($('<td>').attr('id', btnid));
-                makeButton("#incomebtn" + no.toString(), "NetIncomeDetailBtn" + no.toString(), "Veiw Detail", ButtonClickhandler, "css_style1", "width: 90px");
+                    var total_invest_KRW = jsondata[market][marketID]['normal']["total_invest_KRW"];
+                    var eval_KRW = jsondata[market][marketID]['normal']["eval_KRW"];
+                    var net_KRW = jsondata[market][marketID]['normal']["net_KRW"];
+
+                    var total_Ask_Coin = jsondata[market][marketID]['reverse']["total_Ask_Coin"];
+                    var reBid_Coin = jsondata[market][marketID]['reverse']["reBid_Coin"];
+                    var net_Coin = jsondata[market][marketID]['reverse']["net_Coin"];
+
+                    var Net_Ratio = jsondata[market][marketID]["Net_Ratio"];
+
+                    var tr = $('<tr>');
+                    table.append(tr);
+                    $(tr).append($('<td>').html(index));
+                    $(tr).append($('<td>').html(market));
+                    $(tr).append($('<td>').html(marketID));
+                    $(tr).append($('<td>').html(mode));
+                    $(tr).append($('<td>').html(CrDate));
+
+                    $(tr).append($('<td>').html(total_invest_KRW));
+                    $(tr).append($('<td>').html(eval_KRW));
+                    $(tr).append($('<td>').html(net_KRW));
+
+                    $(tr).append($('<td>').html(total_Ask_Coin));
+                    $(tr).append($('<td>').html(reBid_Coin));
+                    $(tr).append($('<td>').html(net_Coin));
+
+                    $(tr).append($('<td>').html(Net_Ratio));
+
+                    let btnid = "incomebtn" + index.toString();
+                    $(tr).append($('<td>').attr('id', btnid));
+                    makeButton("#incomebtn" + index.toString(), "NetIncomeDetailBtn" + index.toString(), "Veiw Detail", NetIncomDetailView_ButtonClickhandler, "css_style1", "width: 90px");
+                }
             }
-
         }).catch((error) => {
 
         });
@@ -740,40 +715,40 @@
 
 
 
-    function Create_IncomeDetailTable(table_bodyID)
+    function Create_IncomeDetailTable(table_bodyID, market, marketID)
     {
-        let market = "KRW-EOS";
-        let marketID = "ID1";
         let index = 0;
         let selecterID = "#" + table_bodyID;
         let table = $(selecterID);
         index = 0;
+
+        if(market == null || marketID == null) { return; }
 
         get_NetIncomeDetailInfo(market, marketID, "all").then((jsondata) => {
             console.log("jsondata['list'].length = ", jsondata['list'].length);
             for (i = 0; i < jsondata['list'].length; i++) 
             {
                 var no = i + 1;
-                var market = jsondata["list"][i]["market"];
-                var marketID = jsondata["list"][i]["ID"];
                 var mode = jsondata["list"][i]["mode"];
                 var CrDate = jsondata["list"][i]["CrDate"];
                 var SlotNo = jsondata["list"][i]["SlotNo"];
                 var BidAsk_Cnt = jsondata["list"][i]["BidAsk_Cnt"];
                 var cur_price = jsondata["list"][i]["cur_price"];
                 var Last_Tr_Price = jsondata["list"][i]["Last_Tr_Price"];
-                var eval_Ratio = jsondata["list"][i]["eval_Ratio"];
+                var Net_Ratio = jsondata["list"][i]["Net_Ratio"];
                 var Gap_Ratio = jsondata["list"][i]["Gap_Ratio"];
 
-                var N_Coin_BidAsk_amount = jsondata["list"][i]['normal']["Coin_BidAsk_amount"];
-                var N_Coin_BidAsk_Average = jsondata["list"][i]['normal']["Coin_BidAsk_Average"];
-                var N_BidAsk_KRW = jsondata["list"][i]['normal']["BidAsk_KRW"];
-                var N_Coin_KRW_eval = jsondata["list"][i]['normal']["Coin_KRW_eval"];
+                var Coin_Bid_amount = jsondata["list"][i]['normal']["Coin_Bid_amount"];
+                var Coin_Bid_Average = jsondata["list"][i]['normal']["Coin_Bid_Average"];
+                var Bid_KRW = jsondata["list"][i]['normal']["Bid_KRW"];
+                var Ask_KRW = jsondata["list"][i]['normal']["Ask_KRW"];
+                var Net_KRW = jsondata["list"][i]['normal']["Net_KRW"];
 
-                var R_Coin_BidAsk_amount = jsondata["list"][i]['reverse']["Coin_BidAsk_amount"];
-                var R_Coin_BidAsk_Average = jsondata["list"][i]['reverse']["Coin_BidAsk_Average"];
-                var R_BidAsk_KRW = jsondata["list"][i]['reverse']["BidAsk_KRW"];
-                var R_Coin_KRW_eval = jsondata["list"][i]['reverse']["Coin_KRW_eval"];
+                var Coin_Ask_amount = jsondata["list"][i]['reverse']["Coin_Ask_amount"];
+                var Coin_Ask_Average = jsondata["list"][i]['reverse']["Coin_Ask_Average"];
+                var Reclaim_KRW = jsondata["list"][i]['reverse']["Reclaim_KRW"];
+                var ReBid_amount = jsondata["list"][i]['reverse']["ReBid_amount"];
+                var Net_Coin = jsondata["list"][i]['reverse']["Net_Coin"];
 
                 var tr = $('<tr>');
                 table.append(tr);
@@ -784,15 +759,17 @@
                 $(tr).append($('<td>').html(CrDate));
                 $(tr).append($('<td>').html(SlotNo));
                 $(tr).append($('<td>').html(BidAsk_Cnt));
-                $(tr).append($('<td>').html(N_Coin_BidAsk_amount));
-                $(tr).append($('<td>').html(N_Coin_BidAsk_Average));
-                $(tr).append($('<td>').html(N_BidAsk_KRW));
-                $(tr).append($('<td>').html(N_Coin_KRW_eval));
-                $(tr).append($('<td>').html(R_Coin_BidAsk_amount));
-                $(tr).append($('<td>').html(R_Coin_BidAsk_Average));
-                $(tr).append($('<td>').html(R_BidAsk_KRW));
-                $(tr).append($('<td>').html(R_Coin_KRW_eval));
-                $(tr).append($('<td>').html(eval_Ratio));
+                $(tr).append($('<td>').html(Coin_Bid_amount));
+                $(tr).append($('<td>').html(Coin_Bid_Average));
+                $(tr).append($('<td>').html(Bid_KRW));
+                $(tr).append($('<td>').html(Ask_KRW));
+                $(tr).append($('<td>').html(Net_KRW));
+                $(tr).append($('<td>').html(Coin_Ask_amount));
+                $(tr).append($('<td>').html(Coin_Ask_Average));
+                $(tr).append($('<td>').html(Reclaim_KRW));
+                $(tr).append($('<td>').html(ReBid_amount));
+                $(tr).append($('<td>').html(Net_Coin));
+                $(tr).append($('<td>').html(Net_Ratio));
             }
         }).catch((error) => {
 
@@ -981,6 +958,25 @@
         }
     }
 
+    
+    /*
+    Button Click Handler.......
+    */
+    function Pfapply_ButtonClickhandler(self, ID)
+    {
+        console.log(" Pfapply_ButtonClickhandler = ", self);
+        console.log("Button ID = ", ID);
+        let instance = ID.replace("pfapplyBtn", "");
+        instance = instance*1;
+        let marketlist = Object.keys(pf);
+        console.log("marketlist = ", marketlist, " instance = ", instance);
+        let instance_name = marketlist[instance-1];
+        console.log("instance_name =", instance_name);
+        let market = instance_name.split('_')[0];
+        let marketID = instance_name.split('_')[1];
+    }
+
+
     /*
     Button Click Handler.......
     */
@@ -999,6 +995,24 @@
         $("#TradingDetail_body").empty();
         Create_TradingDetailTable("TradingDetail_body", market, marketID);
     }
+
+
+    function NetIncomDetailView_ButtonClickhandler(self, ID)
+    {
+        console.log("NetIncomDetailView_ButtonClickhandler = ", self);
+        console.log("Button ID = ", ID);
+        let instance = ID.replace("NetIncomeDetailBtn", "");
+        instance = instance*1;
+        let marketlist = Object.keys(pf);
+        console.log("marketlist = ", marketlist, " instance = ", instance);
+        let instance_name = marketlist[instance-1];
+        console.log("instance_name =", instance_name);
+        let market = instance_name.split('_')[0];
+        let marketID = instance_name.split('_')[1];
+        $("#IncomeDetail_body").empty();
+        Create_IncomeDetailTable("IncomeDetail_body", market, marketID);
+    }
+
 
 
     /*
@@ -1070,7 +1084,7 @@
         let settings = {
             async : true,
             crossDomain : true,
-            url : "http://localhost:7000/config/updatecfg",
+            url : "http://192.168.123.100:7000/config/updatecfg",
             method : "POST",
             headers : {
                 "Content-Type": "application/json",
@@ -1164,7 +1178,7 @@
         var settings = {
             "async": true,
             "crossDomain": true,
-            "url": "http://localhost:7000/config/configparam",
+            "url": "http://192.168.123.100:7000/config/configparam",
             "method": "GET",
             "headers": {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -1199,7 +1213,7 @@
         var settings = {
             "async": true,
             "crossDomain": true,
-            "url": "http://localhost:7000/config/portfoliolists",
+            "url": "http://192.168.123.100:7000/config/portfoliolists",
             "method": "GET",
             "headers": {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -1234,7 +1248,7 @@
         var settings = {
             "async": true,
             "crossDomain": true,
-            "url": "http://localhost:7000/config/tradingsummary",
+            "url": "http://192.168.123.100:7000/config/tradingsummary",
             "method": "GET",
             "headers": {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -1271,7 +1285,7 @@
         var settings = {
             "async": true,
             "crossDomain": true,
-            "url": "http://localhost:7000/config/tradingdetaillist",
+            "url": "http://192.168.123.100:7000/config/tradingdetaillist",
             "method": "GET",
             "headers": {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -1309,7 +1323,7 @@
         var settings = {
             "async": true,
             "crossDomain": true,
-            "url": "http://localhost:7000/config/netincomesummary",
+            "url": "http://192.168.123.100:7000/config/netincomesummary",
             "method": "GET",
             "headers": {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -1330,7 +1344,7 @@
         return new Promise(function (resolve, reject)
         {
             $.ajax(settings).done(function (response) {
-                console.log("ajax done : param = ", response);
+                console.log("ajax NetIncom Summary done : param = ", response);
                 resolve(JSON.parse(response));
             }).fail(function(error) {
                 console.log("ajax NetIncom Summary fail = ", error);
@@ -1346,7 +1360,7 @@
         var settings = {
             "async": true,
             "crossDomain": true,
-            "url": "http://localhost:7000/config/netincomedetaillist",
+            "url": "http://192.168.123.100:7000/config/netincomedetaillist",
             "method": "GET",
             "headers": {
                 "Content-Type": "application/x-www-form-urlencoded",
