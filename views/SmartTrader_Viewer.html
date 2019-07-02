@@ -24,11 +24,17 @@
 <!-- table style -->
 <style>
     .custom_table {
+        display : inline;
         width : 100%;
         border-collapse : collapse;
         border-spacing : 0px 0px;
         border : 1px solid #7f7f7f;
         text-align : center;
+    }
+
+    .custom_table tbody {
+        height : 100px;
+        overflow : auto;
     }
 
     .custom_table th {
@@ -50,6 +56,26 @@
         text-align : center;
     }
 
+
+    .div_date_left {
+        width: 25%;
+        float: left;
+        box-sizing: border-box;
+        background: rgb(255, 255, 255);
+    }
+    .div_date_middle {
+        width: 25%;
+        float: left;
+        box-sizing: border-box;
+        background: rgb(255, 255, 255);
+    }
+    .div_date_right {
+        width: 50%;
+        float: left;
+        box-sizing: border-box;
+        background: rgb(255, 255, 255);
+    }
+    </style>
 </style>
 
 <html>
@@ -62,8 +88,9 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     </head>
     <body>
-        <!-- Portfolio Table -->
-        <table id="PortfolioTable" classe=custom_table>
+        <!-- Portfolio Table 
+        <hr style="height: 4px; border: 2px outset #c8ccca; background-color: #eb3c1d"/>
+        <table id="PortfolioTable" class=custom_table>
             <thead id="PortfolioTable_head">
                 <tr>
                     <th colspan="11" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">포트폴리오 구성</th>
@@ -85,9 +112,10 @@
             <tbody id="PortfolioTable_body">
             </tbody>
         </table>
-
+        -->
         <!-- Configuration Table -->
-        <table id="ConfigTable" classe=custom_table>
+        <hr style="height: 4px; border: 2px outset #c8ccca; background-color: #eb3c1d"/>
+        <table id="ConfigTable" class=custom_table>
             <thead id="ConfigTable_head">
                 <tr>
                     <th colspan="25" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">Trader Configuration 설정 및 적용</th>
@@ -142,7 +170,8 @@
         </table>
 
         <!-- Trading Summary Table -->
-        <table id="TradingSummaryTable" classe=custom_table>
+        <hr style="height: 4px; border: 2px outset #c8ccca; background-color: #eb3c1d"/>
+        <table id="TradingSummaryTable" class=custom_table>
             <thead id="TradingSummary_head">
                 <tr>
                     <th colspan="20" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">트레이딩 요약</th>
@@ -188,12 +217,56 @@
                 <td id = "TS8">-</td>
                 <td id = "TS9">-</td>
                 <td id = "TS10">-</td>
+                <td id = "TS11">-</td>
+                <td id = "TS12">-</td>
+                <td id = "TS13">-</td>
+                <td id = "TS14">-</td>
+                <td id = "TS15">-</td>
             </tr></tfoot>
         </table>
 
+        <hr style="height: 2px; border: 1px outset #c8ccca; background-color: #2aff05"/>
+        <div id="tr_detail_div" style="overflow : auto; width: 100%; height: 250px; background-color: #ffffff; border: 2px solid rgb(255, 255, 255);">
+            <!-- Trading Detail Table -->
+            <table id="TradingDetailTable" class=custom_table>
+                <thead id="TradingDetail_head">
+                    <tr>
+                        <th colspan="19" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">트레이딩 상세 정보</th>
+                    </tr>
+                    <tr>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> No</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:70px"> 종목</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:30px"> ID</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:70px"> 동작모드</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:190px"> 거래일시</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:70px"> Slot No</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:90px"> BidAsk Cnt</th>
+                        <th colspan = "4" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Normal Mode</th>
+                        <th colspan = "4" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Reverse Mode</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:80px"> 이익율(%)</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:100px"> 최종 거래가</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:80px"> 현재가</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:80px"> Gap(%)</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> Coin 매입개수 </th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> Coin 매입평단가</th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> Coin 매입금액</th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:90px"> KRW 이익</th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> Coin 매도개수 </th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> Coin 매도평단가</th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> KRW 회수금액</th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:90px"> Coin 이익</th>
+                    </tr>
+                </thead>
+                <tbody id="TradingDetail_body"></tbody>
+            </table>
+        </div>
+
 
         <!-- Income Summary Table -->
-        <table id="IncomeSummaryTable" classe=custom_table>
+        <hr style="height: 4px; border: 2px outset #c8ccca; background-color: #eb3c1d"/>
+        <table id="IncomeSummaryTable" class=custom_table>
             <thead id="IncomeSummary_head">
                 <tr>
                     <th colspan="14" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">익절 정보 요약</th>
@@ -210,123 +283,85 @@
                     <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Detail Info</th>
                 </tr>
                 <tr>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 총 투자금액(KRW)</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 현 평가금액(KRW)</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 이익 금액(KRW)</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 매도 Coin 합계</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 재매수 Coin 합계</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 증가 합계</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:200px"> 총 투자금액(KRW)</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:200px"> 현 평가금액(KRW)</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:200px"> 이익 금액(KRW)</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:200px"> 매도 Coin 합계</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:200px"> 재매수 Coin 합계</th>
+                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:200px"> Coin 증가 합계</th>
                 </tr>
             </thead>
             <tbody id="IncomeSummary_body"></tbody>
             <tfoot id="IncomeSummary_foot"><tr>
                 <td colspan = "5">Sum</td>
-                <td id = "N1">-</td>
-                <td id = "N2">-</td>
-                <td id = "N3">-</td>
-                <td id = "R1">-</td>
-                <td id = "R2">-</td>
-                <td id = "R3">-</td>
-                <td id = "NR">-</td>
+                <td id = "NI1">-</td>
+                <td id = "NI2">-</td>
+                <td id = "NI3">-</td>
+                <td id = "NI4">-</td>
+                <td id = "NI5">-</td>
+                <td id = "NI6">-</td>
+                <td id = "NI7">-</td>
+                <td id = "NI8">-</td>
             </tr></tfoot>
         </table>
-
-
-        <!-- Trading Detail Table -->
-        <table id="TradingDetailTable" classe=custom_table>
-            <thead id="TradingDetail_head">
-                <tr>
-                    <th colspan="19" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">트레이딩 상세 정보</th>
-                </tr>
-                <tr>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> No</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 종목</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> ID</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 동작모드</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 거래일시</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Slot No</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> BidAsk Cnt</th>
-                    <th colspan = "4" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Normal Mode</th>
-                    <th colspan = "4" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Reverse Mode</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 이익율(%)</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 최종 거래가</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 현재가</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Gap(%)</th>
-                </tr>
-                <tr>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매입개수 </th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매입평단가</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매입금액</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> KRW 이익</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매도개수 </th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매도평단가</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> KRW 회수금액</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 이익</th>
-                </tr>
-            </thead>
-            <tbody id="TradingDetail_body"></tbody>
-            <tfoot id="TradingDetail_foot"><tr>
-                <td colspan = "6">Sum</td>
-                <td id = "N1">-</td>
-                <td id = "N2">-</td>
-                <td id = "N3">-</td>
-                <td id = "N4">-</td>
-                <td id = "R1">-</td>
-                <td id = "R2">-</td>
-                <td id = "R3">-</td>
-                <td id = "R4">-</td>
-            </tr></tfoot>
-        </table>
-
 
         
+        <hr style="height: 2px; border: 1px outset #c8ccca; background-color: #2aff05"/>
         <!-- Income Detail Table -->
-        <table id="IncomeDetailTable" classe=custom_table>
-            <thead id="IncomeDetail_head">
-                <tr>
-                    <th colspan="18" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">익절 상세 정보</th>
-                </tr>
-                <tr>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> No</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 종목</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> ID</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 동작모드</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 거래일시</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Slot No</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> BidAsk Cnt</th>
-                    <th colspan = "5" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Normal Mode</th>
-                    <th colspan = "5" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Reverse Mode</th>
-                    <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> 이익율(%)</th>
-                </tr>
-                <tr>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매입개수 </th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매입평단가</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매입금액</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매도금액</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> KRW 이익</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매도개수 </th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 매도평단가</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> KRW 회수금액</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 재매수 수량</th>
-                    <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Coin 이익</th>
-                </tr>
-            </thead>
-            <tbody id="IncomeDetail_body"></tbody>
-            <tfoot id="IncomeDetail_foot"><tr>
-                    <td colspan = "7">Sum</td>
-                    <td id = "N1">-</td>
-                    <td id = "N2">-</td>
-                    <td id = "N3">-</td>
-                    <td id = "N4">-</td>
-                    <td id = "N5">-</td>
-                    <td id = "R1">-</td>
-                    <td id = "R2">-</td>
-                    <td id = "R3">-</td>
-                    <td id = "R4">-</td>
-                    <td id = "R5">-</td>
-            </tr></tfoot>
-        </table>
-        <div id = "IncomeDetailTableDiv"></div>
+        <div id="setperiod">
+            <div id="period_start" class="div_date_left">시작 : <input type="date" id="startdate" value="2019-06-01"></div>
+            <div id="period_end" class="div_date_middle">종료 : <input type="date" id="enddate" value="2019-07-02"></div>
+            <div id="period_desc" class="div_date_right"> ------ </div>
+        </div>
+        <div id="netincom_detail_div" style="overflow : auto; width: 100%; height: 700px; background-color: #ffffff; border: 2px solid rgb(255, 255, 255);">
+            <table id="IncomeDetailTable" class=custom_table>
+                <thead id="IncomeDetail_head">
+                    <tr>
+                        <th colspan="18" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">익절 상세 정보</th>
+                    </tr>
+                    <tr>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> No</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:70px"> 종목</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:30px"> ID</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:70px"> 동작모드</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:190px"> 거래일시</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:70px"> Slot No</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:90px"> BidAsk Cnt</th>
+                        <th colspan = "5" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Normal Mode</th>
+                        <th colspan = "5" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold"> Reverse Mode</th>
+                        <th rowspan = "2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:90px"> 이익율(%)</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> Coin 매입개수 </th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> Coin 매입평단가</th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> Coin 매입금액</th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> Coin 매도금액</th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:90px"> KRW 이익</th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> Coin 매도개수 </th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> Coin 매도평단가</th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> KRW 회수금액</th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:130px"> Coin 재매수 수량</th>
+                        <th style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:90px"> Coin 이익</th>
+                    </tr>
+                </thead>
+                <tbody id="IncomeDetail_body"></tbody>
+                <tfoot><tr>
+                    <td colspan="6">SUM</td>
+                    <td id="NID1">-</td>
+                    <td id="NID2">1</td>
+                    <td id="NID3">-</td>
+                    <td id="NID4">-</td>
+                    <td id="NID5">-</td>
+                    <td id="NID6">-</td>
+                    <td id="NID7">-</td>
+                    <td id="NID8">-</td>
+                    <td id="NID9">-</td>
+                    <td id="NID10">-</td>
+                    <td id="NID11">-</td>
+                    <td id="NID12">-</td>
+                </tr></tfoot>
+            </table>
+        </div>
     </body>
 </html>
 
@@ -359,12 +394,9 @@
     var pf = {}; 
     var config_filename = {};
 
-
-
     //$(document).ready(function() {  // long syntax
     $(function() {        // short syntax
-        //CreateTable("ConfigurationTable_body", plistx, plisty);
-        Create_PortfolioTable("PortfolioTable_body");
+        //Create_PortfolioTable("PortfolioTable_body");
         Create_ConfigTable("ConfigTable_body");
     });
 
@@ -443,6 +475,8 @@
     var control_mode = ["stop", "run"];
     var algorithm = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ];
     var config_param = {};
+    var start_date = 0;
+    var end_date = 0;
 
     async function Create_ConfigTable(table_bodyID)
     {
@@ -468,7 +502,11 @@
             let market = key.split('_')[0];
             let marketID = key.split('_')[1];
             let config = {}
-            //get_ConfigParam(config_filename[market][marketID]).then((data) => { console.log("OK = ", data)}).catch((error) => { console.log("catch error = ", error)});
+
+            if(config_filename.hasOwnProperty(market) == false) { config_filename[market] = {}; }
+            if(config_filename[market].hasOwnProperty(marketID) == false) { config_filename[market][marketID] = {}; }
+            config_filename[market][marketID] = "Config[" + market + "][" + marketID + "].json";
+
             config = await get_ConfigParam(config_filename[market][marketID]); 
 
             if(config['errno'] == undefined)
@@ -514,7 +552,7 @@
                 makeInputBox("#Cell_instance" + index.toString() + "_amount8", "amount8_" + index.toString(), "number", config['slot_BidAsk_KrwCoin'][8], "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
                 makeInputBox("#Cell_instance" + index.toString() + "_amount9", "amount9_" + index.toString(), "number", config['slot_BidAsk_KrwCoin'][9], "css_style1", "width: 50px", 1, 1000, 1, InputBoxHandler);
                 
-                makeButton("#Cell_instance" + index.toString() + "_applay_cfg", "apply_cfg_Btn" + index.toString(), "Apply CFG", CFG_ButtonClickhandler, "css_style1", "width: 100px");
+                makeButton("#Cell_instance" + index.toString() + "_applay_cfg", "apply_cfg_Btn" + index.toString(), "Apply CFG", CFG_ButtonClickhandler, "css_style1", "width: 115px");
             }
             else
             {
@@ -526,8 +564,9 @@
         Create_TradingDetailTable("TradingDetail_body", null, null);
         Create_IncomeSummaryTable("IncomeSummary_body");
         Create_IncomeDetailTable("IncomeDetail_body", null, null);
+        $("#period_start").change(() => { start_date = $("#startdate").val(); console.log("start = ", start_date); }); 
+        $("#period_end").change(() => { end_date = $("#enddate").val(); console.log("end = ", end_date) }); 
     }
-
 
     function Create_TradingSummaryTable(table_bodyID)
     {
@@ -537,6 +576,13 @@
         let selecterID = "#" + table_bodyID;
         let table = $(selecterID);
         index = 0;
+
+        let  sum = {
+            'liquidCnt' : 0,
+            'SeedSlotCnt' : 0, 
+            'normal' : { 'Coin_BidAsk_amount' : 0, 'Coin_BidAsk_Average' : 0, 'BidAsk_KRW' : 0, 'Coin_KRW_eval' : 0, },
+            'reverse' : { 'Coin_BidAsk_amount' : 0, 'Coin_BidAsk_Average' : 0, 'BidAsk_KRW' : 0, 'Coin_KRW_eval' : 0, },
+        }
 
         get_TradingSummary(market, marketID, "all").then((jsondata) => {
             for (market in jsondata)
@@ -587,9 +633,33 @@
                     $(tr).append($('<td>').html(Gap_Ratio));
                     let btnid = "trbtn" + index.toString();
                     $(tr).append($('<td>').attr('id', btnid));
-                    makeButton("#trbtn" + index.toString(), "TradingDetailBtn" + index.toString(), "Veiw Detail", TrDetailView_ButtonClickhandler, "css_style1", "width: 150px");
+                    makeButton("#trbtn" + index.toString(), "TradingDetailBtn" + index.toString(), "Veiw Detail", TrDetailView_ButtonClickhandler, "css_style1", "width: 140px");
+
+                   sum['liquidCnt'] += jsondata[market][marketID]["liquidCnt"];
+                   sum['SeedSlotCnt'] += jsondata[market][marketID]["SeedSlotCnt"];
+                    
+                   sum['normal']['Coin_BidAsk_amount'] += jsondata[market][marketID]['normal']["Coin_BidAsk_amount"];
+                   sum['normal']['Coin_BidAsk_Average'] += jsondata[market][marketID]['normal']["Coin_BidAsk_Average"];
+                   sum['normal']['BidAsk_KRW'] += jsondata[market][marketID]['normal']["BidAsk_KRW"];
+                   sum['normal']['Coin_KRW_eval'] += jsondata[market][marketID]['normal']["Coin_KRW_eval"];
+
+                   sum['reverse']['Coin_BidAsk_amount'] += jsondata[market][marketID]['reverse']["Coin_BidAsk_amount"];
+                   sum['reverse']['Coin_BidAsk_Average'] += jsondata[market][marketID]['reverse']["Coin_BidAsk_Average"];
+                   sum['reverse']['BidAsk_KRW'] += jsondata[market][marketID]['reverse']["BidAsk_KRW"];
+                   sum['reverse']['Coin_KRW_eval'] += jsondata[market][marketID]['reverse']["Coin_KRW_eval"];
                 }
             }
+
+            $("#TS1").html(sum['liquidCnt']);
+            $("#TS2").html(sum['SeedSlotCnt']);
+            $("#TS3").html(sum['normal']['Coin_BidAsk_amount']);
+            $("#TS4").html(sum['normal']['Coin_BidAsk_Average']);
+            $("#TS5").html(sum['normal']['BidAsk_KRW']);
+            $("#TS6").html(sum['normal']['Coin_KRW_eval']);
+            $("#TS7").html(sum['reverse']['Coin_BidAsk_amount']);
+            $("#TS8").html(sum['reverse']['Coin_BidAsk_Average']);
+            $("#TS9").html(sum['reverse']['BidAsk_KRW']);
+            $("#TS10").html(sum['reverse']['Coin_KRW_eval']);
         }).catch((error) => {
 
         });        
@@ -666,6 +736,12 @@
         let market = "KRW-EOS";
         let marketID = "ID1";
 
+        let sum = {
+            'normal' : { 'total_invest_KRW' : 0, 'eval_KRW' : 0, 'net_KRW' : 0, },
+            'reverse' : { 'total_Ask_Coin' : 0, 'reBid_Coin' : 0, 'net_Coin' : 0, },
+            'Net_Ratio' : 0, 
+        };
+
         get_NetIncomeSummary(market, marketID, "all").then((jsondata) => {
             for (market in jsondata)
             {
@@ -705,9 +781,22 @@
 
                     let btnid = "incomebtn" + index.toString();
                     $(tr).append($('<td>').attr('id', btnid));
-                    makeButton("#incomebtn" + index.toString(), "NetIncomeDetailBtn" + index.toString(), "Veiw Detail", NetIncomDetailView_ButtonClickhandler, "css_style1", "width: 90px");
+                    makeButton("#incomebtn" + index.toString(), "NetIncomeDetailBtn" + index.toString(), "Veiw Detail", NetIncomDetailView_ButtonClickhandler, "css_style1", "width: 142px");
+
+                    sum['normal']['total_invest_KRW'] += total_invest_KRW;
+                    sum['normal']['eval_KRW'] += eval_KRW; 
+                    sum['normal']['net_KRW'] += net_KRW; 
+                    sum['reverse']['total_Ask_Coin'] += total_Ask_Coin;
+                    sum['reverse']['reBid_Coin'] += reBid_Coin; 
+                    sum['reverse']['net_Coin'] += net_Coin;
                 }
             }
+            $("#NI1").html(sum['normal']['total_invest_KRW'].toFixed(0) * 1);
+            $("#NI2").html(sum['normal']['eval_KRW'].toFixed(0) * 1);
+            $("#NI3").html(sum['normal']['net_KRW'].toFixed(0) * 1);
+            $("#NI4").html(sum['reverse']['total_Ask_Coin']);
+            $("#NI5").html(sum['reverse']['reBid_Coin']);
+            $("#NI6").html(sum['reverse']['net_Coin']);
         }).catch((error) => {
 
         });
@@ -722,12 +811,30 @@
         let table = $(selecterID);
         index = 0;
 
+        let  sum = {
+                'SlotNo' : 0,
+                'BidAsk_Cnt' : 0, 
+                'normal' : { 'Coin_Bid_amount' : 0, 'Coin_Bid_Average' : 0, 'Bid_KRW' : 0, 'Ask_KRW' : 0, 'Net_KRW' : 0, },
+                'reverse' : { 'Coin_Ask_amount' : 0, 'Coin_Ask_Average' : 0, 'Reclaim_KRW' : 0, 'ReBid_amount' : 0, 'Net_Coin' : 0},
+                }
+
         if(market == null || marketID == null) { return; }
+
+        let startDate = new Date(start_date);
+        let endDate = new Date(end_date);
 
         get_NetIncomeDetailInfo(market, marketID, "all").then((jsondata) => {
             console.log("jsondata['list'].length = ", jsondata['list'].length);
             for (i = 0; i < jsondata['list'].length; i++) 
             {
+                if(start_date != 0 && end_date != 0)
+                {
+                    let trDate = jsondata["list"][i]["CrDate"];
+                    trDate = trDate.split('T')[0];
+                    trDate = new Date(trDate);
+                    if(trDate < startDate || trDate > endDate) { continue;  }     
+                }
+
                 var no = i + 1;
                 var mode = jsondata["list"][i]["mode"];
                 var CrDate = jsondata["list"][i]["CrDate"];
@@ -736,7 +843,6 @@
                 var cur_price = jsondata["list"][i]["cur_price"];
                 var Last_Tr_Price = jsondata["list"][i]["Last_Tr_Price"];
                 var Net_Ratio = jsondata["list"][i]["Net_Ratio"];
-                var Gap_Ratio = jsondata["list"][i]["Gap_Ratio"];
 
                 var Coin_Bid_amount = jsondata["list"][i]['normal']["Coin_Bid_amount"];
                 var Coin_Bid_Average = jsondata["list"][i]['normal']["Coin_Bid_Average"];
@@ -770,7 +876,31 @@
                 $(tr).append($('<td>').html(ReBid_amount));
                 $(tr).append($('<td>').html(Net_Coin));
                 $(tr).append($('<td>').html(Net_Ratio));
+
+                sum['SlotNo'] += SlotNo;
+                sum['BidAsk_Cnt'] += BidAsk_Cnt;
+                sum['normal']['Coin_Bid_amount'] += Coin_Bid_amount;
+                sum['normal']['Bid_KRW'] += Bid_KRW;
+                sum['normal']['Ask_KRW'] += Ask_KRW;
+                sum['normal']['Net_KRW'] += Net_KRW;
+                sum['reverse']['Coin_Ask_amount'] += Coin_Ask_amount;
+                sum['reverse']['Coin_Ask_Average'] += Coin_Ask_Average;
+                sum['reverse']['Reclaim_KRW'] += Reclaim_KRW;
+                sum['reverse']['ReBid_amount'] += ReBid_amount;
+                sum['reverse']['Net_Coin'] += Net_Coin;
             }
+            $("#NID1").html(sum['BidAsk_Cnt']);
+            $("#NID2").html(sum['normal']['Coin_Bid_amount'].toFixed(2)*1);
+            sum['normal']['Coin_Bid_Average'] = (sum['normal']['Bid_KRW']) / (sum['normal']['Coin_Bid_amount']);
+            $("#NID3").html(sum['normal']['Coin_Bid_Average'].toFixed(0)*1);
+            $("#NID4").html(sum['normal']['Bid_KRW'].toFixed(0)*1);
+            $("#NID5").html(sum['normal']['Ask_KRW'].toFixed(0)*1);
+            $("#NID6").html(sum['normal']['Net_KRW'].toFixed(0)*1);
+            $("#NID7").html(sum['reverse']['Coin_Ask_amount'].toFixed(2)*1);
+            $("#NID8").html(sum['reverse']['Coin_Ask_Average'].toFixed(0)*1);
+            $("#NID9").html(sum['reverse']['Reclaim_KRW'].toFixed(0)*1);
+            $("#NID10").html(sum['reverse']['ReBid_amount'].toFixed(2)*1);
+            $("#NID11").html(sum['reverse']['Net_Coin'].toFixed(2)*1);
         }).catch((error) => {
 
         })
@@ -1010,6 +1140,7 @@
         let market = instance_name.split('_')[0];
         let marketID = instance_name.split('_')[1];
         $("#IncomeDetail_body").empty();
+
         Create_IncomeDetailTable("IncomeDetail_body", market, marketID);
     }
 
@@ -1059,6 +1190,7 @@
         if(self.value < min ) { self.value = min; console.log("force fix min value"); }
         if(self.value > max ) { self.value = max; console.log("force fix max value"); }
     }
+
 
 
     /*

@@ -475,20 +475,23 @@ async function smart_coin_trader()
                     if (priceinfo[market].hasOwnProperty(marketID) === false) { priceinfo[market][marketID] = {}; }
                     previous[market][marketID] = current;
 
-                    if (controlMode !== "run") { console.log("[", market, "][", marketID, "] control Mode is Stop Mode"); continue; }
+//                    if (controlMode !== "run") { console.log("[", market, "][", marketID, "] control Mode is Stop Mode"); continue; }
 
                     if (portfolio_info[market][marketID]['config']['simulation'])
                     {
                         let cur_p = getPrice[market][marketID].next().value;
                         priceinfo[market][marketID]['trade_price'] = cur_p;
-                        //console.log("[", market, "][", marketID, "] Current = ", current, " priceinfo = ", priceinfo[market][marketID]['trade_price']);
+                        console.log("[", market, "][", marketID, "] Current = ", current, " priceinfo = ", priceinfo[market][marketID]['trade_price']);
                     }
                     else
                     {
-                        //console.log("[", market, "][", marketID, "]", portfolio_info[market][marketID]['config']['check_period'], " sec priodic routine....");
+                        console.log("[", market, "][", marketID, "]", portfolio_info[market][marketID]['config']['check_period'], " sec priodic routine....");
                         let cur_price = await upbit.getCurrentPriceInfo(market);
                         priceinfo[market][marketID] = cur_price[0];
+                        console.log("[", market, "][", marketID, "] Current = ", current, " priceinfo = ", priceinfo[market][marketID]['trade_price']);
                     }
+
+                    if (controlMode !== "run") { console.log("[", market, "][", marketID, "] control Mode is Stop Mode"); continue; }
 
                     if(tradeMode === "normal")
                     {
@@ -1991,7 +1994,7 @@ async function disiplay_statics(current, price_infoDB)
                 index++;
             }
         }
-        /*
+        
         console.log("=========================================================================================================================================================================================================================================");
         let total_net_KRW = {};
         let total_net_Coin = {};
@@ -2031,7 +2034,7 @@ async function disiplay_statics(current, price_infoDB)
         console.log("=========================================================================================================================================================================================================================================");
         console.log("Smart Trader 실적 ---- Normal 모드 원화이익 = ", sum_total_KRW, "(원),   Reverse 모드 Coin 이득 = ", sum_total_Coin, "(개)");
         console.log("\n");
-        */
+        
         make_TradingInfomation(current, price_infoDB);
     }
 }
@@ -2047,7 +2050,7 @@ var tr_summary =
     'reverse' : { 'Coin_BidAsk_amount' : 0, 'Coin_BidAsk_Average' : 0, 'BidAsk_KRW' : 0, 'Coin_KRW_eval' : 0, },
     'Net_Ratio' : 0, 
     'Last_Tr_Price' : 0, 
-    'Gap_Ratio' : 0
+    "Gap_Ratio" : 0,
 }
 
 
@@ -2111,7 +2114,8 @@ async function make_TradingInfomation(current, price_infoDB)
                 trinfo['CrDate'] =slots[i]['timetick']; // 시작시간 기록 필요함.... 
                 trinfo['SlotNo'] = i;
                 if(mode == "normal") { trinfo['BidAsk_Cnt'] = slots[i]['add_bid'].length; } else { trinfo['BidAsk_Cnt'] = slots[i]['add_ask'].length; }
-                trinfo['Net_Ratio'] = statics['cur_eval_net_ratio'].toFixed(4) * 100;
+                let nettmp = (statics['cur_eval_net_ratio'].toFixed(4) * 1) * 100; nettmp = nettmp.toFixed(2) * 1;
+                trinfo['Net_Ratio'] = nettmp;
                 trinfo['Last_Tr_Price'] = slots[i]['last_bidask_info']['tr_price'];
                 trinfo['Gap_Ratio'] = gap_ratio;
 
@@ -2251,7 +2255,7 @@ async function make_NetIncomeList(current, price_infoDB)
                     Net_Detail['normal']['Ask_KRW'] = reclaimKRW.toFixed(2) * 1;
                     Net_Detail['normal']['Net_KRW'] = statics['cur_eval_net_KRW'].toFixed(2) * 1;
                     netincome_details[market][marketID]['list'].push(Net_Detail);
-                    console.log("[N] Add = ", i, " data = ", JSON.stringify(Net_Detail));
+                    //console.log("[N] Add = ", i, " data = ", JSON.stringify(Net_Detail));
                 }
 
                 let cur_total_KRW = sum_org_KRW + sum_net_KRW;
@@ -2296,7 +2300,7 @@ async function make_NetIncomeList(current, price_infoDB)
                     Net_Detail['reverse']['ReBid_amount'] = rebidamount.toFixed(2) * 1;
                     Net_Detail['reverse']['Net_Coin'] = statics['cur_eval_net_Coin'].toFixed(2) * 1;
                     netincome_details[market][marketID]['list'].push(Net_Detail);
-                    console.log("[R] Add = ", i, " data = ", JSON.stringify(Net_Detail));
+                    //console.log("[R] Add = ", i, " data = ", JSON.stringify(Net_Detail));
                 }
 
                 let cur_total_coin = sum_org_coin + sum_net_coin;
