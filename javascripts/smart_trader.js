@@ -431,6 +431,7 @@ async function smart_coin_trader()
     let previous = {};
     let elapsed = {};
     let priceinfo = {};
+    let update_dispay = true;
 
     // 1. Initialize Portfolio DB
     await register_trade_markets();
@@ -481,14 +482,14 @@ async function smart_coin_trader()
                     {
                         let cur_p = getPrice[market][marketID].next().value;
                         priceinfo[market][marketID]['trade_price'] = cur_p;
-                        console.log("[", market, "][", marketID, "] Current = ", current, " priceinfo = ", priceinfo[market][marketID]['trade_price']);
+                        console.log("[", current, "] - [", market, "][", marketID, "] priceinfo = ", priceinfo[market][marketID]['trade_price']);
                     }
                     else
                     {
-                        console.log("[", market, "][", marketID, "]", portfolio_info[market][marketID]['config']['check_period'], " sec priodic routine....");
+                        console.log("[", current, "] - [", market, "][", marketID, "]", portfolio_info[market][marketID]['config']['check_period'], " sec priodic routine....");
                         let cur_price = await upbit.getCurrentPriceInfo(market);
                         priceinfo[market][marketID] = cur_price[0];
-                        console.log("[", market, "][", marketID, "] Current = ", current, " priceinfo = ", priceinfo[market][marketID]['trade_price']);
+                        //console.log("[", market, "][", marketID, "] Current = ", current, " priceinfo = ", priceinfo[market][marketID]['trade_price']);
                     }
 
                     if (controlMode !== "run") { console.log("[", market, "][", marketID, "] control Mode is Stop Mode"); continue; }
@@ -535,9 +536,13 @@ async function smart_coin_trader()
                     expired_chk_count++;
                 }
             }
+            //await disiplay_statics(current, priceinfo);
+        }
+        if(update_dispay) 
+        {
             await disiplay_statics(current, priceinfo);
-
-            //await make_TradingInfomation(current, priceinfo);
+            await make_TradingInfomation(current, priceinfo); 
+            update_dispay = false;
         }
     }
 }
@@ -735,7 +740,7 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
         
         Save_JSON_file(portfolio_info, "./output_backup/portfolio");
         Save_JSON_latest_file(portfolio_info, "./output/portfolio");
-
+        update_dispay = true;
         // Update last_bidask_info : this is basic routine... To find the lowest bid price, search all slots and bids price and compare it with for loop.
         //if(portfolio_info[market][marketID]['last_bidask_info']['tr_price'] == 0 
         //    || portfolio_info[market][marketID]['last_bidask_info']['tr_price'] > new_slot['last_bidask_info']['tr_price'])
@@ -876,6 +881,7 @@ async function add_bid_to_slot(market, marketID, current, priceinfo)
 
                     Save_JSON_file(portfolio_info, "./output_backup/portfolio");
                     Save_JSON_latest_file(portfolio_info, "./output/portfolio");
+                    update_dispay = true;
 
                     //console.log("[", market, "][", marketID, "][", i, "][", j, "] Amount = ", bid_sum, " ################### Additional Bid is added ################################");
 
@@ -994,6 +1000,7 @@ async function ask_sellCoin_buyKRW(market, marketID, current, priceinfo)
                 Save_JSON_latest_file(liquidation_DB, "./output/Normal_Liquidation_History");
                 Save_JSON_file(portfolio_info, "./output_backup/portfolio");
                 Save_JSON_latest_file(portfolio_info, "./output/portfolio");
+                update_dispay = true;
             }
         }
     }
@@ -1246,6 +1253,7 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
 
         Save_JSON_file(portfolio_info, "./output_backup/portfolio");
         Save_JSON_latest_file(portfolio_info, "./output/portfolio");
+        update_dispay = true;
 
         // check bid status : wait / done / 
         new_slot['last_bidask_info']['timetick'] = current;
@@ -1386,6 +1394,7 @@ async function add_ask_to_slot(market, marketID, current, priceinfo)
 
                     Save_JSON_file(portfolio_info, "./output_backup/portfolio");
                     Save_JSON_latest_file(portfolio_info, "./output/portfolio");
+                    update_dispay = true;
 
                     // Update last_bidask_info : this is basic routine... To find the lowest bid price, search all slots and bids price and compare it with for loop.
                     slots[i]['last_bidask_info']['timetick'] = current;
@@ -1575,111 +1584,11 @@ async function bid_sellKRW_buyCoin(market, marketID, current, priceinfo)
                 Save_JSON_latest_file(increasecoin_DB, "./output/Reverse_IncreaseCoin_History");
                 Save_JSON_file(portfolio_info, "./output_backup/portfolio");
                 Save_JSON_latest_file(portfolio_info, "./output/portfolio");
+                update_dispay = true;
             }
         }
     }
 }
-
-/*
- * test : 추후 고민 필요...
- */
-/*
-async function check_dopost_transaction(market, marketID, priceinfo)
-{
-    let slots = portfolio_info[market][marketID]['slots'];
-    let config = portfolio_info[market][marketID]['config'];
-    let current_price = priceinfo['trade_price'];
-    let i = 0, j = 0;
-    let save = false;
-
-    // normal
-    let save = false;
-    for (i = 0; i < slots.length; i++)
-    {
-        let orderinfo = slots[i]['liquidation_orderinfo'];
-
-        if (orderinfo.hasOwnProperty('uuid') === true)
-        {
-            if (orderinfo['state'] !== "done")
-            {
-                let uuid = orderinfo['uuid'];
-                orderinfo = await upbit.get_orderinfo(uuid);
-                if ("error" in orderinfo)
-                {
-                    console.log("[N][", market, "][", marketID, "][", i, "][", j, "] UUID = ", uuid, " [update_Normal_TrInfo_Statics] ERROR Get Order info ################################");
-                    continue; //break;  // TBT (to be tested)
-                }
-
-                slots[i]['liquidation_orderinfo'] = orderinfo;
-                // 거래가 완료되었으면 Slots[] --> liquidation_DB 또는 incrasecoin_DB로 이동시킨다.
-                if (orderinfo['state'] === 'done')
-                {
-                    let liquidData = slots[i];
-                    liquidData['config'] = config;
-                    liquidation_DB[market][marketID].push(liquidData);
-                    slots.splice(i, 1);
-                    save = true;
-                }
-                else
-                {
-                    //거래가 미완료 되었으면 slots[]에 그대로 남겨둔다.
-                }
-            }
-        }
-    }
-
-    if (save === true)
-    {
-        Save_JSON_file(liquidation_DB, "./output_backup/Normal_Liquidation_History");
-        Save_JSON_latest_file(liquidation_DB, "./output/Normal_Liquidation_History");
-        Save_JSON_file(portfolio_info, "./output_backup/portfolio");
-        Save_JSON_latest_file(portfolio_info, "./output/portfolio");
-    }
-
-
-    // reverse
-    for (i = 0; i < slots.length; i++)
-    {
-        let orderinfo = slots[i]['increasecoin_orderinfo'];
-
-        if (orderinfo.hasOwnProperty('uuid') === true)
-        {
-            if (orderinfo['state'] !== "done")
-            {
-                let uuid = orderinfo['uuid'];
-                orderinfo = await upbit.get_orderinfo(uuid);
-                if ("error" in orderinfo)
-                {
-                    console.log("[R][", market, "][", marketID, "][", i, "][", j, "] UUID = ", uuid, " [update_Reverse_TrInfo_Statics] ERROR Get Order info ################################");
-                    continue; //break;  // TBT (to be tested)
-                }
-
-                slots[i]['increasecoin_orderinfo'] = orderinfo;
-                // 거래가 완료되었으면 Slots[] --> liquidation_DB 또는 incrasecoin_DB로 이동시킨다. 
-                if (orderinfo['state'] === 'done')
-                {
-                    let increaseData = slots[i];
-                    increaseData['config'] = config;
-                    increasecoin_DB[market][marketID].push(increaseData);
-                    slots.splice(i, 1);
-                    save = true;
-                }
-                else
-                {
-                    //거래가 미완료 되었으면 slots[]에 그대로 남겨둔다.
-                }
-            }
-        }
-    }
-
-    if (save === true) {
-        Save_JSON_file(increasecoin_DB, "./output_backup/Reverse_IncreaseCoin_History");
-        Save_JSON_latest_file(increasecoin_DB, "./output/Reverse_IncreaseCoin_History");
-        Save_JSON_file(portfolio_info, "./output_backup/portfolio");
-        Save_JSON_latest_file(portfolio_info, "./output/portfolio");
-    }
-}
-*/
 
 /*******************************************************************************************************/
 //  Common Function
@@ -1797,7 +1706,7 @@ let static_previous = 0;
 async function disiplay_statics(current, price_infoDB)
 {
     let elapsed = (current - static_previous) / 1000;
-    if (elapsed > 5)
+    //if (elapsed > 5)
     {
         static_previous = current;
         process.stdout.write('\033c');
@@ -2034,8 +1943,6 @@ async function disiplay_statics(current, price_infoDB)
         console.log("=========================================================================================================================================================================================================================================");
         console.log("Smart Trader 실적 ---- Normal 모드 원화이익 = ", sum_total_KRW, "(원),   Reverse 모드 Coin 이득 = ", sum_total_Coin, "(개)");
         console.log("\n");
-        
-        make_TradingInfomation(current, price_infoDB);
     }
 }
 

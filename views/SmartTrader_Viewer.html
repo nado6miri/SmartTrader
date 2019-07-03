@@ -57,19 +57,32 @@
     }
 
 
-    .div_date_left {
+    .div_div2_left {
+        width: 50%;
+        float: left;
+        box-sizing: border-box;
+        background: rgb(255, 255, 255);
+    }
+    .div_div2_middle {
+        width: 50%;
+        float: left;
+        box-sizing: border-box;
+        background: rgb(255, 255, 255);
+    }
+
+    .div_div3_left {
         width: 25%;
         float: left;
         box-sizing: border-box;
         background: rgb(255, 255, 255);
     }
-    .div_date_middle {
+    .div_div3_middle {
         width: 25%;
         float: left;
         box-sizing: border-box;
         background: rgb(255, 255, 255);
     }
-    .div_date_right {
+    .div_div3_right {
         width: 50%;
         float: left;
         box-sizing: border-box;
@@ -113,6 +126,85 @@
             </tbody>
         </table>
         -->
+        <!-- Overall Summary Table -->
+        <hr style="height: 4px; border: 2px outset #c8ccca; background-color: #eb3c1d"/>
+        <div id="overall_summary" style="width:100%; height:220px">
+            <div id="overall_summary_left" class=div_div2_left>
+                <table id="BalanceTable" class=custom_table>
+                    <thead id="Balance_head">
+                        <tr>
+                            <th colspan="8" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">Trader 잔고 확인</th>
+                        </tr>
+                        <tr>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:100px"> 종목</th>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> 보유수량</th>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:100px"> 평단가</th>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> 투자금액</th>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> 현재가격</th>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> 평가금액</th>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:100px"> 손익</th>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> 손익비율</th>
+                        </tr>
+                    </thead>
+                    <tbody id="Balance_body">
+                        <tr id="Balance_1"></tr>
+                        <tr id="Balance_2"></tr>
+                        <tr id="Balance_3"></tr>
+                        <tr id="Balance_4"></tr>
+                        <tr id="Balance_5"></tr>
+                        <tr id="Balance_6"></tr>
+                        <tr id="Balance_7"></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="overall_summary_right" class=div_div2_right>
+                <table id="EvaluationTable" class=custom_table>
+                    <thead id="Evaluation_head">
+                        <tr>
+                            <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:40px"">No</th>
+                            <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:100px"">종목</th>
+                            <th rowspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:40px"">ID</th>
+                            <th colspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">익절이익</th>
+                            <th colspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">SEED비용</th>
+                            <th colspan="2" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold">최종평가이익</th>
+                        </tr>
+                        <tr>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> 원화(KRW)</th>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:100px"> Coin</th>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> 원화(KRW)</th>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:100px"> Coin</th>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:120px"> 원화(KRW)</th>
+                            <th rowspan="1" style="text-align: center; background-color: rgb(217,217,217); font-weight: bold; width:100px"> Coin</th>
+                        </tr>
+                    </thead>
+                    <tbody id="Evaluation_body">
+                        <tr id="Evaluation_1"></tr>
+                        <tr id="Evaluation_2"></tr>
+                        <tr id="Evaluation_3"></tr>
+                        <tr id="Evaluation_4"></tr>
+                        <tr id="Evaluation_5"></tr>
+                        <tr id="Evaluation_6"></tr>
+                        <tr id="Evaluation_7"></tr>
+                    </tbody>
+                    <tfoot id="Evaluation_foot">
+                        <tr>
+                            <td colspan = "3">최종 Trader실적</td>
+                            <td id = "FEV1">-</td>
+                            <td id = "FEV2">-</td>
+                            <td id = "FEV3">-</td>
+                            <td id = "FEV4">-</td>
+                            <td id = "FEV5">-</td>
+                            <td id = "FEV6">-</td>
+                        </tr>
+                        <tr>
+                            <td colspan="7">현재가 기준 최종 Trader 원화 환산 실적</td>
+                            <td colspan="2" id = "FFEV">0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
         <!-- Configuration Table -->
         <hr style="height: 4px; border: 2px outset #c8ccca; background-color: #eb3c1d"/>
         <table id="ConfigTable" class=custom_table>
@@ -309,9 +401,9 @@
         <hr style="height: 2px; border: 1px outset #c8ccca; background-color: #2aff05"/>
         <!-- Income Detail Table -->
         <div id="setperiod">
-            <div id="period_start" class="div_date_left">시작 : <input type="date" id="startdate" value="2019-06-01"></div>
-            <div id="period_end" class="div_date_middle">종료 : <input type="date" id="enddate" value="2019-07-02"></div>
-            <div id="period_desc" class="div_date_right"> ------ </div>
+            <div id="period_start" class="div_div3_left">시작 : <input type="date" id="startdate" value="2019-06-01"></div>
+            <div id="period_end" class="div_div3_middle">종료 : <input type="date" id="enddate" value="2019-07-02"></div>
+            <div id="period_desc" class="div_div3_right"> ------ </div>
         </div>
         <div id="netincom_detail_div" style="overflow : auto; width: 100%; height: 700px; background-color: #ffffff; border: 2px solid rgb(255, 255, 255);">
             <table id="IncomeDetailTable" class=custom_table>
@@ -393,6 +485,8 @@
 <script type="text/javascript">
     var pf = {}; 
     var config_filename = {};
+    var tr_summary = {};
+    var ni_summary = {};
 
     //$(document).ready(function() {  // long syntax
     $(function() {        // short syntax
@@ -418,8 +512,81 @@
         });
     }
 
+
     
-    async function Create_PortfolioTable(table_BodyID)
+    async function Create_BalanceTable(table_bodyID)
+    {
+        let xlabel = ["balance1_", "balance2_", "balance3_", "balance4_", "balance5_", "balance6_", "balance7_", "balance8_" ];
+        let index = 0;
+        let selecterID = "#" + table_bodyID + " > tr";
+
+        $(selecterID).each(function () {
+            //createTds(index++, $(this), table_bodyID, xlabel, ylabel);
+        });
+
+        //var pf = { "KRW-EOS_ID1": [ "R", 2, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID2": [ "R", 4, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID3": [ "N", 2, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID4": [ "N", 4, 6500, 10000, 10, 8000, false ] }
+        //var pf = {};
+        //pf = await get_PortfolioLists("portfolio_list.json");
+    }
+
+
+    async function Create_EvaluationTable(table_bodyID)
+    {
+        let xlabel = ["1", "2", "3", "4", "5", "6", "7", "8" , "9" ];
+        let ylabel = ["evx1", "evx2", "evx3", "evx4", "evx5", "evx6" ];
+        let index = 0;
+        let selecterID = "#" + table_bodyID + " > tr";
+
+        $(selecterID).each(function () {
+            createTds(index++, $(this), table_bodyID, xlabel, ylabel);
+        });
+
+        let sum = [ 0, 0, 0, 0, 0, 0, 0];
+
+        index = 0;
+        for(market in ni_summary)
+        {
+            for(marketID in ni_summary[market])
+            {
+                index++;
+                let idstr_prefix = "#Cell_evx" + index.toString();
+                let data = [];
+                data[0] = index;
+                data[1] = market;
+                data[2] = marketID;
+                data[3] = ni_summary[market][marketID]['normal']['net_KRW'];
+                data[4] = ni_summary[market][marketID]['reverse']['net_Coin']; 
+                data[5] = tr_summary[market][marketID]['normal']['Coin_KRW_eval'];
+                data[6] = tr_summary[market][marketID]['reverse']['Coin_KRW_eval'];
+                data[7] = ni_summary[market][marketID]['normal']['net_KRW'] + tr_summary[market][marketID]['normal']['Coin_KRW_eval'];
+                data[8] = ni_summary[market][marketID]['reverse']['net_Coin'] + tr_summary[market][marketID]['reverse']['Coin_KRW_eval'];
+                //console.log("data = ", data);
+                for(let i = 1; i <= data.length; i++)
+                {
+                    let idstr = idstr_prefix + "_" + i.toString();
+                    $(idstr).html(data[i-1]);
+                }
+                sum[0] += data[3];
+                sum[1] += data[4];
+                sum[2] += data[5];
+                sum[3] += data[6];
+                sum[4] += data[7];
+                sum[5] += data[8];
+                sum[6] += data[7] + data[8]*tr_summary[market][marketID]['cur_price'];
+            }
+        }
+
+        $("#FEV1").html(sum[0]);
+        $("#FEV2").html(sum[1]);
+        $("#FEV3").html(sum[2]);
+        $("#FEV4").html(sum[3]);
+        $("#FEV5").html(sum[4]);
+        $("#FEV6").html(sum[5]);
+        $("#FFEV").html(sum[6]);
+    }
+
+    
+    async function Create_PortfolioTable(table_bodyID)
     {
         //var pf = { "KRW-EOS_ID1": [ "R", 2, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID2": [ "R", 4, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID3": [ "N", 2, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID4": [ "N", 4, 6500, 10000, 10, 8000, false ] }
         pf = await get_PortfolioLists("portfolio_list.json");
@@ -429,7 +596,7 @@
         {
             index++;
             //var obj = "#" + table_ID + " > tbody";
-            var obj = "#" + table_BodyID;
+            var obj = "#" + table_bodyID;
             let market = key.split('_')[0];
             let marketID = key.split('_')[1];
             let trademode = pf[key][0];
@@ -564,6 +731,7 @@
         Create_TradingDetailTable("TradingDetail_body", null, null);
         Create_IncomeSummaryTable("IncomeSummary_body");
         Create_IncomeDetailTable("IncomeDetail_body", null, null);
+        //Create_BalanceTable("Balance_body");
         $("#period_start").change(() => { start_date = $("#startdate").val(); console.log("start = ", start_date); }); 
         $("#period_end").change(() => { end_date = $("#enddate").val(); console.log("end = ", end_date) }); 
     }
@@ -585,6 +753,8 @@
         }
 
         get_TradingSummary(market, marketID, "all").then((jsondata) => {
+            tr_summary = JSON.parse(JSON.stringify(jsondata));
+
             for (market in jsondata)
             {
                 for (marketID in jsondata[market])
@@ -743,6 +913,7 @@
         };
 
         get_NetIncomeSummary(market, marketID, "all").then((jsondata) => {
+            ni_summary = JSON.parse(JSON.stringify(jsondata));
             for (market in jsondata)
             {
                 for (marketID in jsondata[market])
@@ -797,6 +968,8 @@
             $("#NI4").html(sum['reverse']['total_Ask_Coin']);
             $("#NI5").html(sum['reverse']['reBid_Coin']);
             $("#NI6").html(sum['reverse']['net_Coin']);
+
+            Create_EvaluationTable("Evaluation_body");
         }).catch((error) => {
 
         });
@@ -1017,7 +1190,7 @@
     /*
     Button Click Handler.......
     */
-    function CFG_ButtonClickhandler(self, ID)
+    async function CFG_ButtonClickhandler(self, ID)
     {
         console.log(" ButtonClickhandler = ", self);
         console.log("Button ID = ", ID);
@@ -1029,7 +1202,9 @@
         console.log("instance_name =", instance_name);
         let market = instance_name.split('_')[0];
         let marketID = instance_name.split('_')[1];
-        let cur_config = JSON.parse(JSON.stringify(config_param[market][marketID]));
+        //let cur_config = JSON.parse(JSON.stringify(config_param[market][marketID]));
+        let cur_config = await get_ConfigParam(config_filename[market][marketID]); 
+
         let user_config = JSON.parse(JSON.stringify(config_param[market][marketID]));
         let NeedtoUpdate = false;
         console.log("cur_config = ", cur_config);
