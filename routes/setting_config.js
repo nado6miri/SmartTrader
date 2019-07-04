@@ -13,6 +13,8 @@ var XMLHttpRequest = require('xmlhttprequest-ssl').XMLHttpRequest;
 moment.tz.setDefault("Asiz/Seoul");
 var ConfigParam_DB = require('../models/configuration');
 
+const upbit = require("../javascripts/upbit_restapi");
+
 /*
 // http://mongodb.github.io/node-mongodb-native/api-generated/
 // https://bcho.tistory.com/1094
@@ -85,6 +87,20 @@ router.get('/', function(req, res, next) {
     */
 });
 
+
+
+/* GET default page */
+router.get('/balance', function(req, res, next) {
+    console.log("[get] body = ", JSON.stringify(req.body));
+    console.log("[get] params(path) = ", JSON.stringify(req.params));
+    console.log("[get] query = ", JSON.stringify(req.query));
+
+    res.writeHead(200, { 'Content-Type': 'text/html' }); // header 설정
+    upbit.get_accountbalance().then((data) => { 
+        console.log(JSON.stringify(data));
+        res.end(JSON.stringify(data), 'utf-8'); // 브라우저로 전송   
+    });
+});
 
 /* GET default page */
 router.get('/configparam', function(req, res, next) {

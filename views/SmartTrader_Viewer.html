@@ -147,14 +147,24 @@
                         </tr>
                     </thead>
                     <tbody id="Balance_body">
-                        <tr id="Balance_1"></tr>
-                        <tr id="Balance_2"></tr>
-                        <tr id="Balance_3"></tr>
-                        <tr id="Balance_4"></tr>
-                        <tr id="Balance_5"></tr>
-                        <tr id="Balance_6"></tr>
-                        <tr id="Balance_7"></tr>
+                        <tr id="Balance_1" style="height:20px"></tr>
+                        <tr id="Balance_2" style="height:20px"></tr>
+                        <tr id="Balance_3" style="height:20px"></tr>
+                        <tr id="Balance_4" style="height:20px"></tr>
+                        <tr id="Balance_5" style="height:20px"></tr>
+                        <tr id="Balance_6" style="height:20px"></tr>
+                        <tr id="Balance_7" style="height:20px"></tr>
                     </tbody>
+                    <tfoot id="Balance_foot">
+                        <tr>
+                            <td colspan = "3">Summary (요약)</td>
+                            <td id = "BAL1">-</td>
+                            <td id = "BAL2">-</td>
+                            <td id = "BAL3">-</td>
+                            <td id = "BAL4">-</td>
+                            <td id = "BAL5">-</td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
             <div id="overall_summary_right" class=div_div2_right>
@@ -491,6 +501,7 @@
     //$(document).ready(function() {  // long syntax
     $(function() {        // short syntax
         //Create_PortfolioTable("PortfolioTable_body");
+        Create_BalanceTable("Balance_body");
         Create_ConfigTable("ConfigTable_body");
     });
 
@@ -516,17 +527,67 @@
     
     async function Create_BalanceTable(table_bodyID)
     {
-        let xlabel = ["balance1_", "balance2_", "balance3_", "balance4_", "balance5_", "balance6_", "balance7_", "balance8_" ];
+        let xlabel = ["1", "2", "3", "4", "5", "6", "7", "8" ];
+        let ylabel = ["bal1", "bal2", "bal3", "bal4", "bal5", "bal6", "bal7" ];
         let index = 0;
         let selecterID = "#" + table_bodyID + " > tr";
 
         $(selecterID).each(function () {
-            //createTds(index++, $(this), table_bodyID, xlabel, ylabel);
+            createTds(index++, $(this), table_bodyID, xlabel, ylabel);
         });
 
-        //var pf = { "KRW-EOS_ID1": [ "R", 2, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID2": [ "R", 4, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID3": [ "N", 2, 6500, 10000, 10, 8000, false ], "KRW-EOS_ID4": [ "N", 4, 6500, 10000, 10, 8000, false ] }
-        //var pf = {};
-        //pf = await get_PortfolioLists("portfolio_list.json");
+        let balance = [{"currency":"KRW","balance":"6337910.99497943","locked":"0.0","avg_buy_price":"0","avg_buy_price_modified":true,"unit_currency":"KRW","avg_krw_buy_price":"0","modified":true},{"currency":"XRP","balance":"10.0","locked":"0.0","avg_buy_price":"483","avg_buy_price_modified":false,"unit_currency":"KRW","avg_krw_buy_price":"483","modified":false},{"currency":"EOS","balance":"2722.27966035","locked":"0.0","avg_buy_price":"8577.66","avg_buy_price_modified":true,"unit_currency":"KRW","avg_krw_buy_price":"8577.66","modified":true}];
+        get_Balance().then((balance) => {
+            index = 0;
+            let sum = [0, '-', 0, 0, 0];
+            for(i = 0; i < balance.length; i++)
+            {
+                let data = [ 0, 0, 0, 0, 0, 0, 0, 0];
+                data[0] = balance[i]['currency'];
+                data[1] = balance[i]['balance']*1; // 잔고
+                data[1] = data[1].toFixed(2)*1;
+                if(data[0] == "KRW") 
+                {
+                    data[2] = 1; // 평단가
+                    data[3] = data[1] * data[2]; // 투자금액
+                    data[5] = data[1]; // 평가금액
+                }
+                else
+                { 
+                    data[2] = balance[i]['avg_buy_price']; // 평단가
+                    data[3] = data[1] * data[2]; // 투자금액
+                    data[3] = data[3].toFixed(2)*1;
+                    data[4] = 7000; // 현재 price를 알아야 함.
+                    data[5] = data[1] * data[4]; // 평가금액
+                    data[6] = (data[5] - data[3])*1; // 손익
+                    data[6] = data[6].toFixed(2)*1;
+                    data[7] = (data[6] / data[3]); // 손익비율
+                    data[7] = data[7].toFixed(4) * 100;
+
+                    sum[3] += data[6];
+                    sum[0] += data[3];
+                    sum[2] += data[5];
+                }
+
+                index++;
+                let idstr_prefix = "#Cell_bal" + index.toString();
+                for(j = 1; j <= xlabel.length; j++)
+                {
+                    let idstr = idstr_prefix + "_" + j.toString();
+                    console.log(idstr);
+                    $(idstr).html(data[j-1]);
+                }
+            }
+
+            $("#BAL1").html(sum[0].toFixed(2)*1);
+            $("#BAL2").html(sum[1]);
+            $("#BAL3").html(sum[2].toFixed(2)*1);
+            $("#BAL4").html(sum[3].toFixed(2)*1);
+            sum[4] = sum[3]*100/sum[0];
+            $("#BAL5").html(sum[4].toFixed(2)*1);
+        }).catch((error) => {
+
+        });        
     }
 
 
@@ -731,7 +792,6 @@
         Create_TradingDetailTable("TradingDetail_body", null, null);
         Create_IncomeSummaryTable("IncomeSummary_body");
         Create_IncomeDetailTable("IncomeDetail_body", null, null);
-        //Create_BalanceTable("Balance_body");
         $("#period_start").change(() => { start_date = $("#startdate").val(); console.log("start = ", start_date); }); 
         $("#period_end").change(() => { end_date = $("#enddate").val(); console.log("end = ", end_date) }); 
     }
@@ -1513,6 +1573,43 @@
         });
     }
 
+    
+    function get_Balance()
+    {
+        var settings = {
+            "async": true,
+            "crossDomain": true,
+            "url": "http://192.168.123.100:7000/config/balance",
+            "method": "GET",
+            "headers": {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "cache-control": "no-cache",
+            },
+            data : { 
+                'market' : "KRW",
+                'marketID' : "ID1",
+                'trade_mode' : "normal" 
+            },
+            /*
+            success : function (data) { console.log("ajax success : portfolio filename = ", filename, " data = ", data); },
+            error : function (error) { console.log("ajax error = ", error); },
+            complete  : function (data) { console.log("ajax complete = ", data);  },
+            */
+        }
+
+        return new Promise(function (resolve, reject)
+        {
+            $.ajax(settings).done(function (response) {
+                console.log("ajax get_Balance done : param = ", response);
+                resolve(JSON.parse(response));
+            }).fail(function(error) {
+                console.log("ajax get_Balance fail = ", error);
+                reject(JSON.parse(error));
+            }).always(function (data) { 
+                 console.log("ajax get_Balance always = ", data); 
+            })
+        });
+    }
 
 
     function get_PortfolioLists(filename)

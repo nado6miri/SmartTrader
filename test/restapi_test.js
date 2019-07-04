@@ -1,6 +1,6 @@
 const upbit = require("../javascripts/upbit_restapi");
 //upbit.debug = true;
-//upbit.get_accountbalance();
+upbit.get_accountbalance();
 //upbit.get_chance('KRW-EOS').then((data) => { console.log(JSON.stringify(data))});
 //upbit.get_chance('KRW-XRP').then((data) => { console.log(JSON.stringify(data))});
 
@@ -52,5 +52,5 @@ async function test()
 }
 
 
-test();
+//test();
 
