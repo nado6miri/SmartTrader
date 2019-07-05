@@ -476,8 +476,6 @@ async function smart_coin_trader()
                     if (priceinfo[market].hasOwnProperty(marketID) === false) { priceinfo[market][marketID] = {}; }
                     previous[market][marketID] = current;
 
-//                    if (controlMode !== "run") { console.log("[", market, "][", marketID, "] control Mode is Stop Mode"); continue; }
-
                     if (portfolio_info[market][marketID]['config']['simulation'])
                     {
                         let cur_p = getPrice[market][marketID].next().value;
@@ -486,10 +484,16 @@ async function smart_coin_trader()
                     }
                     else
                     {
-                        console.log("[", current, "] - [", market, "][", marketID, "]", portfolio_info[market][marketID]['config']['check_period'], " sec priodic routine....");
-                        let cur_price = await upbit.getCurrentPriceInfo(market);
-                        priceinfo[market][marketID] = cur_price[0];
-                        //console.log("[", market, "][", marketID, "] Current = ", current, " priceinfo = ", priceinfo[market][marketID]['trade_price']);
+                        //console.log("[", current, "] - [", market, "][", marketID, "]", portfolio_info[market][marketID]['config']['check_period'], " sec priodic routine....");
+                        try{
+                            let cur_price = await upbit.getCurrentPriceInfo(market);
+                            priceinfo[market][marketID] = cur_price[0];
+                           console.log("[", market, "][", marketID, "] Current = ", current, " priceinfo = ", priceinfo[market][marketID]['trade_price']);
+                        }
+                        catch(err)
+                        {
+                            console.log("[", current, "] - [", market, "][", marketID, "]",  "Excption error = ", err);
+                        }
                     }
 
                     if (controlMode !== "run") { console.log("[", market, "][", marketID, "] control Mode is Stop Mode"); continue; }

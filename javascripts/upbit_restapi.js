@@ -362,7 +362,7 @@ function getCurrentPriceInfo(MarketID)
         request(options, function (error, response, body) 
         {
             //if (error) throw new Error(error);
-            if(error) { reject(error); } 
+            if(error) { console.log("get price error"); reject(error); } 
             else 
             { 
                 if(debug) { console.log(body); } 

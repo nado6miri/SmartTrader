@@ -102,6 +102,23 @@ router.get('/balance', function(req, res, next) {
     });
 });
 
+
+
+/* GET default page */
+router.get('/price', function(req, res, next) {
+    console.log("[get] body = ", JSON.stringify(req.body));
+    console.log("[get] params(path) = ", JSON.stringify(req.params));
+    console.log("[get] query = ", JSON.stringify(req.query));
+
+    res.writeHead(200, { 'Content-Type': 'text/html' }); // header 설정
+    upbit.getCurrentPriceInfo(req.query['market']).then((data) => { 
+        console.log(JSON.stringify(data));
+        res.end(JSON.stringify(data[0]['trade_price']), 'utf-8'); // 브라우저로 전송   
+    });
+});
+
+
+
 /* GET default page */
 router.get('/configparam', function(req, res, next) {
     console.log("[get] body = ", JSON.stringify(req.body));
