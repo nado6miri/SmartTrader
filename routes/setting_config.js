@@ -15,6 +15,10 @@ var ConfigParam_DB = require('../models/configuration');
 
 const upbit = require("../javascripts/upbit_restapi");
 
+var socketcomm = require('../javascripts/socket_comm');
+socketcomm.socket_server_communication(5555);
+
+
 /*
 // http://mongodb.github.io/node-mongodb-native/api-generated/
 // https://bcho.tistory.com/1094
@@ -94,9 +98,12 @@ router.get('/balance', function(req, res, next) {
     console.log("[get] body = ", JSON.stringify(req.body));
     console.log("[get] params(path) = ", JSON.stringify(req.params));
     console.log("[get] query = ", JSON.stringify(req.query));
-
+    
+    let userid = req.query['userid'];
+    const authkey = require("../config/" + userid + "/upbit_configuration");
     res.writeHead(200, { 'Content-Type': 'text/html' }); // header 설정
-    upbit.get_accountbalance().then((data) => { 
+    
+    upbit.get_accountbalance(authkey).then((data) => { 
         console.log(JSON.stringify(data));
         res.end(JSON.stringify(data), 'utf-8'); // 브라우저로 전송   
     });
@@ -127,7 +134,9 @@ router.get('/configparam', function(req, res, next) {
 
     res.writeHead(200, { 'Content-Type': 'text/html' }); // header 설정
     let filename = req.query['configfile'];
-    fs.readFile(__dirname + '/../output/' + filename, (err, data) => { // 파일 읽는 메소드
+    let userid = req.query['userid'];
+    fs.readFile(__dirname + '/../trade_users/' + userid + '/output/' + filename, (err, data) => { // 파일 읽는 메소드
+    //fs.readFile(__dirname + '/../output/' + filename, (err, data) => { // 파일 읽는 메소드
         if (err) {
             res.end(JSON.stringify(err), 'utf-8');
             return console.error(err); // 에러 발생시 에러 기록하고 종료
@@ -145,7 +154,9 @@ router.get('/portfoliolists', function(req, res, next) {
 
     res.writeHead(200, { 'Content-Type': 'text/html' }); // header 설정
     let filename = req.query['filename'];
-    fs.readFile(__dirname + '/../parameters/' + filename, (err, data) => { // 파일 읽는 메소드
+    let userid = req.query['userid'];
+    fs.readFile(__dirname + '/../trade_users/' + userid + '/parameters/' + filename, (err, data) => { // 파일 읽는 메소드
+    //fs.readFile(__dirname + '/../parameters/' + filename, (err, data) => { // 파일 읽는 메소드
         if (err) {
             res.end(JSON.stringify(err), 'utf-8');
             return console.error(err); // 에러 발생시 에러 기록하고 종료
@@ -175,27 +186,15 @@ router.get('/tradingsummary', function(req, res, next) {
     console.log("[get] query = ", JSON.stringify(req.query));
     
     let filename = "trading_summary.json";
-    fs.readFile(__dirname + '/../output/' + filename, (err, data) => { // 파일 읽는 메소드
+    let userid = req.query['userid'];
+    fs.readFile(__dirname + '/../trade_users/' + userid + '/output/' + filename, (err, data) => { // 파일 읽는 메소드
+    //fs.readFile(__dirname + '/../output/' + filename, (err, data) => { // 파일 읽는 메소드
         if (err) {
             res.end(JSON.stringify(err), 'utf-8');
             return console.error(err); // 에러 발생시 에러 기록하고 종료
         }
         res.end(data, 'utf-8'); // 브라우저로 전송   
     });
-    /*
-    let data = { 'list' : [
-        { "market" : "KRW-EOS", "ID" : 'ID1', "mode" : "reverse", "CrDate" : "2019/11/11T11:00", "SlotNo" : 0, "SeedSlotCnt" : 2, "cur_price" : 8000, 
-        "normal" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "reverse" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "Net_Ratio" : -1.5, "Last_Tr_Price" : 9000, "Gap_Ratio" : 10 },           
-        { "market" : "KRW-EOS", "ID" : 'ID1', "mode" : "reverse", "CrDate" : "2019/11/11T11:00", "SlotNo" : 0, "SeedSlotCnt" : 2, "cur_price" : 8000, 
-        "normal" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "reverse" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "Net_Ratio" : -1.5, "Last_Tr_Price" : 9000, "Gap_Ratio" : 10 },           
-    ] };
-
-    res.end(JSON.stringify(data), 'utf-8'); // 브라우저로 전송   
-    */
 });
 
 
@@ -206,7 +205,9 @@ router.get('/tradingdetaillist', function(req, res, next) {
     console.log("[get] query = ", JSON.stringify(req.query));
 
     let filename = "trading_details.json";
-    fs.readFile(__dirname + '/../output/' + filename, (err, data) => { // 파일 읽는 메소드
+    let userid = req.query['userid'];
+    fs.readFile(__dirname + '/../trade_users/' + userid + '/output/' + filename, (err, data) => { // 파일 읽는 메소드
+    //fs.readFile(__dirname + '/../output/' + filename, (err, data) => { // 파일 읽는 메소드
         if (err) {
             res.end(JSON.stringify(err), 'utf-8');
             return console.error(err); // 에러 발생시 에러 기록하고 종료
@@ -219,24 +220,6 @@ router.get('/tradingdetaillist', function(req, res, next) {
         //console.log("market = ", market, "marketID = ", marketID, "jsondata = ", JSON.stringify(jsondata));
         res.end(JSON.stringify(jsondata), 'utf-8'); // 브라우저로 전송   
     });
-
-    /*
-    let data = { 'list' : [
-        { "market" : "KRW-EOS", "ID" : 'ID1', "mode" : "reverse", "CrDate" : "2019/11/11T11:00", "SlotNo" : 0, "BidAsk_Cnt" : 2, "cur_price" : 8000, 
-        "normal" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "reverse" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "eval_Ratio" : -1.5, "Last_Tr_Price" : 9000, "Gap_Ratio" : 10 },           
-        { "market" : "KRW-EOS", "ID" : 'ID1', "mode" : "reverse", "CrDate" : "2019/11/11T11:00", "SlotNo" : 0, "BidAsk_Cnt" : 2, "cur_price" : 8000, 
-        "normal" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "reverse" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "eval_Ratio" : -1.5, "Last_Tr_Price" : 9000, "Gap_Ratio" : 10 },           
-        { "market" : "KRW-EOS", "ID" : 'ID1', "mode" : "reverse", "CrDate" : "2019/11/11T11:00", "SlotNo" : 0, "BidAsk_Cnt" : 2, "cur_price" : 8000, 
-        "normal" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "reverse" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "eval_Ratio" : -1.5, "Last_Tr_Price" : 9000, "Gap_Ratio" : 10 },    ] };
-
-    res.end(JSON.stringify(data), 'utf-8'); // 브라우저로 전송   
-    */
 });
 
 
@@ -249,12 +232,13 @@ router.get('/netincomesummary', function(req, res, next) {
 
     
     let filename = "netincome_summary.json";
-    fs.readFile(__dirname + '/../output/' + filename, (err, data) => { // 파일 읽는 메소드
+    let userid = req.query['userid'];
+    fs.readFile(__dirname + '/../trade_users/' + userid + '/output/' + filename, (err, data) => { // 파일 읽는 메소드
+    //fs.readFile(__dirname + '/../output/' + filename, (err, data) => { // 파일 읽는 메소드
         if (err) {
             res.end(JSON.stringify(err), 'utf-8');
             return console.error(err); // 에러 발생시 에러 기록하고 종료
         }
-
         res.end(data, 'utf-8'); // 브라우저로 전송   
     });
 });
@@ -267,7 +251,9 @@ router.get('/netincomedetaillist', function(req, res, next) {
     console.log("[get] query = ", JSON.stringify(req.query));
 
     let filename = "netincome_details.json";
-    fs.readFile(__dirname + '/../output/' + filename, (err, data) => { // 파일 읽는 메소드
+    let userid = req.query['userid'];
+    fs.readFile(__dirname + '/../trade_users/' + userid + '/output/' + filename, (err, data) => { // 파일 읽는 메소드
+    //fs.readFile(__dirname + '/../output/' + filename, (err, data) => { // 파일 읽는 메소드
         if (err) {
             res.end(JSON.stringify(err), 'utf-8');
             return console.error(err); // 에러 발생시 에러 기록하고 종료
@@ -280,25 +266,6 @@ router.get('/netincomedetaillist', function(req, res, next) {
         //console.log("market = ", market, "marketID = ", marketID, "jsondata = ", JSON.stringify(jsondata));
         res.end(JSON.stringify(jsondata), 'utf-8'); // 브라우저로 전송   
     });
-    /*
-
-    let data = { 'list' : [
-        { "market" : "KRW-EOS", "ID" : 'ID1', "mode" : "reverse", "CrDate" : "2019/11/11T11:00", "SlotNo" : 0, "BidAsk_Cnt" : 2, 
-        "normal" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "reverse" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "eval_Ratio" : -1.5, },           
-        { "market" : "KRW-EOS", "ID" : 'ID1', "mode" : "reverse", "CrDate" : "2019/11/11T11:00", "SlotNo" : 0, "BidAsk_Cnt" : 2, 
-        "normal" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "reverse" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "eval_Ratio" : -1.5, },           
-        { "market" : "KRW-EOS", "ID" : 'ID1', "mode" : "reverse", "CrDate" : "2019/11/11T11:00", "SlotNo" : 0, "BidAsk_Cnt" : 2, 
-        "normal" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "reverse" : { "Coin_BidAsk_amount" : 100, "Coin_BidAsk_Average" : 8000, "BidAsk_KRW" : 4000000, "Coin_KRW_eval" : -10, },
-        "eval_Ratio" : -1.5, },           
-    ] };
-
-    res.end(JSON.stringify(data), 'utf-8'); // 브라우저로 전송   
-    */
 });
 
 
@@ -316,30 +283,12 @@ router.post('/updatecfg', function(req, res, next) {
     let filename = req.body['name'];
     let config = JSON.stringify(req.body['cfg']);
     console.log("filename = ", filename, "config = ", config); 
-
-    fs.writeFile(__dirname + "/../output/" + filename, config, function (err) {
+    let userid = req.query['userid'];
+    fs.writeFile(__dirname + '/../trade_users/' + userid + '/output/' + filename, config, function (err) { // 파일 읽는 메소드
+    //fs.writeFile(__dirname + "/../output/" + filename, config, function (err) {
         if (err) throw err;
         console.log('Saved!');
       });
-    /*
-    let today = new Date();
-    let newdata = { };
-    let recievedData = req.body;
-    for(market in recievedData)
-    {
-        if(newdata.hasOwnProperty(market) === false) { newdata[market] = {}; }
-        
-        for(marketID in recievedData[market])
-        {
-            if(newdata[market].hasOwnProperty(marketID) === false) { newdata[market][marketID] = { }; }
-            newdata[market][marketID]['marketID'] = market + "_" + marketID;
-            newdata[market][marketID]['inserted'] = today;
-            newdata[market][marketID]['config'] = recievedData[market][marketID]['config'];
-        }
-    }
-    
-    console.log("newdata = ", newdata, JSON.stringify(newdata));
-    */
     res.end("Update 완료되었습니다.", 'utf-8'); // 브라우저로 전송   
 });
 
@@ -432,36 +381,3 @@ router.put('/update', function(req, res, next) {
 
 module.exports = router;
 
-
-
-
-/*
-const SchemaDefine = { 
-    market1 :  
-    {
-        ID1 : {
-            marketID : market1_ID1,
-            inserted_at : Date, 
-            config : Object 
-            }
-        ID2 : {
-            marketID : market1_ID2,
-            inserted_at : Date, 
-            config : Object 
-            }
-    }
-    market2 :  
-    {
-        ID1 : {
-            marketID : market2_ID1,
-            inserted_at : Date, 
-            config : Object 
-            }
-        ID2 : {
-            marketID : market2_ID2,
-            inserted_at : Date, 
-            config : Object 
-            }
-    }
-}
-*/

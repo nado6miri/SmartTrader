@@ -57,13 +57,39 @@
     }
 
 
+    .div4_status_1 {
+        width: 12%;
+        float: left;
+        box-sizing: border-box;
+        background: rgb(255, 255, 255);
+    }
+    .div4_status_2 {
+        width: 12%;
+        float: left;
+        box-sizing: border-box;
+        background: rgb(255, 255, 255);
+    }
+    .div4_status_3 {
+        width: 10%;
+        float: left;
+        box-sizing: border-box;
+        background: rgb(255, 255, 255);
+    }
+    .div4_status_4 {
+        width: 66%;
+        float: left;
+        box-sizing: border-box;
+        background: rgb(255, 255, 255);
+    }
+
+
     .div_div2_left {
         width: 50%;
         float: left;
         box-sizing: border-box;
         background: rgb(255, 255, 255);
     }
-    .div_div2_middle {
+    .div_div2_right {
         width: 50%;
         float: left;
         box-sizing: border-box;
@@ -127,6 +153,16 @@
             </tbody>
         </table>
         -->
+        <div id="user_data"
+            data-currentuser = "sungbin.na" >
+        </div>
+        <hr style="height: 4px; border: 2px outset #c8ccca; background-color: #eb3c1d"/>
+        <div id="user_status" style="width:100%; height:30px">
+            <div id="user_status_1" class=div4_status_1>사용자를 선택해 주세요 : </div>
+            <div id="user_status_2" class=div4_status_2></div>
+            <div id="user_status_3" class=div4_status_3>Status Monitoring : </div>
+            <div id="user_status_4" class=div4_status_4></div>
+        </div>
         <!-- Overall Summary Table -->
         <hr style="height: 4px; border: 2px outset #c8ccca; background-color: #eb3c1d"/>
         <div id="overall_summary" style="width:100%; height:220px">
@@ -469,6 +505,44 @@
 </html>
 
 
+
+
+<script type="text/javascript">
+    var server_socket = null;
+    var trader_socket = null;
+    
+    if(server_socket == null) { server_socket = io.connect('http://192.168.123.100:5555'); }
+
+    server_socket.on('status_monitoring', function (data) {
+        console.log("status_monitoring..................");
+        $("#user_status_4").html(data.msg);
+    });
+
+
+    if(trader_socket == null) { trader_socket = io.connect('http://192.168.123.100:5556'); }
+
+    trader_socket.on('alive_monitoring', function (data) {
+        console.log("alive_monitoring..................");
+        $("#user_status_4").html(data.msg);
+    });
+
+    /*
+    server_socket.on('insert_first', function (data) {
+        console.log("Insert Table");
+        $('#msgs').text(data.msg + '==Insert Table');
+        $('#donate_list > thead').append('<tr><td>First</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>');
+    });
+
+    $("#cmdbox").keyup(function (event) {
+        if (event.which == 13) {
+            server_socket.emit('clientcmd', { msg: $('#cmdbox').val() });
+            $('#cmdbox').val('');
+        }
+    });
+    */
+</script>
+
+
 <!--
     JQUERY : https://www.w3schools.com/jquery/default.asp
     Jquery Selector
@@ -499,14 +573,54 @@
     var tr_summary = {};
     var ni_summary = {};
     var current_price = {};
+    var userlist = ["sungbin.na", "hyunmin.lee" ];
+    var selected_user = null;
 
     //$(document).ready(function() {  // long syntax
     $(function() {        // short syntax
         //Create_PortfolioTable("PortfolioTable_body");
+        console.log("Cookiee = ", document.cookie);
+        selected_user = getCookie("selected_user");
+        if(selected_user == null) { selected_user = userlist[0]; }
+        Create_UserSelect_Status();
         Create_BalanceTable("Balance_body");
         Create_ConfigTable("ConfigTable_body");
         setInterval(function() { worker_15sec() }, 15000);
     });
+
+    function setCookie(cookie_name, value, days) 
+    {
+        var exdate = new Date();
+        exdate.setDate(exdate.getDate() + days);
+        // 설정 일수만큼 현재시간에 만료값으로 지정
+        var cookie_value = escape(value) + ((days == null) ? '' : ';    expires=' + exdate.toUTCString());
+        document.cookie = cookie_name + '=' + cookie_value;
+    }
+
+    function getCookie(cookie_name) 
+    {
+        var x, y;
+        var val = document.cookie.split(';');
+
+        for (var i = 0; i < val.length; i++) {
+            x = val[i].substr(0, val[i].indexOf('='));
+            y = val[i].substr(val[i].indexOf('=') + 1);
+            x = x.replace(/^\s+|\s+$/g, ''); // 앞과 뒤의 공백 제거하기
+            if (x == cookie_name) 
+            {
+                return unescape(y); // unescape로 디코딩 후 값 리턴
+            }
+        }
+    }
+
+    function Create_UserSelect_Status()
+    {
+        let user = getCookie("selected_user");
+        let default_index = userlist.indexOf(user);
+
+        makeListBox("#user_status_2", "userselection", userlist, ListBox_userChange, "css_style1", "width:200px; height:30px; font-size:large", default_index, "single", 1);
+        $("#user_status_4").html("ddddddddddddddddddddddddd");
+    }
 
     function buttton1_handler()
     {
@@ -754,21 +868,38 @@
                 $(tr).append($('<td>').html(N_Coin_BidAsk_amount));
                 $(tr).append($('<td>').html(N_Coin_BidAsk_Average));
                 $(tr).append($('<td>').html(N_BidAsk_KRW));
-                $(tr).append($('<td>').html(N_Coin_KRW_eval));
+
+                if(N_Coin_KRW_eval > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + N_Coin_KRW_eval.toFixed(1))); } 
+                else if(N_Coin_KRW_eval < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + N_Coin_KRW_eval.toFixed(1))); } 
+                else { $(tr).append($('<td>').html(N_Coin_KRW_eval)); }
+                //$(tr).append($('<td>').html(N_Coin_KRW_eval));
+               
                 $(tr).append($('<td>').html(R_Coin_BidAsk_amount));
                 $(tr).append($('<td>').html(R_Coin_BidAsk_Average));
                 $(tr).append($('<td>').html(R_BidAsk_KRW));
-                $(tr).append($('<td>').html(R_Coin_KRW_eval));
-                $(tr).append($('<td>').html(Net_Ratio));
+            
+                if(R_Coin_KRW_eval > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + R_Coin_KRW_eval.toFixed(1))); } 
+                else if(R_Coin_KRW_eval < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + R_Coin_KRW_eval.toFixed(1))); } 
+                else { $(tr).append($('<td>').html(R_Coin_KRW_eval)); }
+                //$(tr).append($('<td>').html(R_Coin_KRW_eval));
+
+                if(Net_Ratio > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + Net_Ratio.toFixed(1))); } 
+                else if(Net_Ratio < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + Net_Ratio.toFixed(1))); } 
+                else { $(tr).append($('<td>').html(Net_Ratio)); }
+                //$(tr).append($('<td>').html(Net_Ratio));
+               
                 $(tr).append($('<td>').html(Last_Tr_Price));
                 $(tr).append($('<td>').html(cur_price));
-                $(tr).append($('<td>').html(Gap_Ratio));
+               
+                if(Gap_Ratio > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + Gap_Ratio.toFixed(1))); } 
+                else if(Gap_Ratio < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + Gap_Ratio.toFixed(1))); } 
+                else { $(tr).append($('<td>').html(Gap_Ratio)); }
+                //$(tr).append($('<td>').html(Gap_Ratio));
             }
         }).catch((error) => {
 
         });
     }
-
 
 
     function Create_IncomeSummaryTable(table_bodyID)
@@ -842,13 +973,26 @@
                 $(tr).append($('<td>').html(Coin_Bid_Average));
                 $(tr).append($('<td>').html(Bid_KRW));
                 $(tr).append($('<td>').html(Ask_KRW));
-                $(tr).append($('<td>').html(Net_KRW));
+
+                if(Net_KRW > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + Net_KRW.toFixed(1))); } 
+                else if(Net_KRW < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + Net_KRW.toFixed(1))); } 
+                else { $(tr).append($('<td>').html(Net_KRW)); }
+                //$(tr).append($('<td>').html(Net_KRW));
+
                 $(tr).append($('<td>').html(Coin_Ask_amount));
                 $(tr).append($('<td>').html(Coin_Ask_Average));
                 $(tr).append($('<td>').html(Reclaim_KRW));
                 $(tr).append($('<td>').html(ReBid_amount));
-                $(tr).append($('<td>').html(Net_Coin));
-                $(tr).append($('<td>').html(Net_Ratio));
+
+                if(Net_Coin > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + Net_Coin.toFixed(2))); } 
+                else if(Net_Coin < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + Net_Coin.toFixed(2))); } 
+                else { $(tr).append($('<td>').html(Net_Coin)); }
+                //$(tr).append($('<td>').html(Net_Coin));
+
+                if(Net_Ratio > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + Net_Ratio.toFixed(2))); } 
+                else if(Net_Ratio < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + Net_Ratio.toFixed(2))); } 
+                else { $(tr).append($('<td>').html(Net_Ratio)); }
+                //$(tr).append($('<td>').html(Net_Ratio));
 
                 sum['SlotNo'] += SlotNo;
                 sum['BidAsk_Cnt'] += BidAsk_Cnt;
@@ -868,12 +1012,21 @@
             $("#NID3").html(sum['normal']['Coin_Bid_Average'].toFixed(0)*1);
             $("#NID4").html(sum['normal']['Bid_KRW'].toFixed(0)*1);
             $("#NID5").html(sum['normal']['Ask_KRW'].toFixed(0)*1);
-            $("#NID6").html(sum['normal']['Net_KRW'].toFixed(0)*1);
+
+            if(sum['normal']['Net_KRW'] > 0) { $("#NID6").attr("style", "color:#FF0000").html("▲ " + sum['normal']['Net_KRW'].toFixed(0)); } 
+            else if(sum['normal']['Net_KRW'] < 0) { $("#NID6").attr("style", "color:#0000FF").html("▼ " + sum['normal']['Net_KRW'].toFixed(0)); } 
+            else { $("#NID6").html(sum['normal']['Net_KRW']); }
+            //$("#NID6").html(sum['normal']['Net_KRW'].toFixed(0)*1);
+            
             $("#NID7").html(sum['reverse']['Coin_Ask_amount'].toFixed(2)*1);
             $("#NID8").html(sum['reverse']['Coin_Ask_Average'].toFixed(0)*1);
             $("#NID9").html(sum['reverse']['Reclaim_KRW'].toFixed(0)*1);
             $("#NID10").html(sum['reverse']['ReBid_amount'].toFixed(2)*1);
-            $("#NID11").html(sum['reverse']['Net_Coin'].toFixed(2)*1);
+
+            if(sum['reverse']['Net_Coin'] > 0) { $("#NID11").attr("style", "color:#FF0000").html("▲ " + sum['reverse']['Net_Coin'].toFixed(2)); } 
+            else if(sum['reverse']['Net_Coin'] < 0) { $("#NID11").attr("style", "color:#0000FF").html("▼ " + sum['reverse']['Net_Coin'].toFixed(2)); } 
+            else { $("#NID11").html(sum['reverse']['Net_Coin']); }
+            //$("#NID11").html(sum['reverse']['Net_Coin'].toFixed(2)*1);
         }).catch((error) => {
 
         })
@@ -943,6 +1096,15 @@
         {
             if(self[i].selected) { console.log("Selected Item[", i, "] = ", self[i].value); }
         }
+    }
+
+    
+    function ListBox_userChange (self, itemList) 
+    {
+        selected_user = getListBox_values("userselection");
+        setCookie("selected_user", selected_user, 30);
+        console.log("Save UserIndex ==============", selected_user);
+        location.reload();
     }
 
     /*
@@ -1186,7 +1348,11 @@
     function Update_ConfigParam(filename, config)
     {
         console.log("filename = ", filename, "config = " , config);
-        let senddata = { name : filename, cfg : config };
+        let senddata = { 
+            userid : selected_user, 
+            name : filename, 
+            cfg : config 
+        };
 
         let settings = {
             async : true,
@@ -1291,7 +1457,10 @@
                 "Content-Type": "application/x-www-form-urlencoded",
                 "cache-control": "no-cache",
             },
-            data : { 'configfile' : filename },
+            data : { 
+                userid : selected_user, 
+                'configfile' : filename 
+            },
             /*
             success : function (data) { console.log("ajax success : config filename = ", filename, " data = ", data); },
             error : function (error) { console.log("ajax error = ", error); },
@@ -1326,6 +1495,7 @@
                 "cache-control": "no-cache",
             },
             data : { 
+                'userid' : selected_user, 
                 'market' : "KRW",
                 'marketID' : "ID1",
                 'trade_mode' : "normal" 
@@ -1370,6 +1540,7 @@
                 "cache-control": "no-cache",
             },
             data : { 
+                userid : selected_user, 
                 'market' : Market,
             },
             /*
@@ -1406,7 +1577,10 @@
                 "Content-Type": "application/x-www-form-urlencoded",
                 "cache-control": "no-cache",
             },
-            data : { 'filename' : filename },
+            data : { 
+                userid : selected_user, 
+                'filename' : filename 
+            },
             /*
             success : function (data) { console.log("ajax success : portfolio filename = ", filename, " data = ", data); },
             error : function (error) { console.log("ajax error = ", error); },
@@ -1442,6 +1616,7 @@
                 "cache-control": "no-cache",
             },
             data : { 
+                userid : selected_user, 
                 'market' : market,
                 'marketID' : marketID,
                 'trade_mode' : trade_mode 
@@ -1479,6 +1654,7 @@
                 "cache-control": "no-cache",
             },
             data : { 
+                userid : selected_user, 
                 'market' : market,
                 'marketID' : marketID,
                 'trade_mode' : trade_mode 
@@ -1517,6 +1693,7 @@
                 "cache-control": "no-cache",
             },
             data : { 
+                userid : selected_user, 
                 'market' : market,
                 'marketID' : marketID,
                 'trade_mode' : trade_mode 
@@ -1554,6 +1731,7 @@
                 "cache-control": "no-cache",
             },
             data : { 
+                userid : selected_user, 
                 'market' : market,
                 'marketID' : marketID,
                 'trade_mode' : trade_mode 
@@ -1586,6 +1764,8 @@
         update_Balance();
         update_TradeSummary("TradingSummary_body");
         update_NetIncomSummary("IncomeSummary_body", false);
+        server_socket.emit('clientcmd', { msg: "status" });
+        trader_socket.emit('clientcmd', { msg: "status" });
     }
 
 
@@ -1707,7 +1887,9 @@
                     if(i == 1) { $(idstr).html(data[i-1]); }
                     else
                     {
-                        if(data[i-1] > 0) { $(idstr).attr("style", "color:#FF0000").html("▲ " + data[i-1]); } else if(data[i-1] < 0) { $(idstr).attr("style", "color:#0000FF").html("▼ " + data[i-1]); } else { $(idstr).html(data[i-1]); }
+                        if(data[i-1] > 0) { $(idstr).attr("style", "color:#FF0000").html("▲ " + data[i-1].toFixed(1)); } 
+                        else if(data[i-1] < 0) { $(idstr).attr("style", "color:#0000FF").html("▼ " + data[i-1].toFixed(1)); } 
+                        else { $(idstr).html(data[i-1]); }
                     }
                 }
                 sum[0] += data[3];
@@ -1720,14 +1902,15 @@
             }
         }
 
-        if(sum[0] > 0) { $("#FEV1").attr("style", "color:#FF0000").html("▲ " + sum[0]); } else if(sum[0] < 0) { $("#FEV1").attr("style", "color:#0000FF").html("▼ " + sum[0]); } else { $("#FEV1").html(sum[0]); }
-        if(sum[1] > 0) { $("#FEV2").attr("style", "color:#FF0000").html("▲ " + sum[1]); } else if(sum[1] < 0) { $("#FEV1").attr("style", "color:#0000FF").html("▼ " + sum[1]); } else { $("#FEV1").html(sum[1]); }
-        if(sum[2] > 0) { $("#FEV3").attr("style", "color:#FF0000").html("▲ " + sum[2]); } else if(sum[2] < 0) { $("#FEV1").attr("style", "color:#0000FF").html("▼ " + sum[2]); } else { $("#FEV1").html(sum[2]); }
-        if(sum[3] > 0) { $("#FEV4").attr("style", "color:#FF0000").html("▲ " + sum[3]); } else if(sum[3] < 0) { $("#FEV1").attr("style", "color:#0000FF").html("▼ " + sum[3]); } else { $("#FEV1").html(sum[3]); }
-        if(sum[4] > 0) { $("#FEV5").attr("style", "color:#FF0000").html("▲ " + sum[4]); } else if(sum[4] < 0) { $("#FEV1").attr("style", "color:#0000FF").html("▼ " + sum[4]); } else { $("#FEV1").html(sum[4]); }
-        if(sum[5] > 0) { $("#FEV6").attr("style", "color:#FF0000").html("▲ " + sum[5]); } else if(sum[5] < 0) { $("#FEV1").attr("style", "color:#0000FF").html("▼ " + sum[5]); } else { $("#FEV1").html(sum[5]); }
-        if(sum[6] > 0) { $("#FFEV").attr("style", "color:#FF0000").html("▲ " + sum[6]); } else if(sum[6] < 0) { $("#FFEV").attr("style", "color:#0000FF").html("▼ " + sum[6]); } else { $("#FFEV").html(sum[6]); }
+        if(sum[0] > 0) { $("#FEV1").attr("style", "color:#FF0000").html("▲ " + sum[0].toFixed(1)); } else if(sum[0] < 0) { $("#FEV1").attr("style", "color:#0000FF").html("▼ " + sum[0].toFixed(1)); } else { $("#FEV1").html(sum[0]); }
+        if(sum[1] > 0) { $("#FEV2").attr("style", "color:#FF0000").html("▲ " + sum[1].toFixed(1)); } else if(sum[1] < 0) { $("#FEV2").attr("style", "color:#0000FF").html("▼ " + sum[1].toFixed(1)); } else { $("#FEV2").html(sum[1]); }
+        if(sum[2] > 0) { $("#FEV3").attr("style", "color:#FF0000").html("▲ " + sum[2].toFixed(1)); } else if(sum[2] < 0) { $("#FEV3").attr("style", "color:#0000FF").html("▼ " + sum[2].toFixed(1)); } else { $("#FEV3").html(sum[2]); }
+        if(sum[3] > 0) { $("#FEV4").attr("style", "color:#FF0000").html("▲ " + sum[3].toFixed(1)); } else if(sum[3] < 0) { $("#FEV4").attr("style", "color:#0000FF").html("▼ " + sum[3].toFixed(1)); } else { $("#FEV4").html(sum[3]); }
+        if(sum[4] > 0) { $("#FEV5").attr("style", "color:#FF0000").html("▲ " + sum[4].toFixed(1)); } else if(sum[4] < 0) { $("#FEV5").attr("style", "color:#0000FF").html("▼ " + sum[4].toFixed(1)); } else { $("#FEV5").html(sum[4]); }
+        if(sum[5] > 0) { $("#FEV6").attr("style", "color:#FF0000").html("▲ " + sum[5].toFixed(1)); } else if(sum[5] < 0) { $("#FEV6").attr("style", "color:#0000FF").html("▼ " + sum[5].toFixed(1)); } else { $("#FEV6").html(sum[5]); }
+        if(sum[6] > 0) { $("#FFEV").attr("style", "color:#FF0000").html("▲ " + sum[6].toFixed(1)); } else if(sum[6] < 0) { $("#FFEV").attr("style", "color:#0000FF").html("▼ " + sum[6].toFixed(1)); } else { $("#FFEV").html(sum[6]); }
     }
+
 
     function update_TradeSummary(table_bodyID)
     {
@@ -1787,15 +1970,32 @@
                     $(tr).append($('<td>').html(N_Coin_BidAsk_amount));
                     $(tr).append($('<td>').html(N_Coin_BidAsk_Average));
                     $(tr).append($('<td>').html(N_BidAsk_KRW));
-                    $(tr).append($('<td>').html(N_Coin_KRW_eval));
+
+                    if(N_Coin_KRW_eval > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + N_Coin_KRW_eval.toFixed(1))); } 
+                    else if(N_Coin_KRW_eval < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + N_Coin_KRW_eval.toFixed(1))); } 
+                    else { $(tr).append($('<td>').html(N_Coin_KRW_eval)); }
+                    
+
                     $(tr).append($('<td>').html(R_Coin_BidAsk_amount));
                     $(tr).append($('<td>').html(R_Coin_BidAsk_Average));
                     $(tr).append($('<td>').html(R_BidAsk_KRW));
-                    $(tr).append($('<td>').html(R_Coin_KRW_eval));
-                    $(tr).append($('<td>').html(Net_Ratio));
+
+                    if(R_Coin_KRW_eval > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + R_Coin_KRW_eval.toFixed(1))); } 
+                    else if(R_Coin_KRW_eval < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + R_Coin_KRW_eval.toFixed(1))); } 
+                    else { $(tr).append($('<td>').html(R_Coin_KRW_eval)); }
+
+                    if(Net_Ratio > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + Net_Ratio.toFixed(1))); } 
+                    else if(Net_Ratio < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + Net_Ratio.toFixed(1))); } 
+                    else { $(tr).append($('<td>').html(Net_Ratio)); }
+
                     $(tr).append($('<td>').html(Last_Tr_Price));
                     $(tr).append($('<td>').html(cur_price));
-                    $(tr).append($('<td>').html(Gap_Ratio));
+
+                    //
+                    if(Gap_Ratio > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + Gap_Ratio.toFixed(1))); } 
+                    else if(Gap_Ratio < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + Gap_Ratio.toFixed(1))); } 
+                    else { $(tr).append($('<td>').html(Gap_Ratio)); }
+
                     let btnid = "trbtn" + index.toString();
                     $(tr).append($('<td>').attr('id', btnid));
                     makeButton("#trbtn" + index.toString(), "TradingDetailBtn" + index.toString(), "Veiw Detail", TrDetailView_ButtonClickhandler, "css_style1", "width: 140px");
@@ -1815,16 +2015,23 @@
                 }
             }
 
-            $("#TS1").html(sum['liquidCnt']);
-            $("#TS2").html(sum['SeedSlotCnt']);
-            $("#TS3").html(sum['normal']['Coin_BidAsk_amount']);
-            $("#TS4").html(sum['normal']['Coin_BidAsk_Average']);
-            $("#TS5").html(sum['normal']['BidAsk_KRW']);
-            $("#TS6").html(sum['normal']['Coin_KRW_eval']);
-            $("#TS7").html(sum['reverse']['Coin_BidAsk_amount']);
-            $("#TS8").html(sum['reverse']['Coin_BidAsk_Average']);
-            $("#TS9").html(sum['reverse']['BidAsk_KRW']);
-            $("#TS10").html(sum['reverse']['Coin_KRW_eval']);
+            $("#TS1").html(sum['liquidCnt'].toFixed(2));
+            $("#TS2").html(sum['SeedSlotCnt'].toFixed(2));
+            $("#TS3").html(sum['normal']['Coin_BidAsk_amount'].toFixed(2));
+            $("#TS4").html(sum['normal']['Coin_BidAsk_Average'].toFixed(2));
+            $("#TS5").html(sum['normal']['BidAsk_KRW'].toFixed(0));
+
+            if(sum['normal']['Coin_KRW_eval'] > 0) { $("#TS6").attr("style", "color:#FF0000").html("▲ " + sum['normal']['Coin_KRW_eval'].toFixed(0)); } 
+            else if(sum['normal']['Coin_KRW_eval'] < 0) { $("#TS6").attr("style", "color:#0000FF").html("▼ " + sum['normal']['Coin_KRW_eval'].toFixed(0)); } 
+            else { $("#TS6").html(sum['normal']['Coin_KRW_eval']); }
+
+            $("#TS7").html(sum['reverse']['Coin_BidAsk_amount'].toFixed(2));
+            $("#TS8").html(sum['reverse']['Coin_BidAsk_Average'].toFixed(2));
+            $("#TS9").html(sum['reverse']['BidAsk_KRW'].toFixed(0));
+
+            if(sum['reverse']['Coin_KRW_eval'] > 0) { $("#TS10").attr("style", "color:#FF0000").html("▲ " + sum['reverse']['Coin_KRW_eval'].toFixed(2)); } 
+            else if(sum['reverse']['Coin_KRW_eval'] < 0) { $("#TS10").attr("style", "color:#0000FF").html("▼ " + sum['reverse']['Coin_KRW_eval'].toFixed(2)); } 
+            else { $("#TS6").html(sum['reverse']['Coin_KRW_eval']); }
         }).catch((error) => {
 
         });     
@@ -1875,13 +2082,24 @@
 
                     $(tr).append($('<td>').html(total_invest_KRW));
                     $(tr).append($('<td>').html(eval_KRW));
-                    $(tr).append($('<td>').html(net_KRW));
+
+                    if(net_KRW > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + net_KRW.toFixed(1))); } 
+                    else if(net_KRW < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + net_KRW.toFixed(1))); } 
+                    else { $(tr).append($('<td>').html(net_KRW)); }
+                    //$(tr).append($('<td>').html(net_KRW));
 
                     $(tr).append($('<td>').html(total_Ask_Coin));
                     $(tr).append($('<td>').html(reBid_Coin));
-                    $(tr).append($('<td>').html(net_Coin));
 
-                    $(tr).append($('<td>').html(Net_Ratio));
+                    if(net_Coin > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + net_Coin.toFixed(1))); } 
+                    else if(net_Coin < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + net_Coin.toFixed(1))); } 
+                    else { $(tr).append($('<td>').html(net_Coin)); }
+                    //$(tr).append($('<td>').html(net_Coin));
+
+                    if(Net_Ratio > 0) { $(tr).append($('<td>').attr("style", "color:#FF0000").html("▲ " + Net_Ratio.toFixed(2))); } 
+                    else if(Net_Ratio < 0) { $(tr).append($('<td>').attr("style", "color:#0000FF").html("▼ " + Net_Ratio.toFixed(2))); } 
+                    else { $(tr).append($('<td>').html(Net_Ratio).toFixed(2)); }
+                    //$(tr).append($('<td>').html(Net_Ratio));
 
                     let btnid = "incomebtn" + index.toString();
                     $(tr).append($('<td>').attr('id', btnid));
@@ -1897,10 +2115,19 @@
             }
             $("#NI1").html(sum['normal']['total_invest_KRW'].toFixed(0) * 1);
             $("#NI2").html(sum['normal']['eval_KRW'].toFixed(0) * 1);
-            $("#NI3").html(sum['normal']['net_KRW'].toFixed(0) * 1);
+
+            if(sum['normal']['net_KRW'] > 0) { $("#NI3").attr("style", "color:#FF0000").html("▲ " + sum['normal']['net_KRW'].toFixed(1)); } 
+            else if(sum['normal']['net_KRW'] < 0) { $("#NI3").attr("style", "color:#0000FF").html("▼ " + sum['normal']['net_KRW'].toFixed(1)); } 
+            else { $("#NI3").html(sum['normal']['net_KRW']); }
+            //$("#NI3").html(sum['normal']['net_KRW'].toFixed(0) * 1);
+
             $("#NI4").html(sum['reverse']['total_Ask_Coin']);
             $("#NI5").html(sum['reverse']['reBid_Coin']);
-            $("#NI6").html(sum['reverse']['net_Coin']);
+
+            if(sum['reverse']['net_Coin'] > 0) { $("#NI6").attr("style", "color:#FF0000").html("▲ " + sum['reverse']['net_Coin'].toFixed(1)); } 
+            else if(sum['reverse']['net_Coin'] < 0) { $("#NI6").attr("style", "color:#0000FF").html("▼ " + sum['reverse']['net_Coin'].toFixed(1)); } 
+            else { $("#NI6").html(sum['reverse']['net_Coin']); }
+            //$("#NI6").html(sum['reverse']['net_Coin']);
 
             if(mktable) { Create_EvaluationTable("Evaluation_body"); } else { update_Evalueation(); }
 
@@ -1910,4 +2137,3 @@
     }
 
 </script>
-

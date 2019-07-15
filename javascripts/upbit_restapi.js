@@ -1,11 +1,3 @@
-const upbit = require("../config/upbit_configuration");
-/*
-
-const AccessKey = 'sfsdfsdfadsfaghhjgrthtrhtrhtrhgfbhgfhgfh'; // fake key
-const SecretKey = 'afd4gtrtgg34t43b43b435vg534f43534b3434gv'; // fake key
-module.exports = { AccessKey, SecretKey };
-
-*/
 const jwt = require("jsonwebtoken")
 const request = require("request")
 const queryEncode = require("querystring").encode
@@ -20,13 +12,13 @@ https://docs.upbit.com/v1.0.1/reference#%EC%9E%90%EC%82%B0-%EC%A1%B0%ED%9A%8C
     {"currency":"EOS","balance":"11766.46162836","locked":"0.0","avg_buy_price":"5119.12","avg_buy_price_modified":false,"unit_currency":"KRW","avg_krw_buy_price":"5119.12","modified":false}
 ]
 */
-function get_accountbalance()
+function get_accountbalance(authkey)
 {
     const payload = {
-        access_key: upbit.AccessKey,
+        access_key: authkey.AccessKey,
         nonce: (new Date).getTime()
     };
-    const jwtToken = jwt.sign(payload, upbit.SecretKey);
+    const jwtToken = jwt.sign(payload, authkey.SecretKey);
     const authorizationToken = `Bearer ${jwtToken}`;
     var options = {
         method: "GET",
@@ -53,15 +45,15 @@ function get_accountbalance()
  Market별 주문 가능 정보를 확인한다. 'KRW-BTC', 'KRW-EOS'......
  https://docs.upbit.com/v1.0.1/reference#%EC%A3%BC%EB%AC%B8-%EA%B0%80%EB%8A%A5-%EC%A0%95%EB%B3%B4
 */
-function get_chance(marketID)
+function get_chance(authkey, marketID)
 {
     const query = queryEncode({ market : marketID });
     const payload = {
-        access_key : upbit.AccessKey,
+        access_key : authkey.AccessKey,
         nonce : (new Date).getTime(),
         query : query,
     };
-    const jwtToken = jwt.sign(payload, upbit.SecretKey);
+    const jwtToken = jwt.sign(payload, authkey.SecretKey);
     const authorizationToken = `Bearer ${jwtToken}`;
     var options = {
         method: "GET",
@@ -88,15 +80,15 @@ function get_chance(marketID)
  9d59aacb-7184-42e4-a78e-3b49beb041b4
  https://docs.upbit.com/v1.0.1/reference#%EC%A3%BC%EB%AC%B8-%EA%B0%80%EB%8A%A5-%EC%A0%95%EB%B3%B4
 */
-function get_orderinfo(UUID)
+function get_orderinfo(authkey, UUID)
 {
     const query = queryEncode({ uuid : UUID });
     const payload = {
-        access_key : upbit.AccessKey,
+        access_key : authkey.AccessKey,
         nonce : (new Date).getTime(),
         query : query,
     };
-    const jwtToken = jwt.sign(payload, upbit.SecretKey);
+    const jwtToken = jwt.sign(payload, authkey.SecretKey);
     const authorizationToken = `Bearer ${jwtToken}`;
     var options = {
         method: "GET",
@@ -128,15 +120,15 @@ function get_orderinfo(UUID)
  PageCnt : Page Count (default 1)
  orderRule : 'asc', 'desc'
 */
-function get_orderslist(MarketID, State, PageCnt = 1, orderRule = 'desc')
+function get_orderslist(authkey, MarketID, State, PageCnt = 1, orderRule = 'desc')
 {
     const query = queryEncode({ market : MarketID, state: State, page: PageCnt, order_by : orderRule });
     const payload = {
-        access_key : upbit.AccessKey,
+        access_key : authkey.AccessKey,
         nonce : (new Date).getTime(),
         query : query,
       };
-    const jwtToken = jwt.sign(payload, upbit.SecretKey);
+    const jwtToken = jwt.sign(payload, authkey.SecretKey);
     const authorizationToken = `Bearer ${jwtToken}`;
     var options = {
         method: "GET",
@@ -165,16 +157,16 @@ function get_orderslist(MarketID, State, PageCnt = 1, orderRule = 'desc')
  ask : sell
  https://docs.upbit.com/v1.0.1/reference#%EC%A3%BC%EB%AC%B8-%EC%B7%A8%EC%86%8C
 */
-function input_orders(MarketID, Side, Volume, Price, Order_Type)
+function input_orders(authkey, MarketID, Side, Volume, Price, Order_Type)
 {
     const body = { market: MarketID, side: Side, volume: Volume, price: Price, ord_type: Order_Type };
     const query = queryEncode(body);
     const payload = {
-        access_key : upbit.AccessKey,
+        access_key : authkey.AccessKey,
         nonce : (new Date).getTime(),
         query : query,
     };
-    const jwtToken = jwt.sign(payload, upbit.SecretKey);
+    const jwtToken = jwt.sign(payload, authkey.SecretKey);
     const authorizationToken = `Bearer ${jwtToken}`;
     var options = {
         method: "POST",
@@ -203,15 +195,15 @@ function input_orders(MarketID, Side, Volume, Price, Order_Type)
  주문 취소 요청
  https://docs.upbit.com/v1.0.1/reference#%EC%A3%BC%EB%AC%B8-%EC%B7%A8%EC%86%8C
 */
-function cancel_orders(UUID)
+function cancel_orders(authkey, UUID)
 {
     const query = queryEncode({ uuid : UUID });
     const payload = {
-        access_key : upbit.AccessKey,
+        access_key : authkey.AccessKey,
         nonce : (new Date).getTime(),
         query : query,
     };
-    const jwtToken = jwt.sign(payload, upbit.SecretKey);
+    const jwtToken = jwt.sign(payload, authkey.SecretKey);
     const authorizationToken = `Bearer ${jwtToken}`;
     var options = {
         method: "DELETE",
@@ -351,6 +343,7 @@ function getTodayTransactionList(MarketID, Count = 500, To = "")
 */
 function getCurrentPriceInfo(MarketID)
 {
+    //console.log("passed params - userid = ", arguments);
     let query = { markets : MarketID } ;
     var options = { 
         method: 'GET',

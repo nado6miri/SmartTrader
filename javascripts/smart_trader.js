@@ -2,10 +2,12 @@
 var fs = require('fs');
 const fse = require('fs-extra');
 var moment = require('moment-timezone');
-
+var params = {};
+params.userid = "sungbin.na";
 const upbit = require("./upbit_restapi");
-var NConfig = require("../parameters/Normal_trade_config");
-var RConfig = require("../parameters/Reverse_trade_config");
+
+var socketcomm = require('../javascripts/socket_comm');
+var authkey = null;
 
 const tradefee = 0.0005;
 const expiredtime = 1*24*60*60*1000; // 24Hours
@@ -194,23 +196,57 @@ var trading_summary = {};
 var trading_details = {};
 var netincome_summary = {};
 var netincome_details = {};
+var userid = "";
+var useridpath = "";
+
 
 async function register_trade_markets()
-{
-    /*
-    console.log(process.argv, process.argv.length, process.argv[2]);
+{   
+    /* 
+    console.log(process.argv, process.argv.length, process.argv[1], process.argv[2], process.argv[3]);
     process.argv.forEach(function (val, index, array) { console.log(index + ': ' + val); });
     */
+    userid = process.argv[2];
+    
+    if(userid == 0 || userid == 'resume' || userid == null) 
+    { 
+        //console.log("user id error"); 
+        exit(-1); 
+    } 
+    else 
+    { 
+        params.userid = userid;
+
+        if(authkey == null)
+        {
+            authkey = require("./upbit_authkey")(params);
+            //console.log("key =========", authkey.AccessKey, authkey.SecretKey);
+        }
+
+        useridpath = "./trade_users/" + userid + "/";
+        //console.log("[User ID] = ", userid); 
+
+        if(!fs.existsSync(useridpath + "./parameters/"))
+        {
+            console.log("file is not exist");
+            fse.copySync("./trade_users/default/parameters/", useridpath + "parameters/");
+        }
+    }
+
+    let strNconfig = "." + useridpath + 'parameters/Normal_trade_config';
+    let strRconfig = "." + useridpath + 'parameters/Reverse_trade_config';
+    var NConfig = require(strNconfig);
+    var RConfig = require(strRconfig);
 
     //1. read portfolio json file.... : 투자목록 list를 portfolio_list 에서 가져온다.
     portfolio_list = await Load_JsonDB("./parameters/" + "portfolio_list");
     //console.log("portfolio_list = ", JSON.stringify(portfolio_list));
-
+    
     //2. resume mode 이면 기존 저정된 config 및 portfolio / liquidation / increase coin 정보를 읽어온다.
-    if (process.argv.length === 3 && process.argv[2] == 'resume')
+    if (process.argv.length === 4 && process.argv[3] == 'resume')
     {
         console.log("===========Resume Mode==============");
-        process.argv.splice(2, 1);  // 처음 한번만 실행하도록 함.
+        process.argv.splice(3, 1);  // 처음 한번만 실행하도록 함. resume parameter 삭제함.
         // 1) read portfolio_info DB
         portfolio_info = await Load_JsonDB("./output/" + "portfolio");
         //console.log("portfolio_info = ", JSON.stringify(portfolio_info));
@@ -432,6 +468,9 @@ async function smart_coin_trader()
     let elapsed = {};
     let priceinfo = {};
     let update_dispay = true;
+    let update_prev = 0;
+
+    socketcomm.socket_trader_communication(5556);
 
     // 1. Initialize Portfolio DB
     await register_trade_markets();
@@ -476,7 +515,7 @@ async function smart_coin_trader()
                     if (priceinfo[market].hasOwnProperty(marketID) === false) { priceinfo[market][marketID] = {}; }
                     previous[market][marketID] = current;
 
-                    if (portfolio_info[market][marketID]['config']['simulation'])
+                    if (0) //portfolio_info[market][marketID]['config']['simulation'])
                     {
                         let cur_p = getPrice[market][marketID].next().value;
                         priceinfo[market][marketID]['trade_price'] = cur_p;
@@ -487,8 +526,12 @@ async function smart_coin_trader()
                         //console.log("[", current, "] - [", market, "][", marketID, "]", portfolio_info[market][marketID]['config']['check_period'], " sec priodic routine....");
                         try{
                             let cur_price = await upbit.getCurrentPriceInfo(market);
-                            priceinfo[market][marketID] = cur_price[0];
-                           console.log("[", market, "][", marketID, "] Current = ", current, " priceinfo = ", priceinfo[market][marketID]['trade_price']);
+                            if(cur_price[0].hasOwnProperty['trade_price'] == false) { continue; }
+                            else 
+                            {
+                                priceinfo[market][marketID] = cur_price[0];
+                                console.log("[", market, "][", marketID, "] Current = ", current, " priceinfo = ", priceinfo[market][marketID]['trade_price']);
+                            }
                         }
                         catch(err)
                         {
@@ -540,10 +583,14 @@ async function smart_coin_trader()
                     expired_chk_count++;
                 }
             }
-            //await disiplay_statics(current, priceinfo);
         }
-        if(update_dispay) 
+
+        let update_elapsed = (current - update_prev) / 1000;
+
+        if(update_dispay || update_elapsed > 60*10) // every 10 min, make trading information & display statics information. 
         {
+            update_prev = current;
+            //console.log("update && remake statistics file..........");
             await disiplay_statics(current, priceinfo);
             await make_TradingInfomation(current, priceinfo); 
             update_dispay = false;
@@ -664,7 +711,7 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
     {
         // 잔고 Check후 input order
         let SYM = market.split('-')[0]; // KRW
-        let balance = await upbit.get_chance(market);
+        let balance = await upbit.get_chance(authkey, market);
         let order_money = (new_bid['amount'] * current_price);
 
         trade_fee[market]['bid_fee'] = balance['bid_fee'], trade_fee[market]['ask_fee'] = balance['ask_fee'];
@@ -676,11 +723,11 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
             {
                 if (config['real_test_mode'])
                 {
-                    orderinfo = await upbit.input_orders(market, 'bid', 1, current_price, 'limit'); new_bid['amount'] = 1; new_bid['invest_KRW'] = new_bid['amount'] * current_price;
+                    orderinfo = await upbit.input_orders(authkey, market, 'bid', 1, current_price, 'limit'); new_bid['amount'] = 1; new_bid['invest_KRW'] = new_bid['amount'] * current_price;
                 }
                 else // real mode
                 {
-                    orderinfo = await upbit.input_orders(market, 'bid', new_bid['amount'], current_price, 'limit');
+                    orderinfo = await upbit.input_orders(authkey, market, 'bid', new_bid['amount'], current_price, 'limit');
                 }
                 //console.log("[", market, "][", marketID, "] Balance(KRW) = ", balance['bid_account']['balance'], " price = ", current_price, " input order amount = ", new_bid['amount'], " Invest KRW(order_money) = ", order_money);
             }
@@ -694,11 +741,11 @@ async function create_new_bid_slot(market, marketID, current, priceinfo)
 
                 if (config['real_test_mode'])
                 {
-                    orderinfo = await upbit.input_orders(market, 'bid', 1, current_price, 'limit'); new_bid['amount'] = 1; new_bid['invest_KRW'] = new_bid['amount'] * current_price;
+                    orderinfo = await upbit.input_orders(authkey, market, 'bid', 1, current_price, 'limit'); new_bid['amount'] = 1; new_bid['invest_KRW'] = new_bid['amount'] * current_price;
                 }
                 else
                 {
-                    orderinfo = await upbit.input_orders(market, 'bid', new_bid['amount'], current_price, 'limit');
+                    orderinfo = await upbit.input_orders(authkey, market, 'bid', new_bid['amount'], current_price, 'limit');
                 }
                 console.log("[", market, "][", marketID, "] Insuffient Balance on your account!!! adjust input order amount!!");
                 console.log("[", market, "][", marketID, "] Balance(KRW) = ", balance['bid_account']['balance'], " orgBid = ", org_bid, " price = ", current_price, " input order amount = ", new_bid['amount'], " Invest KRW(order_money) = ", order_money);
@@ -820,7 +867,7 @@ async function add_bid_to_slot(market, marketID, current, priceinfo)
                 else
                 {
                     // 잔고 Check후 input order
-                    let balance = await upbit.get_chance(market);
+                    let balance = await upbit.get_chance(authkey, market);
                     let order_money = (new_bid['amount'] * current_price);
                     trade_fee[market]['bid_fee'] = balance['bid_fee'], trade_fee[market]['ask_fee'] = balance['ask_fee'];
                     order_money = order_money * (1 + tradefee); // 수수료 포함 매입 코인 금액이 잔고보다 커야 정상 bid 됨.  
@@ -830,11 +877,11 @@ async function add_bid_to_slot(market, marketID, current, priceinfo)
                         {
                             if (config['real_test_mode'])
                             {
-                                orderinfo = await upbit.input_orders(market, 'bid', 2, current_price, 'limit'); new_bid['amount'] = bid_sum = 1;
+                                orderinfo = await upbit.input_orders(authkey, market, 'bid', 2, current_price, 'limit'); new_bid['amount'] = bid_sum = 1;
                             }
                             else
                             {
-                                orderinfo = await upbit.input_orders(market, 'bid', new_bid['amount'], current_price, 'limit');
+                                orderinfo = await upbit.input_orders(authkey, market, 'bid', new_bid['amount'], current_price, 'limit');
                             }
                             //console.log("[", market, "][", marketID, "] Balance(KRW) = ", balance['bid_account']['balance'], " price = ", current_price, " input order amount = ", new_bid['amount'], " Invest KRW(order_money) = ", order_money);
                         }
@@ -846,13 +893,13 @@ async function add_bid_to_slot(market, marketID, current, priceinfo)
                             new_bid['amount'] = new_bid['amount'] * (1 - tradefee);  // minus trade fee - 수수료 고려하여 주문할 수 있는 최대 코인을 주문한다.
                             new_bid['amount'] = 1 * new_bid['amount'].toFixed(6);
 
-                            if (real_test_mode)
+                            if (config['real_test_mode'])
                             {
-                                orderinfo = await upbit.input_orders(market, 'bid', 1, current_price, 'limit'); new_bid['amount'] = bid_sum = 1;
+                                orderinfo = await upbit.input_orders(authkey, market, 'bid', 1, current_price, 'limit'); new_bid['amount'] = bid_sum = 1;
                             }
                             else
                             {
-                                orderinfo = await upbit.input_orders(market, 'bid', new_bid['amount'], current_price, 'limit');
+                                orderinfo = await upbit.input_orders(authkey, market, 'bid', new_bid['amount'], current_price, 'limit');
                             }
                             console.log("[", market, "][", marketID, "] Insuffient Balance on your account!!! adjust input order amount!!");
                             console.log("[", market, "][", marketID, "] Balance(KRW) = ", balance['bid_account']['balance'], " orgBid_sum = ", org_bid_sum, " price = ", current_price, " input order amount = ", new_bid['amount'], " Invest KRW(order_money) = ", order_money);
@@ -945,14 +992,14 @@ async function ask_sellCoin_buyKRW(market, marketID, current, priceinfo)
             else
             {
                 // 잔고 Check후 input order
-                let balance = await upbit.get_chance(market);
+                let balance = await upbit.get_chance(authkey, market);
                 trade_fee[market]['bid_fee'] = balance['bid_fee'], trade_fee[market]['ask_fee'] = balance['ask_fee'];
 
                 if (balance['market']['id'] === market)
                 {
                     if(balance['ask_account']['balance'] >= sum_amount_done) // Order Input (add ask)
                     {
-                        orderinfo = await upbit.input_orders(market, 'ask', sum_amount_done, current_price, 'limit');
+                        orderinfo = await upbit.input_orders(authkey, market, 'ask', sum_amount_done, current_price, 'limit');
                         //console.log("[", market, "][", marketID, "][slots", i, "] Balance(Coin) = ", balance['ask_account']['balance'], " price = ", current_price, " input order amount = ", sum_amount_done);
                         save_DB = true;
                     }
@@ -961,7 +1008,7 @@ async function ask_sellCoin_buyKRW(market, marketID, current, priceinfo)
                         if (balance['bid_account']['balance'] >= (sum_amount_done * 0.9))
                         {
                             // 잔고 부족시 남은 잔고라도 익절을 할지.... 그냥 slot을 유지할지.....고민 필요함. 우선 그냥 error message만 표시하고 유지하는 것으로 작성함.
-                            orderinfo = await upbit.input_orders(market, 'ask', balance['ask_account']['balance'], current_price, 'limit');
+                            orderinfo = await upbit.input_orders(authkey, market, 'ask', balance['ask_account']['balance'], current_price, 'limit');
                             console.log("[", market, "][", marketID, "][slots", i, "] Insuffient Coin Balance on your account!!! Please check your Coin Balance!!");
                             console.log("[", market, "][", marketID, "][slots", i, "] Balance(Coin) = ", balance['ask_account']['balance'], " price = ", current_price, " input order amount = ", sum_amount_done);
                             save_DB = true;
@@ -1035,7 +1082,7 @@ async function update_Normal_TrInfo_Statics(market, marketID, priceinfo)
             if(bidinfo['status'] !== "done")
             {
                 let uuid = bidinfo['order_info']['uuid'];
-                orderinfo = await upbit.get_orderinfo(uuid);
+                orderinfo = await upbit.get_orderinfo(authkey, uuid);
                 if("error" in orderinfo) 
                 { 
                     console.log("[", market, "][", marketID, "][", i, "][", j, "] UUID = ", uuid, " [update_Normal_TrInfo_Statics] ERROR Get Order info ################################");
@@ -1192,7 +1239,7 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
     {
         // 잔고 Check후 input order
         let SYM = market.split('-')[1];
-        let balance = await upbit.get_chance(market);
+        let balance = await upbit.get_chance(authkey, market);
         trade_fee[market]['bid_fee'] = balance['bid_fee'], trade_fee[market]['ask_fee'] = balance['ask_fee'];
 
         if(balance['ask_account']['currency'] === SYM && balance['market']['id'] === market) // Coin을 매도해야 하기 때문에 ask_account를 체크함.
@@ -1201,11 +1248,11 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
             {
                 if (config['real_test_mode'])
                 {
-                    orderinfo = await upbit.input_orders(market, 'ask', 1, current_price, 'limit'); new_ask['amount'] = 1;
+                    orderinfo = await upbit.input_orders(authkey, market, 'ask', 1, current_price, 'limit'); new_ask['amount'] = 1;
                 }
                 else
                 {
-                    orderinfo = await upbit.input_orders(market, 'ask', new_ask['amount'], current_price, 'limit');
+                    orderinfo = await upbit.input_orders(authkey, market, 'ask', new_ask['amount'], current_price, 'limit');
                 }
                 console.log("[", market, "][", marketID, "] Balance(Coin) = ", balance['ask_account']['balance'], " price = ", current_price, " input order amount = ", new_ask['amount']);
             }
@@ -1215,7 +1262,7 @@ async function create_new_ask_slot(market, marketID, current, priceinfo)
                 new_ask['amount'] = balance['ask_account']['balance'];
                 //new_ask['amount'] = new_ask['amount'] * (1 - tradefee);  // minus trade fee
                 new_ask['amount'] = 1 * new_ask['amount'].toFixed(6);
-                orderinfo = await upbit.input_orders(market, 'ask', new_ask['amount'], current_price, 'limit');
+                orderinfo = await upbit.input_orders(authkey, market, 'ask', new_ask['amount'], current_price, 'limit');
                 console.log("[", market, "][", marketID, "] Insuffient Balance on your account!!! adjust input order amount!!");
                 console.log("[", market, "][", marketID, "] Balance(Coin) = ", balance['ask_account']['balance'], " orgAsk = ", org_ask, " price = ", current_price, " input order amount = ", new_ask['amount']);
             }
@@ -1337,7 +1384,7 @@ async function add_ask_to_slot(market, marketID, current, priceinfo)
                 {
                     // 잔고 Check후 input order
                     let SYM = market.split('-')[1];
-                    let balance = await upbit.get_chance(market);
+                    let balance = await upbit.get_chance(authkey, market);
 
                     trade_fee[market]['bid_fee'] = balance['bid_fee'], trade_fee[market]['ask_fee'] = balance['ask_fee'];
                     new_ask['amount'] = ask_sum.toFixed(6) * 1;
@@ -1354,11 +1401,11 @@ async function add_ask_to_slot(market, marketID, current, priceinfo)
                         {
                             if (config['real_test_mode'])
                             {
-                                orderinfo = await upbit.input_orders(market, 'ask', 2, current_price, 'limit'); new_ask['amount'] = 2;
+                                orderinfo = await upbit.input_orders(authkey, market, 'ask', 2, current_price, 'limit'); new_ask['amount'] = 2;
                             }
                             else
                             {
-                                orderinfo = await upbit.input_orders(market, 'ask', new_ask['amount'], current_price, 'limit');
+                                orderinfo = await upbit.input_orders(authkey, market, 'ask', new_ask['amount'], current_price, 'limit');
                             }
                             //console.log("[", market, "][", marketID, "] Balance(Coin) = ", balance['ask_account']['balance'], " price = ", current_price, " input order amount = ", new_ask['amount']);
                         }
@@ -1366,7 +1413,7 @@ async function add_ask_to_slot(market, marketID, current, priceinfo)
                         {
                             new_ask['amount'] = balance['ask_account']['balance'];
                             new_ask['amount'] = 1 * new_ask['amount'].toFixed(6);
-                            orderinfo = await upbit.input_orders(market, 'ask', new_ask['amount'], current_price, 'limit');
+                            orderinfo = await upbit.input_orders(authkey, market, 'ask', new_ask['amount'], current_price, 'limit');
                             console.log("[", market, "][", marketID, "] Insuffient Coin Balance on your account!!! adjust input order amount!!");
                             console.log("[", market, "][", marketID, "] Balance(Coin) = ", balance['ask_account']['balance'], " orgAsk_sum = ", org_ask_sum, " price = ", current_price, " input order amount = ", new_ask['amount']);
                         }
@@ -1440,7 +1487,7 @@ async function update_Reverse_TrInfo_Statics(market, marketID, priceinfo)
             if (askinfo['status'] !== "done")
             {
                 let uuid = askinfo['order_info']['uuid'];
-                orderinfo = await upbit.get_orderinfo(uuid);
+                orderinfo = await upbit.get_orderinfo(authkey, uuid);
                 if ("error" in orderinfo)
                 {
                     console.log("[", market, "][", marketID, "][", i, "][", j, "] UUID = ", uuid, " [update_Reverse_TrInfo_Statics] ERROR Get Order info ################################");
@@ -1524,7 +1571,7 @@ async function bid_sellKRW_buyCoin(market, marketID, current, priceinfo)
             {
                 // 잔고 Check후 input order
                 let SYM = market.split('-')[0];
-                let balance = await upbit.get_chance(market);
+                let balance = await upbit.get_chance(authkey, market);
                 let order_money = sum_reclaim_KRW;
 
                 trade_fee[market]['bid_fee'] = balance['bid_fee'], trade_fee[market]['ask_fee'] = balance['ask_fee'];
@@ -1533,7 +1580,7 @@ async function bid_sellKRW_buyCoin(market, marketID, current, priceinfo)
                 {
                     if (balance['bid_account']['balance'] >= order_money) // Order Input (add ask)
                     {
-                        orderinfo = await upbit.input_orders(market, 'bid', order_coin_count, current_price, 'limit');
+                        orderinfo = await upbit.input_orders(authkey, market, 'bid', order_coin_count, current_price, 'limit');
                         //console.log("[", market, "][", marketID, "][slots", i, "] Balance(KRW) = ", balance['bid_account']['balance'], " price = ", current_price, " input order amount = ", order_coin_count);
                         save_DB = true;
                     }
@@ -1544,7 +1591,7 @@ async function bid_sellKRW_buyCoin(market, marketID, current, priceinfo)
                         {
                             order_coin_count = order_coin_count * 0.9;
                             order_coin_count = order_coin_count.toFixed(6) * 1;
-                            orderinfo = await upbit.input_orders(market, 'bid', order_coin_count, current_price, 'limit');
+                            orderinfo = await upbit.input_orders(authkey, market, 'bid', order_coin_count, current_price, 'limit');
                             console.log("[", market, "][", marketID, "][slots", i, "] Insuffient Coin Balance on your account!!! Input Order amount = 90% ");
                             console.log("[", market, "][", marketID, "][slots", i, "] Balance(KRW) = ", balance['bid_account']['balance'], " price = ", current_price, " input order amount = ", order_coin_count, " Order Money = ", order_money);
                             //console.log("[", market, "][", marketID, "][slots", i, "] Balance(KRW) = ", balance['bid_account']['balance'], " price = ", current_price, " input order amount = ", order_coin_count);
@@ -1625,7 +1672,7 @@ async function cancel_oldorders(market, marketID, current)
                 }
                 else
                 {
-                    upbit.cancel_orders(cancel_uuid);   // need to do exception handling
+                    upbit.cancel_orders(authkey, cancel_uuid);   // need to do exception handling
                 }
                 cancel_orderlist[market][marketID].push(cancel);
                 Save_JSON_file(cancel_orderlist, "./output_backup/cancel_orderlist");
@@ -2238,7 +2285,7 @@ async function make_NetIncomeList(current, price_infoDB)
 */
 function Save_JSON_file(jsonObject, filename) {
     var json = JSON.stringify(jsonObject);
-    filename = filename + "_" + suffix + ".json";
+    filename = useridpath + filename + "_" + suffix + ".json";
     fse.outputFileSync(filename, json, 'utf-8', function (e) {
         if (e) { console.log(e); } else { console.log("Download is done!"); }
     });
@@ -2249,7 +2296,7 @@ function Save_JSON_file(jsonObject, filename) {
 */
 function Save_JSON_latest_file(jsonObject, filename) {
     var json = JSON.stringify(jsonObject);
-    filename = filename + ".json";
+    filename = useridpath + filename + ".json";
     fse.outputFileSync(filename, json, 'utf-8', function (e) {
         if (e) { console.log(e); } else { console.log("Download is done!"); }
     });
@@ -2263,7 +2310,7 @@ function Save_JSON_latest_file(jsonObject, filename) {
 function Load_JsonDB(filename)
 {
     //filename = filename + "_" + suffix + ".json";
-    filename = filename + ".json";
+    filename = useridpath + filename + ".json";
 
     return new Promise(function (resolve, reject)
     {

@@ -1,6 +1,7 @@
+const authkey = require("../config/" + "sungbin.na" + "/upbit_configuration");
 const upbit = require("../javascripts/upbit_restapi");
 //upbit.debug = true;
-upbit.get_accountbalance();
+upbit.get_accountbalance(authkey);
 //upbit.get_chance('KRW-EOS').then((data) => { console.log(JSON.stringify(data))});
 //upbit.get_chance('KRW-XRP').then((data) => { console.log(JSON.stringify(data))});
 
